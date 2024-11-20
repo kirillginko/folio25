@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      curtainsjs:
+        specifier: ^8.1.6
+        version: 8.1.6
       gsap:
         specifier: ^3.12.5
         version: 3.12.5
@@ -452,6 +455,9 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
+
+  curtainsjs@8.1.6:
+    resolution: {integrity: sha512-sdZtA4LrhR7f2Ty90j//cLyQYnZJu2MsfZ1EWKj9TpcvrvEBNrbG506oK6JmJCB0epD5kTFKNkyrGCjiZz7Caw==}
 
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -1790,6 +1796,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  curtainsjs@8.1.6: {}
 
   damerau-levenshtein@1.0.8: {}
 

@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import About from "./components/About";
 import MusicPlayer from "./components/MusicPlayer";
+import FluidBackground from "./components/fluid/Fluid";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -36,6 +37,7 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <FluidBackground />
       <main className={styles.main}>
         <div
           className={`

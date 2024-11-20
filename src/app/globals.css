@@ -1,5 +1,11 @@
 :root {
   --background-color: #ffffff;
+  background: radial-gradient(
+    circle at center,
+    #ffffff 0%,
+    #ffffff 50%,
+    #fafafa 100%
+  );
   --grid-color: #80808012;
   --flower-color: #1a1a1a;
   --border-color: #1a1a1a;
@@ -9,6 +15,7 @@
 
 [class="dark"] {
   --background-color: #1a1a1a;
+  background: #1a1a1a;
   --grid-color: #ffffff12;
   --flower-color: #ffffff;
   --border-color: #1a1a1a;
@@ -32,10 +39,16 @@ body {
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: inherit;
   font-family: var(--font-instruction), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  filter: brightness(1.1);
+}
+
+html:not(.dark) body {
+  background-color: #ffffff;
+  backdrop-filter: brightness(1.05);
 }
 
 * {

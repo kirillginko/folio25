@@ -138,6 +138,50 @@ const MusicPlayer = () => {
     nextSong(); // This will automatically play the next song since we removed setIsPlaying(false) earlier
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Check if the component is outside the viewport
+        if (rect.right > windowWidth) {
+          gsap.to(containerRef.current, {
+            x: windowWidth - rect.width - 20, // 20px padding from edge
+            duration: 0.3,
+          });
+        }
+        if (rect.bottom > windowHeight) {
+          gsap.to(containerRef.current, {
+            y: windowHeight - rect.height - 20,
+            duration: 0.3,
+          });
+        }
+        if (rect.left < 0) {
+          gsap.to(containerRef.current, {
+            x: 20, // 20px padding from left edge
+            duration: 0.3,
+          });
+        }
+        if (rect.top < 0) {
+          gsap.to(containerRef.current, {
+            y: 20,
+            duration: 0.3,
+          });
+        }
+      }
+    };
+
+    // Add resize listener
+    window.addEventListener("resize", handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <div
       ref={containerRef}
