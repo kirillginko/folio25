@@ -1,0 +1,206 @@
+/* Container styling */
+.designContainer {
+  position: relative;
+  height: 550px;
+  width: 380px;
+  border-radius: 25px;
+  justify-content: space-between;
+  text-align: center;
+  background-color: #e6e6e6;
+  border: 1px solid #000;
+  padding: 1rem;
+  touch-action: none;
+  user-select: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Draggable wrapper */
+.draggableWrapper {
+  position: absolute;
+  top: 320px;
+  left: 20px;
+  z-index: 10;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Normal container */
+.normalContainer {
+  width: 380px;
+  height: 550px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  background-color: #e6e6e6;
+}
+
+/* Minimized container */
+.minimizedContainer {
+  width: 150px;
+  height: 50px;
+  max-width: calc(100vw - 40px);
+  background-color: white;
+}
+
+/* Minimize button */
+.greenCircle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #f8e932;
+  border-radius: 50%;
+  top: -25px;
+  right: 5px;
+  cursor: pointer;
+  z-index: 11;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.greenCircle:hover {
+  background-color: #ffb120;
+}
+
+/* Minimized content */
+.minimizedContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+å .minimizedText {
+  font-size: 14px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #000;
+  margin-bottom: 10px;
+  margin-top: 15px;
+}
+
+.header span {
+  font-weight: normal;
+  color: #000;
+  font-family: monospace;
+  margin-right: 8px;
+}
+
+/* Header input */
+.headerInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #000;
+  outline: none;
+  font-family: monospace;
+}
+
+.headerInput::placeholder {
+  color: #808080;
+  font-family: monospace;
+}
+
+.footerInput::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Content area */
+.content {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.minimizedContainer .content {
+  opacity: 0;
+}
+
+/* Minimized content */
+.minimizedContent {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.minimizedContainer .minimizedContent {
+  opacity: 1;
+}
+
+/* Message input */
+.messageInput {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  font-family: monospace;
+  resize: none;
+  outline: none;
+  color: #000;
+  padding-top: 20px;
+}
+
+.messageInput::placeholder {
+  color: #808080;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Send button */
+.sendButton {
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-family: monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sendButton:hover {
+  background: #ffb120;
+}
+
+/* Confirmation message */
+.confirmation {
+  margin-top: 10px;
+  font-size: 12px;
+  color: green;
+  text-align: center;
+}
+
+.error {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sendButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

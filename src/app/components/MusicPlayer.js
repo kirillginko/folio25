@@ -4,6 +4,7 @@ import styles from "../styles/musicPlayer.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import songs from "../../songs"; // Import the songs array
+import Marquee from "react-fast-marquee";
 
 const MusicPlayer = () => {
   const containerRef = useRef(null);
@@ -189,16 +190,20 @@ const MusicPlayer = () => {
         isMinimized ? styles.minimizedContainer : ""
       }`}
     >
-      {/* Audio Element - Move outside conditional rendering */}
       <audio ref={audioRef} src={currentSong.link} onEnded={handleSongEnd} />
-
-      {/* Minimize Button */}
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
 
-      {/* Minimized State */}
+      {/* Minimized State with Marquee */}
       {isMinimized ? (
         <div className={styles.minimizedContent}>
-          <span className={styles.minimizedText}>{currentSong.name}</span>
+          <Marquee gradient={false} speed={30} pauseOnHover={true}>
+            <span className={styles.minimizedText}>
+              <span className={styles.artistName}>{currentSong.artist}</span>
+              &nbsp;&nbsp;-&nbsp;&nbsp;
+              <span className={styles.songName}>{currentSong.name}</span>
+              &nbsp;&nbsp;&nbsp;&nbsp;
+            </span>
+          </Marquee>
         </div>
       ) : (
         <>

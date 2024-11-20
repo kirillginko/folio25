@@ -1,7 +1,7 @@
 /* Base container with all shared styles */
 .musicContainer {
   position: absolute;
-  top: 580px;
+  top: 650px;
   right: 50px;
   border-radius: 30px;
   background-color: #948aa8;
@@ -13,12 +13,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 15px;
   transition: width 0.3s ease, height 0.3s ease;
   /* Default (normal) state dimensions */
   width: 600px;
   height: 60px;
   max-width: calc(100vw - 40px);
+  gap: 10px;
 }
 
 /* Only override what changes in minimized state */
@@ -27,14 +28,37 @@
   height: 40px !important;
   justify-content: center;
 }
+.minimizedContent {
+  font-size: 14px;
+  color: white;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  padding-top: 2px; /* Add small padding to center text vertically */
+  line-height: 1.2;
+}
+
+.minimizedText {
+  padding-right: 30px;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.artistName {
+  color: #b0c4de; /* Light blue color for artist name */
+}
+
+.songName {
+  color: #fff; /* Keep song name white */
+}
 
 /* Song details (hidden in minimized state) */
 .songDetails {
-  flex: 1;
+  flex: 0.6;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-width: 120px;
+  min-width: 100px;
 }
 
 .songTitle {
@@ -54,9 +78,9 @@
 .controls {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   justify-content: center;
-  flex: 1;
+  flex: 0.4;
 }
 
 .controlButton {
@@ -81,15 +105,15 @@
 }
 
 /* Progress bar */
-/* Progress bar */
 .progressBar {
   position: relative;
-  width: 100%;
+  width: 200px;
   height: 6px;
   background-color: #495a78;
   border-radius: 3px;
   overflow: hidden;
-  margin: 10px 0;
+  margin: 10px;
+  flex: 2;
 }
 
 .progress {
@@ -100,12 +124,12 @@
 
 /* Time Info */
 .timeInfo {
-  flex: 0.5;
+  flex: 0.3;
   font-size: 0.6em;
   color: #b0c4de;
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Green Circle (Minimize Button) */
@@ -127,8 +151,11 @@
 
 .minimizedContent {
   font-size: 14px;
-  color: white;
   text-align: center;
+  width: 100%;
+  overflow: hidden;
+  padding-top: 2px;
+  line-height: 1.2;
 }
 
 /* Hide these elements in minimized state */
@@ -141,9 +168,41 @@
 @media (max-width: 640px) {
   .musicContainer {
     width: calc(100vw - 40px);
+    padding: 0 10px;
+    gap: 5px;
+    padding: 0px 20px;
   }
 
   .minimizedContainer {
-    width: 150px !important; /* Smaller width for mobile */
+    width: 150px !important;
+  }
+
+  .progressBar {
+    width: 250px;
+    flex: 1;
+    margin: 8px;
+  }
+
+  .songDetails {
+    flex: 0.5;
+    min-width: 90px;
+  }
+
+  .controls {
+    flex: 0.3;
+    gap: 3px;
+  }
+
+  .timeInfo {
+    flex: 0.2;
+    font-size: 0.55em;
+  }
+
+  .controlButton {
+    width: 20px;
+  }
+
+  .playButton {
+    width: 26px;
   }
 }
