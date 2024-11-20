@@ -1,0 +1,117 @@
+/* styles/CustomDesign.module.css */
+
+/* Container styling */
+.designContainer {
+  position: absolute;
+  top: 160px;
+  right: 20px;
+  height: 540px;
+  width: 320px;
+  border-radius: 16px;
+  justify-content: space-between;
+  text-align: center;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  color: var(--flower-color);
+  padding: 1rem;
+  z-index: 10;
+  touch-action: none;
+  user-select: none;
+  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+}
+
+/* Normal container (default state) */
+.normalContainer {
+  width: 320px;
+  height: 400px;
+  border: 1px solid black;
+  border-radius: 16px;
+  padding: 20px;
+  background-color: white;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Minimized container */
+.minimizedContainer {
+  width: 100px;
+  height: 50px;
+  border: 1px solid black;
+  border-radius: 25px;
+  background-color: white;
+  padding: 5px;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Green circle */
+.greenCircle {
+  width: 15px;
+  height: 15px;
+  background-color: lime;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px; /* Position the circle outside the top */
+  right: 15px; /* Position the circle outside the right */
+  cursor: pointer;
+}
+
+/* Minimized content */
+.minimizedContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minimizedDots {
+  padding-top: 10px;
+  font-size: 0.8em;
+  text-align: center;
+  color: var(--p-color);
+}
+/* Header styling */
+.header {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+  color: var(--p-color);
+}
+
+.headerContent {
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+.parentContainer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Bio section styles */
+.bioSection {
+  margin: 50px 0;
+  padding: 0 15px;
+  text-align: left;
+  color: var(--p-color);
+}
+
+.bioTitle {
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  color: var(--p-color);
+  border-radius: 16px;
+  padding: 5px;
+}
+
+.bioText {
+  font-size: 0.7em;
+  line-height: 1.5;
+  text-align: justify;
+  color: var(--p-color);
+}

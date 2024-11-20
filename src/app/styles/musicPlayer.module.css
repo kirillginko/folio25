@@ -1,0 +1,122 @@
+/* Base container with all shared styles */
+.musicContainer {
+  position: absolute;
+  top: 160px;
+  left: 20px;
+  border-radius: 30px;
+  background-color: #2e3b55;
+  border: 1px solid #495a78;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+  z-index: 10;
+  touch-action: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 15px;
+  transition: width 0.3s ease, height 0.3s ease;
+  /* Default (normal) state dimensions */
+  width: 700px;
+  height: 60px;
+}
+
+/* Only override what changes in minimized state */
+.minimizedContainer {
+  width: 200px !important;
+  height: 40px !important;
+  justify-content: center;
+}
+
+/* Song details (hidden in minimized state) */
+.songDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.songTitle {
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+}
+
+.songArtist {
+  font-size: 12px;
+  color: #b0c4de; /* Lighter text for the artist */
+  margin: 0;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+.controlButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.controlButton:active {
+  transform: scale(0.9);
+}
+
+.playButton {
+  font-size: 20px;
+}
+
+/* Progress bar */
+.progressBar {
+  position: relative;
+  width: 50%;
+  height: 4px;
+  background-color: #495a78;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 15px;
+}
+
+.progress {
+  width: 30%; /* Adjust this dynamically based on progress */
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 2px;
+}
+
+/* Time Info */
+.timeInfo {
+  font-size: 12px;
+  color: #b0c4de;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Green Circle (Minimize Button) */
+.greenCircle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: green;
+  border-radius: 50%;
+  top: -25px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.minimizedContent {
+  font-size: 14px;
+  color: white;
+  text-align: center;
+}
