@@ -98,6 +98,15 @@ const Email = () => {
 
   const handleInputClick = (e) => {
     e.stopPropagation();
+    if (draggableInstance.current) {
+      draggableInstance.current.disable();
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (draggableInstance.current) {
+      draggableInstance.current.enable();
+    }
   };
 
   const toggleMinimized = () => {
@@ -196,6 +205,7 @@ const Email = () => {
                 value={fromEmail}
                 onChange={(e) => setFromEmail(e.target.value)}
                 onClick={handleInputClick}
+                onBlur={handleInputBlur}
                 required
               />
             </div>
@@ -207,6 +217,7 @@ const Email = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onClick={handleInputClick}
+                onBlur={handleInputBlur}
                 required
               />
               <div className={styles.footer}>

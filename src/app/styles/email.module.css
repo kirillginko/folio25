@@ -100,6 +100,8 @@
   color: #000;
   outline: none;
   font-family: monospace;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .headerInput::placeholder {
@@ -148,6 +150,8 @@
   outline: none;
   color: #000;
   padding-top: 20px;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .messageInput::placeholder {
