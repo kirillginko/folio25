@@ -75,7 +75,25 @@ const Email = () => {
         edgeResistance: isMinimized ? 0.85 : 0.65,
         dragResistance: isMinimized ? 0.1 : 0.05,
         zIndexBoost: true,
-        onDragStart: function () {
+        allowEventDefault: true,
+        allowNativeTouchScrolling: true,
+        onClick: function (e) {
+          if (
+            e.target.tagName.toLowerCase() === "input" ||
+            e.target.tagName.toLowerCase() === "textarea" ||
+            e.target.tagName.toLowerCase() === "button"
+          ) {
+            return false;
+          }
+        },
+        onDragStart: function (e) {
+          if (
+            e.target.tagName.toLowerCase() === "input" ||
+            e.target.tagName.toLowerCase() === "textarea" ||
+            e.target.tagName.toLowerCase() === "button"
+          ) {
+            return false;
+          }
           gsap.to(this.target, {
             scale: isMinimized ? 1.05 : 1.1,
             duration: 0.2,
@@ -98,15 +116,6 @@ const Email = () => {
 
   const handleInputClick = (e) => {
     e.stopPropagation();
-    if (draggableInstance.current) {
-      draggableInstance.current.disable();
-    }
-  };
-
-  const handleInputBlur = () => {
-    if (draggableInstance.current) {
-      draggableInstance.current.enable();
-    }
   };
 
   const toggleMinimized = () => {
@@ -205,7 +214,6 @@ const Email = () => {
                 value={fromEmail}
                 onChange={(e) => setFromEmail(e.target.value)}
                 onClick={handleInputClick}
-                onBlur={handleInputBlur}
                 required
               />
             </div>
@@ -217,7 +225,6 @@ const Email = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onClick={handleInputClick}
-                onBlur={handleInputBlur}
                 required
               />
               <div className={styles.footer}>
