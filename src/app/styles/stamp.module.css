@@ -1,0 +1,47 @@
+/* Main container */
+.okokMeter {
+  position: fixed;
+  bottom: 0px; /* Adjust as needed */
+  right: 0px; /* Adjust as needed */
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  text-align: center;
+  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); */
+  width: 250px; /* Adjust width as needed */
+}
+
+/* General text styles */
+.text {
+  margin: 5px 0;
+  line-height: 1.4;
+}
+
+/* Bold text */
+.bold {
+  font-weight: bold;
+}
+
+/* Text with outline effect */
+.boldOutline {
+  font-weight: bold;
+  border: 1px solid var(--span-border);
+  padding: 2px 6px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+/* Icon container */
+.icons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0px 0;
+}
+
+/* Recycle icon */
+.recycleIcon {
+  font-size: 36px;
+}

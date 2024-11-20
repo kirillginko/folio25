@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import About from "./components/About";
 import MusicPlayer from "./components/MusicPlayer";
+import Stamp from "./components/Stamp";
 import FluidBackground from "./components/fluid/Fluid";
 
 export default function Home() {
@@ -52,6 +53,7 @@ export default function Home() {
         </div>
         <About />
         <MusicPlayer />
+        <Stamp />
       </main>
     </div>
   );

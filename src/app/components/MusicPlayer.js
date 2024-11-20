@@ -114,7 +114,7 @@ const MusicPlayer = () => {
         }
       }
     }
-  }, [currentSongIndex]); // Update audio source when the song changes
+  }, [currentSongIndex, isPlaying]); // Added isPlaying to dependency array
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);

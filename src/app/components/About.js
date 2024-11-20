@@ -53,46 +53,47 @@ const About = () => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`${styles.designContainer} ${
-        isMinimized ? styles.minimizedContainer : styles.normalContainer
-      }`}
-    >
-      {/* Green Circle */}
+    <div ref={containerRef} className={styles.draggableWrapper}>
+      {/* Green Circle - Now outside the design container but inside draggable wrapper */}
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
 
-      {/* Minimized State */}
-      {isMinimized ? (
-        <div className={styles.minimizedContent}>
-          <span className={styles.minimizedDots}>About</span>
-        </div>
-      ) : (
-        <>
-          {/* Header Section */}
-          <header className={styles.header}>
-            <div className={styles.headerContent}>
-              <p>*** Kirill@Kirill.Studio ***</p>
-            </div>
-          </header>
+      <div
+        className={`${styles.designContainer} ${
+          isMinimized ? styles.minimizedContainer : styles.normalContainer
+        }`}
+      >
+        {/* Minimized State */}
+        {isMinimized ? (
+          <div className={styles.minimizedContent}>
+            <span className={styles.minimizedDots}>About</span>
+          </div>
+        ) : (
+          <>
+            {/* Header Section */}
+            <header className={styles.header}>
+              <div className={styles.headerContent}>
+                <p>*** Kirill@Kirill.Studio ***</p>
+              </div>
+            </header>
 
-          {/* Bio Section */}
-          <section className={styles.bioSection}>
-            <h2 className={styles.bioTitle}>About Me</h2>
-            <p className={styles.bioText}>
-              I am a <strong>full-stack creative web developer</strong> with a
-              passion for crafting{" "}
-              <strong> interactive, user-centric digital experiences</strong>.
-              My expertise spans from front-end development to back-end systems,
-              combining technical skill with artistic vision to build webpages
-              that are both functional and visually engaging. I specialize in
-              using cutting-edge tools like <strong>React</strong>,{" "}
-              <strong>GSAP</strong>, and <strong>Next.js</strong> to bring ideas
-              to life.
-            </p>
-          </section>
-        </>
-      )}
+            {/* Bio Section */}
+            <section className={styles.bioSection}>
+              <h2 className={styles.bioTitle}>About Me</h2>
+              <p className={styles.bioText}>
+                I am a <strong>full-stack creative web developer</strong> with a
+                passion for crafting{" "}
+                <strong> interactive, user-centric digital experiences</strong>.
+                My expertise spans from front-end development to back-end
+                systems, combining technical skill with artistic vision to build
+                webpages that are both functional and visually engaging. I
+                specialize in using cutting-edge tools like{" "}
+                <strong>React</strong>, <strong>GSAP</strong>, and{" "}
+                <strong>Next.js</strong> to bring ideas to life.
+              </p>
+            </section>
+          </>
+        )}
+      </div>
     </div>
   );
 };

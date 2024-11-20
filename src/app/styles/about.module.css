@@ -2,10 +2,8 @@
 
 /* Container styling */
 .designContainer {
-  position: absolute;
-  top: 160px;
-  right: 20px;
-  height: 540px;
+  position: relative;
+  height: 400px;
   width: 320px;
   border-radius: 16px;
   justify-content: space-between;
@@ -14,7 +12,6 @@
   border: 1px solid var(--border-color);
   color: var(--flower-color);
   padding: 1rem;
-  z-index: 10;
   touch-action: none;
   user-select: none;
   transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
@@ -48,14 +45,19 @@
 
 /* Green circle */
 .greenCircle {
-  width: 15px;
-  height: 15px;
-  background-color: lime;
-  border-radius: 50%;
   position: absolute;
-  top: 5px; /* Position the circle outside the top */
-  right: 15px; /* Position the circle outside the right */
+  width: 20px;
+  height: 20px;
+  background-color: #f8e932;
+  border-radius: 50%;
+  top: -25px;
+  right: 10px;
   cursor: pointer;
+  z-index: 11;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.greenCircle:hover {
+  background-color: #ffb120; /* Darker shade for hover effect */
 }
 
 /* Minimized content */
@@ -115,4 +117,25 @@
   line-height: 1.5;
   text-align: justify;
   color: var(--p-color);
+}
+
+.wrapper {
+  position: absolute;
+  top: 160px;
+  right: 20px;
+  z-index: 10;
+}
+
+/* Add new containerWrapper style */
+.containerWrapper {
+  position: relative;
+  /* No specific dimensions needed as it will wrap content */
+}
+
+/* Add draggable wrapper */
+.draggableWrapper {
+  position: absolute;
+  top: 160px;
+  right: 20px;
+  z-index: 10;
 }

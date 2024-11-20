@@ -94,7 +94,7 @@
 
 .progress {
   height: 100%;
-  background-color: lime;
+  background-color: var(--track-color);
   transition: width 0.2s ease-in-out;
 }
 
@@ -113,11 +113,16 @@
   position: absolute;
   width: 20px;
   height: 20px;
-  background-color: lime;
+  background-color: #f8e932;
   border-radius: 50%;
   top: -25px;
   right: 10px;
   cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.greenCircle:hover {
+  background-color: #ffb120; /* Lighter shade for hover effect */
 }
 
 .minimizedContent {

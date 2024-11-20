@@ -11,6 +11,8 @@
   --border-color: #1a1a1a;
   --flower-filter: filter: invert(95%) sepia(60%) saturate(816%) hue-rotate(336deg) brightness(103%) contrast(108%);
   --p-color: #1a1a1a;
+  --track-color: #f8e932;
+  --span-border: #1a1a1a;
 }
 
 [class="dark"] {
@@ -21,6 +23,8 @@
   --border-color: #1a1a1a;
   --flower-filter: invert(36%) sepia(90%) saturate(1370%) hue-rotate(343deg) brightness(106%) contrast(107%);
   --p-color: #1a1a1a;
+  --track-color: #FFB120;
+  --span-border: #ffffff;
 }
 
 html {
