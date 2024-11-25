@@ -36,12 +36,12 @@ const MusicPlayer = () => {
         inertia: true,
         cursor: "grab",
         activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.85 : 0.65,
-        dragResistance: isMinimized ? 0.1 : 0.05,
+        edgeResistance: 0.65,
+        dragResistance: 0.05,
         zIndexBoost: true,
         onDragStart: function () {
           gsap.to(this.target, {
-            scale: isMinimized ? 1.05 : 1.1,
+            scale: 1.1,
             duration: 0.2,
           });
         },
@@ -70,7 +70,6 @@ const MusicPlayer = () => {
     try {
       if (audioContext.state === "suspended") {
         await audioContext.resume();
-        console.log("Audio context resumed");
       }
 
       if (isPlaying) {
@@ -290,91 +289,98 @@ const MusicPlayer = () => {
   return (
     <div
       ref={containerRef}
-      className={`${styles.musicContainer} ${
+      className={`${styles.musicPlayerWrapper} ${
         isMinimized ? styles.minimizedContainer : ""
       }`}
     >
       {!isMinimized && (
-        <div className={styles.visualizerContainer}>
-          {analyser && <AudioVisualizer analyserNode={analyser} />}
+        <div className={styles.visualizerWrapper}>
+          <div className={styles.visualizerContainer}>
+            {analyser && <AudioVisualizer analyserNode={analyser} />}
+          </div>
         </div>
       )}
 
-      <audio
-        ref={audioRef}
-        src={currentSong.link}
-        onEnded={handleSongEnd}
-        preload="auto"
-        crossOrigin="anonymous"
-      />
-      <div className={styles.greenCircle} onClick={toggleMinimized}></div>
-
-      {/* Minimized State with Marquee */}
-      {isMinimized ? (
-        <div className={styles.minimizedContent}>
-          <Marquee gradient={false} speed={30} pauseOnHover={true}>
-            <span className={styles.minimizedText}>
-              <span className={styles.artistName}>{currentSong.artist}</span>
-              &nbsp;&nbsp;-&nbsp;&nbsp;
-              <span className={styles.songName}>{currentSong.name}</span>
-              &nbsp;&nbsp;&nbsp;&nbsp;
-            </span>
-          </Marquee>
-        </div>
-      ) : (
-        <>
-          {/* Song Info */}
-          <div className={styles.songDetails}>
-            <h3 className={styles.songTitle}>{currentSong.name}</h3>
-            <p className={styles.songArtist}>{currentSong.artist}</p>
+      <div
+        className={`${styles.musicContainer} ${
+          isMinimized ? styles.minimizedContainer : ""
+        }`}
+      >
+        <audio
+          ref={audioRef}
+          src={currentSong.link}
+          onEnded={handleSongEnd}
+          preload="auto"
+          crossOrigin="anonymous"
+        />
+        <div className={styles.greenCircle} onClick={toggleMinimized}></div>
+        {/* Minimized State with Marquee */}
+        {isMinimized ? (
+          <div className={styles.minimizedContent}>
+            <Marquee gradient={false} speed={30} pauseOnHover={true}>
+              <span className={styles.minimizedText}>
+                <span className={styles.artistName}>{currentSong.artist}</span>
+                &nbsp;&nbsp;-&nbsp;&nbsp;
+                <span className={styles.songName}>{currentSong.name}</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+              </span>
+            </Marquee>
           </div>
+        ) : (
+          <>
+            {/* Song Info */}
+            <div className={styles.songDetails}>
+              <h3 className={styles.songTitle}>{currentSong.name}</h3>
+              <p className={styles.songArtist}>{currentSong.artist}</p>
+            </div>
 
-          {/* Progress Bar */}
-          <div
-            className={styles.progressBar}
-            onClick={handleProgressClick}
-            style={{ cursor: "pointer" }} // Add cursor pointer
-          >
+            {/* Progress Bar */}
             <div
-              className={styles.progress}
-              style={{
-                width: duration ? `${(currentTime / duration) * 100}%` : "0%",
-              }}
-            ></div>
-          </div>
+              className={styles.progressBar}
+              onClick={handleProgressClick}
+              style={{ cursor: "pointer" }} // Add cursor pointer
+            >
+              <div
+                className={styles.progress}
+                style={{
+                  width: duration ? `${(currentTime / duration) * 100}%` : "0%",
+                }}
+              ></div>
+            </div>
 
-          {/* Controls */}
-          <div className={styles.controls}>
-            <button
-              className={styles.controlButton}
-              aria-label="Previous"
-              onClick={prevSong}
-            >
-              ⏮
-            </button>
-            <button
-              className={`${styles.controlButton} ${styles.playButton}`}
-              onClick={togglePlay}
-              aria-label={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? "⏸" : "▶"}
-            </button>
-            <button
-              className={styles.controlButton}
-              aria-label="Next"
-              onClick={nextSong}
-            >
-              ⏭
-            </button>
-          </div>
+            {/* Controls */}
+            <div className={styles.controls}>
+              <button
+                className={styles.controlButton}
+                aria-label="Previous"
+                onClick={prevSong}
+              >
+                ⏮
+              </button>
+              <button
+                className={`${styles.controlButton} ${styles.playButton}`}
+                onClick={togglePlay}
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? "⏸" : "▶"}
+              </button>
+              <button
+                className={styles.controlButton}
+                aria-label="Next"
+                onClick={nextSong}
+              >
+                ⏭
+              </button>
+            </div>
 
-          {/* Time */}
-          <div className={styles.timeInfo}>
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-        </>
-      )}
+            {/* Time */}
+            <div className={styles.timeInfo}>
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,47 +1,47 @@
 /* Base container with all shared styles */
 .musicContainer {
-  position: absolute;
-  top: 650px;
-  right: 50px;
+  position: relative;
   border-radius: 30px;
   background-color: #948aa8;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   color: white;
-  z-index: 10;
-  touch-action: none;
-  user-select: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
-  transition: width 0.3s ease, height 0.3s ease;
-  /* Default (normal) state dimensions */
   width: 600px;
   height: 60px;
   max-width: calc(100vw - 40px);
   gap: 10px;
+  z-index: 2;
+  margin-top: -43px;
 }
 
 /* Only override what changes in minimized state */
 .minimizedContainer {
-  width: 200px !important;
-  height: 40px !important;
+  width: 140px;
+}
+
+.minimizedContainer .musicContainer {
+  width: 140px;
+  height: 40px;
+  padding: 0 10px;
   justify-content: center;
 }
+
 .minimizedContent {
-  font-size: 14px;
-  color: white;
+  font-size: 11px;
   text-align: center;
   width: 100%;
   overflow: hidden;
-  padding-top: 2px; /* Add small padding to center text vertically */
+  padding-top: 2px;
   line-height: 1.2;
 }
 
 .minimizedText {
-  padding-right: 30px;
+  padding-right: 15px;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 11px;
 }
 
 .artistName {
@@ -149,15 +149,6 @@
   background-color: #ffb120; /* Lighter shade for hover effect */
 }
 
-.minimizedContent {
-  font-size: 14px;
-  text-align: center;
-  width: 100%;
-  overflow: hidden;
-  padding-top: 2px;
-  line-height: 1.2;
-}
-
 /* Hide these elements in minimized state */
 .minimizedContainer .songDetails,
 .minimizedContainer .progressBar,
@@ -174,7 +165,12 @@
   }
 
   .minimizedContainer {
-    width: 150px !important;
+    width: 100px;
+  }
+
+  .minimizedContainer .musicContainer {
+    width: 100px;
+    height: 40px;
   }
 
   .progressBar {
@@ -205,21 +201,23 @@
   .playButton {
     width: 26px;
   }
+
+  .minimizedText {
+    font-size: 10px;
+  }
 }
 
 .visualizerContainer {
   position: absolute;
-  bottom: -145px; /* Height of musicContainer */
+  bottom: 4px; /* Height of music container */
   left: 0;
-  width: 600px; /* Match musicContainer width */
+  width: 600px;
   height: 150px;
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px 8px 30px 30px;
   overflow: hidden;
   background: transparent;
   pointer-events: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  transform: translateY(-100%); /* Move up by its own height */
+  z-index: 1;
 }
 
 /* Adjust for minimized state */
@@ -230,8 +228,72 @@
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .visualizerContainer {
-    width: calc(100vw - 40px); /* Match musicContainer mobile width */
-    bottom: -104px; /* Match minimized height */
+    width: calc(100vw - 40px);
     height: 120px;
+    bottom: 15px;
+  }
+}
+
+.musicPlayerWrapper {
+  position: absolute;
+  top: 650px;
+  right: 50px;
+  touch-action: none;
+  user-select: none;
+  width: auto;
+  transition: width 0.3s ease;
+}
+
+.visualizerWrapper {
+  position: relative;
+  height: 105px;
+  margin-bottom: -15px;
+}
+
+.visualizerContainer {
+  width: 600px;
+  height: 100%;
+  border-radius: 8px 8px 30px 30px;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+.musicContainer {
+  position: relative;
+  border-radius: 30px;
+  background-color: #948aa8;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  height: 60px;
+  gap: 10px;
+  z-index: 2; /* Ensure music container is on top */
+}
+
+@media (max-width: 640px) {
+  .musicPlayerWrapper {
+    width: auto;
+  }
+
+  .visualizerWrapper {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    width: 100%;
+  }
+
+  .visualizerContainer {
+    width: calc(100vw - 40px); /* Match music container width */
+  }
+
+  .musicContainer {
+    width: calc(100vw - 40px);
+    padding: 0 15px;
+    gap: 5px;
+    height: 40px;
+    margin-top: -54px;
   }
 }

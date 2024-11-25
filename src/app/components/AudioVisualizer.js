@@ -104,10 +104,14 @@ const AudioVisualizer = ({ analyserNode }) => {
         analyserNode.getByteFrequencyData(dataArray);
 
         barsRef.current.forEach((bar, i) => {
-          const freqIndex = Math.floor((i * dataArray.length) / numBars);
+          // Skip sub-bass and brilliance frequencies by adjusting the frequency range
+          const startBin = Math.floor(dataArray.length * 0.1); // Skip first 10% (sub-bass)
+          const endBin = Math.floor(dataArray.length * 0.8); // Skip last 20% (brilliance)
+          const usableRange = endBin - startBin;
+
+          const freqIndex = Math.floor((i * usableRange) / numBars + startBin);
           const value = dataArray[freqIndex];
 
-          // Reduced height scaling from 12 to 8
           const targetScale = (value / 255) * 10;
 
           bar.scale.y = THREE.MathUtils.lerp(
