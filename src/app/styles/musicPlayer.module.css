@@ -206,3 +206,32 @@
     width: 26px;
   }
 }
+
+.visualizerContainer {
+  position: absolute;
+  bottom: -145px; /* Height of musicContainer */
+  left: 0;
+  width: 600px; /* Match musicContainer width */
+  height: 150px;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transform: translateY(-100%); /* Move up by its own height */
+}
+
+/* Adjust for minimized state */
+.minimizedContainer .visualizerContainer {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .visualizerContainer {
+    width: calc(100vw - 40px); /* Match musicContainer mobile width */
+    bottom: -104px; /* Match minimized height */
+    height: 120px;
+  }
+}

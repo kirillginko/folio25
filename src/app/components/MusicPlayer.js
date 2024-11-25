@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import songs from "../../songs"; // Import the songs array
 import Marquee from "react-fast-marquee";
+import AudioVisualizer from "./AudioVisualizer";
 
 const MusicPlayer = () => {
   const containerRef = useRef(null);
@@ -15,6 +16,9 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0); // Track current playback time
   const [duration, setDuration] = useState(0); // Track song duration
   const draggableInstance = useRef(null);
+  const [audioContext, setAudioContext] = useState(null);
+  const [analyser, setAnalyser] = useState(null);
+  const animationFrameRef = useRef(null);
 
   const currentSong = songs[currentSongIndex]; // Get the current song
 
@@ -60,16 +64,28 @@ const MusicPlayer = () => {
     setIsMinimized((prev) => !prev);
   };
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
+  const togglePlay = async () => {
+    if (!audioRef.current || !audioContext) return;
 
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+    try {
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
+        console.log("Audio context resumed");
+      }
+
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
+      }
+      setIsPlaying(!isPlaying);
+      console.log("Playback state toggled:", !isPlaying);
+    } catch (error) {
+      console.error("Error toggling playback:", error);
     }
-
-    setIsPlaying((prev) => !prev);
   };
 
   const nextSong = () => {
@@ -101,21 +117,26 @@ const MusicPlayer = () => {
   }, []);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.load(); // Load the new song
-      setCurrentTime(0); // Reset current time
-      setDuration(0); // Reset duration
-      if (isPlaying) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.log("Playback failed:", error);
+    if (!audioRef.current) return;
+
+    audioRef.current.pause();
+    audioRef.current.load(); // Load the new song
+    setCurrentTime(0);
+    setDuration(0);
+
+    if (isPlaying) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log("Playback started successfully");
+          })
+          .catch((error) => {
+            console.error("Playback failed:", error);
           });
-        }
       }
     }
-  }, [currentSongIndex, isPlaying]); // Added isPlaying to dependency array
+  }, [currentSongIndex]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -183,6 +204,89 @@ const MusicPlayer = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!audioRef.current || audioContext) return;
+
+    try {
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      const analyzerNode = context.createAnalyser();
+      analyzerNode.fftSize = 2048;
+      analyzerNode.smoothingTimeConstant = 0.8;
+
+      const source = context.createMediaElementSource(audioRef.current);
+      source.connect(analyzerNode);
+      analyzerNode.connect(context.destination);
+
+      setAudioContext(context);
+      setAnalyser(analyzerNode);
+    } catch (error) {
+      console.error("Error setting up audio context:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!analyser || !isPlaying) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+
+    const analyzeFrequency = () => {
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+
+      // Calculate average frequency for different ranges
+      // Sub-bass (20-60 Hz)
+      const subBass = dataArray.slice(1, 3).reduce((a, b) => a + b) / 2;
+
+      // Bass (60-250 Hz)
+      const bass = dataArray.slice(3, 12).reduce((a, b) => a + b) / 9;
+
+      // Low Mids (250-500 Hz)
+      const lowMids = dataArray.slice(12, 24).reduce((a, b) => a + b) / 12;
+
+      // Mids (500-2000 Hz)
+      const mids = dataArray.slice(24, 96).reduce((a, b) => a + b) / 72;
+
+      // High Mids (2000-4000 Hz)
+      const highMids = dataArray.slice(96, 192).reduce((a, b) => a + b) / 96;
+
+      // Presence (4000-6000 Hz)
+      const presence = dataArray.slice(192, 288).reduce((a, b) => a + b) / 96;
+
+      // Brilliance (6000-20000 Hz)
+      const brilliance =
+        dataArray.slice(288, 1024).reduce((a, b) => a + b) / 736;
+
+      // Calculate overall volume (RMS of all frequencies)
+      const volume = Math.sqrt(
+        dataArray.reduce((a, b) => a + b * b, 0) / dataArray.length
+      );
+
+      console.log("Frequency Analysis:", {
+        subBass: Math.round(subBass),
+        bass: Math.round(bass),
+        lowMids: Math.round(lowMids),
+        mids: Math.round(mids),
+        highMids: Math.round(highMids),
+        presence: Math.round(presence),
+        brilliance: Math.round(brilliance),
+        volume: Math.round(volume),
+      });
+
+      animationFrameRef.current = requestAnimationFrame(analyzeFrequency);
+    };
+
+    analyzeFrequency();
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [analyser, isPlaying]);
+
   return (
     <div
       ref={containerRef}
@@ -190,7 +294,19 @@ const MusicPlayer = () => {
         isMinimized ? styles.minimizedContainer : ""
       }`}
     >
-      <audio ref={audioRef} src={currentSong.link} onEnded={handleSongEnd} />
+      {!isMinimized && (
+        <div className={styles.visualizerContainer}>
+          {analyser && <AudioVisualizer analyserNode={analyser} />}
+        </div>
+      )}
+
+      <audio
+        ref={audioRef}
+        src={currentSong.link}
+        onEnded={handleSongEnd}
+        preload="auto"
+        crossOrigin="anonymous"
+      />
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
 
       {/* Minimized State with Marquee */}
