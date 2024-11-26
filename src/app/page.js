@@ -9,6 +9,7 @@ import MusicPlayer from "./components/MusicPlayer";
 import Email from "./components/Email";
 import Stamp from "./components/Stamp";
 import FluidBackground from "./components/fluid/Fluid";
+import ImageGallery from "./components/ImageGallery";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -56,6 +57,7 @@ export default function Home() {
         <MusicPlayer />
         <Email />
         <Stamp />
+        <ImageGallery />
       </main>
     </div>
   );

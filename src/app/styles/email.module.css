@@ -39,7 +39,9 @@
   width: 150px;
   height: 50px;
   max-width: calc(100vw - 40px);
-  background-color: white;
+  background-color: #e6e6e6;
+  color: #000;
+  font-size: 12px;
 }
 
 /* Minimize button */
@@ -170,7 +172,6 @@
 
 /* Send button */
 .sendButton {
-  background: #fff;
   border: 1px solid #000;
   border-radius: 25px;
   padding: 10px 20px;

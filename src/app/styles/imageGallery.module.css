@@ -1,0 +1,42 @@
+.galleryContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.imageWrapper {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  cursor: grab;
+  pointer-events: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: white;
+  padding: 10px;
+  transform-origin: center center;
+}
+
+.imageWrapper:active {
+  cursor: grabbing;
+}
+
+.image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 5px;
+  pointer-events: none;
+  position: relative !important;
+}
+
+@media (max-width: 768px) {
+  .imageWrapper {
+    width: 150px;
+    height: 150px;
+  }
+}
