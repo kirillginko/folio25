@@ -17,7 +17,7 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   background: white;
-  padding: 10px;
+  /* padding: 10px; */
   transform-origin: center center;
 }
 
@@ -29,9 +29,44 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: cover;
-  border-radius: 5px;
+  /* border-radius: 5px; */
   pointer-events: none;
   position: relative !important;
+}
+
+.shuffleButton {
+  font-family: var(--primary-font);
+  position: fixed;
+  top: 46px;
+  right: 160px;
+  transform: translateX(-50%);
+  background-color: #948aa8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.6em;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+.hideButton {
+  font-family: var(--primary-font);
+  position: fixed;
+  top: 46px;
+  right: 85px;
+  transform: translateX(-50%);
+  background-color: #948aa8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.6em;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
 }
 
 @media (max-width: 768px) {
@@ -39,4 +74,22 @@
     width: 150px;
     height: 150px;
   }
+}
+
+.shuffleButton:hover {
+  background-color: #7a708f;
+  transform: translateX(-50%) scale(1.05);
+}
+
+.shuffleButton:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.hideButton:hover {
+  background-color: #7a708f;
+  transform: translateX(-50%) scale(1.05);
+}
+
+.hideButton:active {
+  transform: translateX(-50%) scale(0.95);
 }
