@@ -286,6 +286,73 @@ const MusicPlayer = () => {
     };
   }, [analyser, isPlaying]);
 
+  useEffect(() => {
+    // Animation for expanding/minimizing
+    if (containerRef.current) {
+      const container = containerRef.current.querySelector(
+        `.${styles.musicContainer}`
+      );
+      if (!container) return;
+
+      // Create timeline
+      const tl = gsap.timeline();
+
+      if (isMinimized) {
+        // Minimize animation
+        tl.to(container, {
+          width: "150px",
+          height: "40px",
+          duration: 0.3,
+          ease: "power2.inOut",
+        });
+
+        // Only animate content if it exists
+        const minimizedContent = container.querySelector(
+          `.${styles.minimizedContent}`
+        );
+        if (minimizedContent) {
+          tl.fromTo(
+            minimizedContent,
+            { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.2 },
+            "-=0.1"
+          );
+        }
+      } else {
+        // Expand animation
+        tl.to(container, {
+          width: window.innerWidth <= 640 ? "calc(100vw - 40px)" : "600px",
+          height: "60px",
+          duration: 0.3,
+          ease: "power2.inOut",
+        });
+
+        // Only animate elements if they exist
+        const elements = [
+          container.querySelector(`.${styles.controls}`),
+          container.querySelector(`.${styles.progressBar}`),
+          container.querySelector(`.${styles.timeInfo}`),
+          container.querySelector(`.${styles.songDetails}`),
+        ].filter(Boolean); // Remove null values
+
+        if (elements.length) {
+          tl.fromTo(
+            elements,
+            { opacity: 0, scale: 0.8 },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 0.2,
+              stagger: 0.05,
+              ease: "power2.out",
+            },
+            "-=0.1"
+          );
+        }
+      }
+    }
+  }, [isMinimized]);
+
   return (
     <div
       ref={containerRef}

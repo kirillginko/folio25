@@ -13,7 +13,7 @@
   height: 60px;
   max-width: calc(100vw - 40px);
   gap: 10px;
-  z-index: 2;
+  z-index: 2000;
   margin-top: -43px;
 }
 
@@ -209,7 +209,7 @@
 
 .visualizerContainer {
   position: absolute;
-  bottom: 4px; /* Height of music container */
+  bottom: 3px; /* Height of music container */
   left: 0;
   width: 600px;
   height: 150px;
@@ -230,18 +230,19 @@
   .visualizerContainer {
     width: calc(100vw - 40px);
     height: 120px;
-    bottom: 15px;
+    bottom: 14px;
   }
 }
 
 .musicPlayerWrapper {
   position: absolute;
-  top: 650px;
-  right: 50px;
+  top: 550px;
+  right: 40px;
   touch-action: none;
   user-select: none;
   width: auto;
   transition: width 0.3s ease;
+  z-index: 2000;
 }
 
 .visualizerWrapper {

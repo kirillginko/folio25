@@ -46,7 +46,7 @@ const AudioVisualizer = ({ analyserNode }) => {
     containerRef.current.appendChild(rendererRef.current.domElement);
 
     // Create bars that span full width
-    const numBars = 98; // More bars
+    const numBars = 138; // More bars
     const barWidth = 0.35; // Slightly thinner to fit more
     const spacing = 0.37; // Minimal gap between bars
 

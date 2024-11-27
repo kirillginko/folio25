@@ -1,160 +1,63 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import styles from "../styles/email.module.css";
 import { gsap } from "gsap";
-import { Draggable } from "gsap/Draggable";
 
 const Email = () => {
   const containerRef = useRef(null);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [fromEmail, setFromEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isSent, setIsSent] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(true);
-  const draggableInstance = useRef(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const formRef = useRef(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        if (rect.right > windowWidth) {
-          gsap.to(containerRef.current, {
-            x: windowWidth - rect.width - 20,
+    // Animation for expanding/minimizing
+    if (containerRef.current) {
+      if (!isMinimized) {
+        // Expand animation
+        gsap.fromTo(
+          containerRef.current.children[1], // The designContainer
+          {
+            height: "40px",
+            width: "100px",
+            borderRadius: "30px",
+          },
+          {
+            height: "550px",
+            width: "380px",
+            borderRadius: "16px",
             duration: 0.3,
-          });
-        }
-        if (rect.bottom > windowHeight) {
-          gsap.to(containerRef.current, {
-            y: windowHeight - rect.height - 20,
-            duration: 0.3,
-          });
-        }
-        if (rect.left < 0) {
-          gsap.to(containerRef.current, {
-            x: 20,
-            duration: 0.3,
-          });
-        }
-        if (rect.top < 0) {
-          gsap.to(containerRef.current, {
-            y: 20,
-            duration: 0.3,
-          });
-        }
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    handleResize();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    gsap.registerPlugin(Draggable);
-
-    const createDraggable = () => {
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
-      }
-
-      draggableInstance.current = Draggable.create(containerRef.current, {
-        type: "x,y",
-        bounds: window,
-        inertia: true,
-        cursor: "grab",
-        activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.85 : 0.65,
-        dragResistance: isMinimized ? 0.1 : 0.05,
-        zIndexBoost: true,
-        allowEventDefault: true,
-        allowNativeTouchScrolling: true,
-        onClick: function (e) {
-          if (
-            e.target.tagName.toLowerCase() === "input" ||
-            e.target.tagName.toLowerCase() === "textarea" ||
-            e.target.tagName.toLowerCase() === "button"
-          ) {
-            return false;
+            ease: "power2.out",
           }
-        },
-        onDragStart: function (e) {
-          if (
-            e.target.tagName.toLowerCase() === "input" ||
-            e.target.tagName.toLowerCase() === "textarea" ||
-            e.target.tagName.toLowerCase() === "button"
-          ) {
-            return false;
-          }
-          gsap.to(this.target, {
-            scale: isMinimized ? 1.05 : 1.1,
-            duration: 0.2,
-          });
-        },
-        onDragEnd: function () {
-          gsap.to(this.target, { scale: 1, duration: 0.2 });
-        },
-      })[0];
-    };
-
-    createDraggable();
-
-    return () => {
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
+        );
+      } else {
+        // Minimize animation
+        gsap.to(containerRef.current.children[1], {
+          height: "40px",
+          width: "100px",
+          borderRadius: "30px",
+          duration: 0.3,
+          ease: "power2.in",
+        });
       }
-    };
+    }
   }, [isMinimized]);
 
-  const handleInputClick = (e) => {
-    e.stopPropagation();
-  };
-
   const toggleMinimized = () => {
-    if (isMinimized) {
-      gsap.to(formRef.current, {
-        width: 350,
-        height: 500,
-        duration: 0.3,
-        ease: "power2.inOut",
-        onComplete: () => setIsMinimized(false),
-      });
-    } else {
-      gsap.to(formRef.current, {
-        width: 150,
-        height: 50,
-        duration: 0.3,
-        ease: "power2.inOut",
-        onComplete: () => setIsMinimized(true),
-      });
-    }
+    setIsAnimating(true);
+    setIsMinimized((prev) => !prev);
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 300);
   };
 
   const handleSend = async (e) => {
     e.preventDefault();
-    setError(null);
     setIsLoading(true);
-
-    if (!fromEmail.trim() || !message.trim()) {
-      setError("Please fill out both email and message fields.");
-      setIsLoading(false);
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(fromEmail)) {
-      setError("Please enter a valid email address.");
-      setIsLoading(false);
-      return;
-    }
+    setError(null);
 
     try {
       const response = await fetch("/api/send-email", {
@@ -172,18 +75,20 @@ const Email = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to send email");
+        throw new Error(data.error || "Failed to send message");
       }
 
       setIsSent(true);
       setFromEmail("");
       setMessage("");
+
       setTimeout(() => {
         setIsSent(false);
-      }, 3000);
-    } catch (error) {
-      console.error("Error sending email:", error);
-      setError(error.message || "Failed to send email. Please try again.");
+        setIsMinimized(true);
+      }, 2000);
+    } catch (err) {
+      console.error("Send error:", err);
+      setError(err.message || "Failed to send message. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +99,6 @@ const Email = () => {
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
 
       <div
-        ref={formRef}
         className={`${styles.designContainer} ${
           isMinimized ? styles.minimizedContainer : styles.normalContainer
         }`}
@@ -206,31 +110,30 @@ const Email = () => {
         ) : (
           <form onSubmit={handleSend}>
             <div className={styles.header}>
-              <span>From: </span>
+              <span>FROM: </span>
               <input
-                type="email"
-                placeholder="Your Email Here"
                 className={styles.headerInput}
+                type="email"
+                placeholder="[Your Email Here]"
                 value={fromEmail}
                 onChange={(e) => setFromEmail(e.target.value)}
-                onClick={handleInputClick}
                 required
+                autoFocus
               />
             </div>
-
             <div className={styles.content}>
               <textarea
                 className={styles.messageInput}
-                placeholder="Hi Kirill, Lets Work Together!"
+                placeholder="Hi my name is"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onClick={handleInputClick}
                 required
               />
               <div className={styles.footer}>
+                <span className={styles.email}>HELLO@KIRILL.STUDIO</span>
                 <button
                   type="submit"
-                  className={`${styles.sendButton} ${
+                  className={`${styles.submitButton} ${
                     isLoading ? styles.loading : ""
                   }`}
                   disabled={isLoading}
@@ -238,9 +141,9 @@ const Email = () => {
                   SEND MESSAGE
                 </button>
               </div>
-              {error && <p className={styles.error}>{error}</p>}
-              {isSent && <p className={styles.confirmation}>Message Sent!</p>}
             </div>
+            {error && <p className={styles.error}>{error}</p>}
+            {isSent && <p className={styles.confirmation}>Message Sent!</p>}
           </form>
         )}
       </div>

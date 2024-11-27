@@ -11,6 +11,7 @@ const ImageGallery = () => {
   const draggableInstances = useRef([]);
   const zIndexCounter = useRef(1);
   const [isVisible, setIsVisible] = React.useState(true);
+  const [selectedImage, setSelectedImage] = React.useState(null);
 
   const getRandomPosition = () => {
     const padding = 100;
@@ -85,6 +86,47 @@ const ImageGallery = () => {
         stagger: 0.05,
       });
     });
+  };
+
+  const handleDoubleClick = (index) => {
+    if (selectedImage === index) {
+      // If already selected, minimize
+      gsap.to(imageRefs.current[index], {
+        x: getRandomPosition().x,
+        y: getRandomPosition().y,
+        scale: 1,
+        rotation: Math.random() * 30 - 15,
+        duration: 0.5,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setSelectedImage(null);
+          draggableInstances.current[index].enable();
+        },
+      });
+    } else {
+      // Maximize and center
+      const windowCenter = {
+        x: window.innerWidth / 2 - 100, // Half of image width
+        y: window.innerHeight / 2 - 100, // Half of image height
+      };
+
+      setSelectedImage(index);
+      zIndexCounter.current += 1;
+
+      gsap.to(imageRefs.current[index], {
+        x: windowCenter.x,
+        y: windowCenter.y,
+        scale: 3,
+        rotation: 0,
+        zIndex: zIndexCounter.current,
+        duration: 0.5,
+        ease: "power2.inOut",
+        onStart: () => {
+          // Disable dragging while maximized
+          draggableInstances.current[index].disable();
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -184,7 +226,10 @@ const ImageGallery = () => {
           <div
             key={image.id}
             ref={(el) => (imageRefs.current[index] = el)}
-            className={styles.imageWrapper}
+            className={`${styles.imageWrapper} ${
+              selectedImage === index ? styles.selected : ""
+            }`}
+            onDoubleClick={() => handleDoubleClick(index)}
           >
             <Image
               src={image.url}
