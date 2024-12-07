@@ -38,7 +38,6 @@ const BrushCanvas = () => {
   const containerRef = useRef(null);
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // Add these state variables at the top with your other states
   const [notificationState, setNotificationState] = useState({
@@ -54,7 +53,7 @@ const BrushCanvas = () => {
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
 
   const setup = (p5, canvasParentRef) => {
-    const canvas = p5.createCanvas(1000, 800).parent(canvasParentRef);
+    p5.createCanvas(1000, 800).parent(canvasParentRef);
     p5.background(255);
     p5.noStroke();
     if (brush.blend) {
@@ -224,8 +223,6 @@ const BrushCanvas = () => {
           errorData.error || `HTTP error! status: ${response.status}`
         );
       }
-
-      const data = await response.json();
 
       showNotification("Drawing sent successfully!", "success");
     } catch (err) {
@@ -512,11 +509,7 @@ const BrushCanvas = () => {
     if (!isMinimized) {
       saveCanvasState();
     }
-    setIsAnimating(true);
     setIsMinimized((prev) => !prev);
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 200);
   };
 
   // Modify the draw function to save canvas data before minimizing
