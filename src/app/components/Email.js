@@ -65,23 +65,23 @@ const Email = () => {
     setError(null);
 
     try {
-      const response = await fetch("/api/send-email", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           fromEmail,
-          toEmail: "kirillginko@gmail.com",
           message,
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to send message");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
       }
+
+      const data = await response.json();
 
       setIsSent(true);
       setFromEmail("");
@@ -92,11 +92,15 @@ const Email = () => {
         type: "success",
       });
 
+      // Hide notification and minimize after 3 seconds
       setTimeout(() => {
         setIsSent(false);
         setIsMinimized(true);
-        setNotificationState((prev) => ({ ...prev, show: false }));
-      }, 2000);
+        setNotificationState((prev) => ({
+          ...prev,
+          show: false,
+        }));
+      }, 3000);
     } catch (err) {
       console.error("Send error:", err);
       setError(err.message || "Failed to send message. Please try again.");
@@ -105,9 +109,14 @@ const Email = () => {
         message: err.message || "Failed to send message",
         type: "error",
       });
+
+      // Hide error notification after 3 seconds
       setTimeout(() => {
-        setNotificationState((prev) => ({ ...prev, show: false }));
-      }, 2000);
+        setNotificationState((prev) => ({
+          ...prev,
+          show: false,
+        }));
+      }, 3000);
     } finally {
       setIsLoading(false);
     }

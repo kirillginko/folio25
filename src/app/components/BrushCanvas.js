@@ -40,8 +40,21 @@ const BrushCanvas = () => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Add these state variables at the top with your other states
+  const [notificationState, setNotificationState] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Add state to store canvas data
+  const [canvasData, setCanvasData] = useState(null);
+
+  const [isNotificationExiting, setIsNotificationExiting] = useState(false);
+
   const setup = (p5, canvasParentRef) => {
-    p5.createCanvas(1000, 800).parent(canvasParentRef);
+    const canvas = p5.createCanvas(1000, 800).parent(canvasParentRef);
     p5.background(255);
     p5.noStroke();
     if (brush.blend) {
@@ -50,6 +63,13 @@ const BrushCanvas = () => {
       p5.blendMode(p5.BLEND);
     }
     setP5Instance(p5);
+
+    // Restore canvas data if it exists
+    if (canvasData) {
+      p5.loadImage(canvasData, (img) => {
+        p5.image(img, 0, 0);
+      });
+    }
   };
 
   // Add clear canvas function
@@ -60,6 +80,7 @@ const BrushCanvas = () => {
       if (brush.blend) {
         p5Instance.blendMode(p5Instance.MULTIPLY); // Reapply blend mode
       }
+      setCanvasData(null); // Clear saved canvas data
     }
   };
 
@@ -140,6 +161,90 @@ const BrushCanvas = () => {
   const hex2rgba = (opacity) => {
     const alpha = Math.round(opacity * 255).toString(16);
     return alpha.length === 1 ? "0" + alpha : alpha;
+  };
+
+  const showNotification = (message, type) => {
+    setNotificationState({
+      show: true,
+      message,
+      type,
+    });
+
+    // Start exit animation after 2.5 seconds
+    setTimeout(() => {
+      setIsNotificationExiting(true);
+
+      // Hide notification after animation completes
+      setTimeout(() => {
+        setNotificationState((prev) => ({
+          ...prev,
+          show: false,
+        }));
+        setIsNotificationExiting(false);
+      }, 500); // Match animation duration
+    }, 2500);
+  };
+
+  // Move handleSave before the controls definition
+  const handleSave = async () => {
+    if (!p5Instance) return;
+
+    setIsLoading(true);
+    try {
+      p5Instance.redraw();
+      const currentCanvas = p5Instance.get();
+
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = currentCanvas.width;
+      tempCanvas.height = currentCanvas.height;
+
+      const ctx = tempCanvas.getContext("2d");
+      ctx.drawImage(currentCanvas.canvas, 0, 0);
+
+      const canvasData = tempCanvas.toDataURL("image/png", 1.0);
+
+      const requestBody = {
+        fromEmail: "drawing@kirill.studio",
+        toEmail: "kirillginko@gmail.com",
+        message: "New drawing from your website",
+        attachment: canvasData,
+      };
+
+      const response = await fetch("/api/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+
+      showNotification("Drawing sent successfully!", "success");
+    } catch (err) {
+      console.error("Save error:", err);
+      showNotification(err.message || "Failed to save drawing", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!p5Instance) return;
+    try {
+      // Use p5's built-in save function
+      p5Instance.save("drawing.png");
+    } catch (err) {
+      console.error("Download error:", err);
+      showNotification("Failed to download drawing", "error");
+    }
   };
 
   const controls = (
@@ -230,7 +335,7 @@ const BrushCanvas = () => {
               brush.blend ? styles.selected : ""
             }`}
             style={{
-              backgroundColor: brush.blend ? "#000000" : "transparent",
+              backgroundColor: brush.blend ? "#666" : "transparent",
               border: brush.blend ? "2px solid #666" : "2px solid #666",
             }}
             onClick={() => {
@@ -245,9 +350,21 @@ const BrushCanvas = () => {
           />
         </div>
       </div>
-      <button onClick={clearCanvas} className={styles.clearButton}>
-        Clear
-      </button>
+      <div className={styles.buttonGroup}>
+        <button onClick={clearCanvas} className={styles.clearButton}>
+          Clear
+        </button>
+        <button
+          onClick={handleSave}
+          className={`${styles.saveButton} ${isLoading ? styles.loading : ""}`}
+          disabled={isLoading}
+        >
+          {isLoading ? "Sending..." : "Email"}
+        </button>
+        <button onClick={handleDownload} className={styles.saveButton}>
+          Download
+        </button>
+      </div>
     </div>
   );
 
@@ -392,6 +509,9 @@ const BrushCanvas = () => {
   }, [isMinimized]);
 
   const toggleMinimized = () => {
+    if (!isMinimized) {
+      saveCanvasState();
+    }
     setIsAnimating(true);
     setIsMinimized((prev) => !prev);
     setTimeout(() => {
@@ -399,30 +519,42 @@ const BrushCanvas = () => {
     }, 200);
   };
 
+  // Modify the draw function to save canvas data before minimizing
+  const saveCanvasState = () => {
+    if (p5Instance) {
+      const currentCanvas = p5Instance.get();
+      setCanvasData(currentCanvas.canvas.toDataURL());
+    }
+  };
+
   return (
     <div ref={containerRef} className={styles.draggableWrapper}>
+      {notificationState.show && (
+        <div
+          className={`${styles.notification} 
+                     ${styles[notificationState.type]}
+                     ${isNotificationExiting ? styles.exit : ""}`}
+        >
+          {notificationState.message}
+        </div>
+      )}
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
       <div
         className={`${styles.designContainer} ${
           isMinimized ? styles.minimizedContainer : styles.normalContainer
         }`}
       >
-        <div
-          style={{
-            opacity: isMinimized ? 0 : 1,
-            position: isMinimized ? "absolute" : "relative",
-            pointerEvents: isMinimized ? "none" : "auto",
-          }}
-        >
-          {controls}
-          <div className={styles.canvasWrapper}>
-            <Sketch setup={setup} draw={draw} />
-          </div>
-        </div>
-        {isMinimized && (
+        {isMinimized ? (
           <div className={styles.minimizedContent}>
             <span className={styles.minimizedText}>Draw</span>
           </div>
+        ) : (
+          <>
+            {controls}
+            <div className={styles.canvasWrapper}>
+              <Sketch setup={setup} draw={draw} />
+            </div>
+          </>
         )}
       </div>
     </div>

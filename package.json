@@ -26,6 +26,7 @@
     "three": "^0.170.0"
   },
   "devDependencies": {
+    "@types/node": "22.10.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "15.0.3"
   }
