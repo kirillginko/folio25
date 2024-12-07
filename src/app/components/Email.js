@@ -12,6 +12,11 @@ const Email = () => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [notificationState, setNotificationState] = useState({
+    show: false,
+    message: "",
+    type: "success", // or 'error'
+  });
 
   useEffect(() => {
     // Animation for expanding/minimizing
@@ -81,14 +86,28 @@ const Email = () => {
       setIsSent(true);
       setFromEmail("");
       setMessage("");
+      setNotificationState({
+        show: true,
+        message: "Message sent successfully!",
+        type: "success",
+      });
 
       setTimeout(() => {
         setIsSent(false);
         setIsMinimized(true);
+        setNotificationState((prev) => ({ ...prev, show: false }));
       }, 2000);
     } catch (err) {
       console.error("Send error:", err);
       setError(err.message || "Failed to send message. Please try again.");
+      setNotificationState({
+        show: true,
+        message: err.message || "Failed to send message",
+        type: "error",
+      });
+      setTimeout(() => {
+        setNotificationState((prev) => ({ ...prev, show: false }));
+      }, 2000);
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +115,13 @@ const Email = () => {
 
   return (
     <div ref={containerRef} className={styles.draggableWrapper}>
+      {notificationState.show && (
+        <div
+          className={`${styles.notification} ${styles[notificationState.type]}`}
+        >
+          {notificationState.message}
+        </div>
+      )}
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
 
       <div
@@ -105,7 +131,7 @@ const Email = () => {
       >
         {isMinimized ? (
           <div className={styles.minimizedContent}>
-            <span className={styles.minimizedText}>Email</span>
+            <span className={styles.minimizedText}>Contact</span>
           </div>
         ) : (
           <form onSubmit={handleSend}>

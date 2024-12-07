@@ -124,7 +124,7 @@
   width: 100px;
   height: 40px;
   border-radius: 30px;
-  background-color: #948aa8;
+  background-color: #fdfdfd;
   padding: 12px 24px;
   overflow: hidden;
   display: flex;
@@ -143,13 +143,14 @@
 .minimizedText {
   font-family: var(--primary-font);
   font-size: 0.6em;
-  color: white;
+  color: #000;
   margin: 0;
   padding: 0;
 }
 
 .minimizedContainer:hover {
-  background-color: #7a708f;
+  /* background-color: #7a708f; */
+  background-color: #c0c0c0;
 }
 
 .draggableWrapper {
@@ -175,4 +176,43 @@
 
 .greenCircle:hover {
   background-color: #ffb120;
+}
+
+.notification {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  z-index: 1000;
+  animation: slideDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.success {
+  background-color: #4caf50;
+}
+
+.error {
+  background-color: #f44336;
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, 5px);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-50%, -3px);
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }

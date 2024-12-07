@@ -1,0 +1,204 @@
+.container {
+  position: relative;
+  top: 1000px;
+  left: 80px;
+  z-index: 10;
+}
+.designContainer {
+  position: relative;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.canvasWrapper canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  margin: auto;
+  cursor: crosshair;
+}
+
+.minimizedContainer {
+  width: 100px !important;
+  height: 50px !important;
+  border: 1px solid black;
+  border-radius: 25px;
+  background-color: #e6e6e6;
+  padding: 5px;
+  overflow: hidden;
+}
+
+.minimizedContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minimizedText {
+  padding-top: 10px;
+  font-size: 12px;
+  text-align: center;
+  color: #000;
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 16px 16px 0 0;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  box-sizing: border-box;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+
+.controls:active {
+  cursor: grabbing;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.3rem;
+  color: #333;
+  padding: 0 0.5rem;
+}
+
+.control input[type="range"] {
+  width: 60px;
+  cursor: pointer;
+  accent-color: #666;
+}
+
+.control input[type="color"] {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+}
+
+.control input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.control input[type="color"]::-webkit-color-swatch {
+  border: 2px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Hover effects */
+.control input[type="range"]:hover {
+  opacity: 0.8;
+}
+
+.control input[type="color"]:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Label text */
+.control span {
+  white-space: nowrap;
+  font-size: 0.7rem;
+  min-width: 40px;
+}
+
+.colorPicker {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.colorButton {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.colorButton:hover {
+  transform: scale(1.1);
+}
+
+.colorButton.selected {
+  border: 2px solid #333;
+  transform: scale(1.1);
+}
+
+.clearButton {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  background-color: #f0f0f0;
+  border-color: #ccc;
+}
+
+.clearButton:active {
+  transform: scale(0.95);
+}
+
+.greenCircle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: #f8e932;
+  border-radius: 50%;
+  top: -25px;
+  right: 10px;
+  cursor: pointer;
+  z-index: 11;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.greenCircle:hover {
+  background-color: #ffb120;
+}
+
+.contentWrapper > * {
+  pointer-events: auto;
+}
+
+.draggableWrapper {
+  position: absolute;
+  top: 160px;
+  left: 20px;
+  z-index: 10;
+}

@@ -13,13 +13,13 @@ function SpinningModel() {
 
   useFrame(() => {
     if (modelRef.current) {
-      modelRef.current.rotation.y += 0.09; // Spin around Y axis
+      modelRef.current.rotation.y += 0.03; // Spin around Y axis
       // modelRef.current.rotation.x += 0.02; // Add tilt around X axis
       // modelRef.current.rotation.z += 0.01; // Add slight roll around Z axis
     }
   });
 
-  return <Model ref={modelRef} position={[-2, 2.4, 0]} scale={1} />;
+  return <Model ref={modelRef} position={[0, 1, 0]} scale={1.5} />;
 }
 
 export default function TennisBallScene() {

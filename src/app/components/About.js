@@ -20,7 +20,12 @@ const About = () => {
 
       draggableInstance.current = Draggable.create(containerRef.current, {
         type: "x,y",
-        bounds: window,
+        bounds: {
+          top: -50,
+          left: -50,
+          width: window.innerWidth + 100,
+          height: window.innerHeight + 50,
+        },
         inertia: true,
         cursor: "grab",
         activeCursor: "grabbing",
@@ -29,7 +34,7 @@ const About = () => {
         zIndexBoost: true,
         onDragStart: function () {
           gsap.to(this.target, {
-            scale: isMinimized ? 1.05 : 1.1,
+            scale: isMinimized ? 1.05 : 1.02,
             duration: 0.2,
           });
         },
@@ -41,10 +46,20 @@ const About = () => {
 
     createDraggable();
 
+    const updateDraggableBounds = () => {
+      if (draggableInstance.current) {
+        draggableInstance.current.kill();
+        createDraggable();
+      }
+    };
+
+    window.addEventListener("resize", updateDraggableBounds);
+
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
+      window.removeEventListener("resize", updateDraggableBounds);
     };
   }, [isMinimized]);
 

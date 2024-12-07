@@ -44,6 +44,9 @@ importers:
       react-fast-marquee:
         specifier: ^1.6.5
         version: 1.6.5(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
+      react-p5:
+        specifier: ^1.4.1
+        version: 1.4.1(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106)
       three:
         specifier: ^0.170.0
         version: 0.170.0
@@ -365,6 +368,9 @@ packages:
 
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
+
+  '@types/p5@1.7.0':
+    resolution: {integrity: sha512-6AnjmW98/edgXB+pYDBx7t6QbCogIG6NUzey93JpGTZA4096C+KjSN8y0sj43QRd9XtblrAhoRXHj1pFZ2vsCg==}
 
   '@types/prop-types@15.7.13':
     resolution: {integrity: sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==}
@@ -1513,6 +1519,10 @@ packages:
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
+  opencollective-postinstall@2.0.2:
+    resolution: {integrity: sha512-pVOEP16TrAO2/fjej1IdOyupJY8KDUM1CvsaScRbw6oddvpQoOfGk4ywha0HKKVAD6RkW4x6Q+tNBwhf3Bgpuw==}
+    hasBin: true
+
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -1530,6 +1540,9 @@ packages:
 
   p5@1.11.1:
     resolution: {integrity: sha512-JWvOwAgInsuSOjzMwAtaiN8gMLzhR1jcyosytNeftH0vnTkywfIyFfVYFfsLSsh6B+DYuqJYu1SVcfkuvrYi1Q==}
+
+  p5@1.7.0:
+    resolution: {integrity: sha512-qrbT/44Dwm63ZtOKX/mp61pw+5yj6ijYLOmRv7p6zcfjbo83Vb0gVFEvW0kTLFu7hceWCig0HONo9F1bSlqbsQ==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -1629,6 +1642,13 @@ packages:
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+
+  react-p5@1.4.1:
+    resolution: {integrity: sha512-njeL8zskkbo8gK3ql1u4/MgmecT/g7Z7LvypTn65DWUnuBvV/9S5AowcKkwQuLVo8/DDAE5vgGVFq1DOkoWiJA==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    peerDependencies:
+      react: '>= 17.0.1'
+      react-dom: '>= 17.0.1'
 
   react-reconciler@0.31.0-rc-935180c7e0-20240524:
     resolution: {integrity: sha512-qM2ilapJ/g050GdXEzy3SzbkGhw7Odda6Js6w/3sVBYcdbFYyfsJp5b/Y/o6v7hISAa2e1HNQ7sus/p4u8XD0Q==}
@@ -2358,6 +2378,8 @@ snapshots:
   '@types/json5@0.0.29': {}
 
   '@types/offscreencanvas@2019.7.3': {}
+
+  '@types/p5@1.7.0': {}
 
   '@types/prop-types@15.7.13': {}
 
@@ -3719,6 +3741,8 @@ snapshots:
     dependencies:
       wrappy: 1.0.2
 
+  opencollective-postinstall@2.0.2: {}
+
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -3745,6 +3769,8 @@ snapshots:
       - supports-color
 
   p5@1.11.1: {}
+
+  p5@1.7.0: {}
 
   parent-module@1.0.1:
     dependencies:
@@ -3829,6 +3855,14 @@ snapshots:
       react-dom: 19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106)
 
   react-is@16.13.1: {}
+
+  react-p5@1.4.1(react-dom@19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106))(react@19.0.0-rc-66855b96-20241106):
+    dependencies:
+      '@types/p5': 1.7.0
+      opencollective-postinstall: 2.0.2
+      p5: 1.7.0
+      react: 19.0.0-rc-66855b96-20241106
+      react-dom: 19.0.0-rc-66855b96-20241106(react@19.0.0-rc-66855b96-20241106)
 
   react-reconciler@0.31.0-rc-935180c7e0-20240524(react@19.0.0-rc-66855b96-20241106):
     dependencies:

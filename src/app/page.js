@@ -10,7 +10,7 @@ import Email from "./components/Email";
 import Stamp from "./components/Stamp";
 import FluidBackground from "./components/fluid/Fluid";
 import ImageGallery from "./components/ImageGallery";
-import TennisBallScene from "./components/TennisBallScene";
+import BrushCanvas from "./components/BrushCanvas";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -59,7 +59,7 @@ export default function Home() {
         <Email />
         <Stamp />
         <ImageGallery />
-        {/* <TennisBallScene /> */}
+        <BrushCanvas />
       </main>
     </div>
   );
