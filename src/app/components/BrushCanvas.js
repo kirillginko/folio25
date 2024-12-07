@@ -13,7 +13,7 @@ const BrushCanvas = () => {
   const colors = [
     "#1a75ff", // blue
     "#ff4d4d", // red
-    "#ffb366", // orange
+    "#ffb300", // adjusted orange - more yellow-leaning
     "#66ff66", // green
     "#ff66ff", // pink
     "#ffff66", // yellow
@@ -21,11 +21,11 @@ const BrushCanvas = () => {
   ];
 
   const [brush, setBrush] = useState({
-    weight: 30,
-    vibration: 2,
-    definition: 0.5,
+    weight: 9,
+    vibration: 6,
+    definition: 2,
     quality: 8,
-    opacity: 0.3,
+    opacity: 0.7,
     spacing: 5,
     color: colors[0],
     blend: true,
@@ -46,8 +46,10 @@ const BrushCanvas = () => {
     p5.noStroke();
     if (brush.blend) {
       p5.blendMode(p5.MULTIPLY);
+    } else {
+      p5.blendMode(p5.BLEND);
     }
-    setP5Instance(p5); // Store p5 instance
+    setP5Instance(p5);
   };
 
   // Add clear canvas function
@@ -143,7 +145,10 @@ const BrushCanvas = () => {
   const controls = (
     <div className={styles.controls}>
       <label className={styles.control}>
-        <span>Size</span>
+        <div className={styles.labelRow}>
+          <span>Size</span>
+          <div className={styles.valueDisplay}>({brush.weight})</div>
+        </div>
         <input
           type="range"
           min="5"
@@ -155,11 +160,14 @@ const BrushCanvas = () => {
         />
       </label>
       <label className={styles.control}>
-        <span>Spread</span>
+        <div className={styles.labelRow}>
+          <span>Spread</span>
+          <div className={styles.valueDisplay}>({brush.vibration})</div>
+        </div>
         <input
           type="range"
           min="0"
-          max="10"
+          max="20"
           step="0.5"
           value={brush.vibration}
           onChange={(e) =>
@@ -168,15 +176,34 @@ const BrushCanvas = () => {
         />
       </label>
       <label className={styles.control}>
-        <span>Flow</span>
+        <div className={styles.labelRow}>
+          <span>Flow</span>
+          <div className={styles.valueDisplay}>({brush.definition})</div>
+        </div>
         <input
           type="range"
           min="0.1"
-          max="1"
+          max="3"
           step="0.1"
           value={brush.definition}
           onChange={(e) =>
             setBrush({ ...brush, definition: parseFloat(e.target.value) })
+          }
+        />
+      </label>
+      <label className={styles.control}>
+        <div className={styles.labelRow}>
+          <span>Opacity</span>
+          <div className={styles.valueDisplay}>({brush.opacity})</div>
+        </div>
+        <input
+          type="range"
+          min="0.1"
+          max="0.9"
+          step="0.05"
+          value={brush.opacity}
+          onChange={(e) =>
+            setBrush({ ...brush, opacity: parseFloat(e.target.value) })
           }
         />
       </label>
@@ -195,19 +222,29 @@ const BrushCanvas = () => {
           ))}
         </div>
       </div>
-      <label className={styles.control}>
-        <span>Opacity</span>
-        <input
-          type="range"
-          min="0.1"
-          max="0.5"
-          step="0.05"
-          value={brush.opacity}
-          onChange={(e) =>
-            setBrush({ ...brush, opacity: parseFloat(e.target.value) })
-          }
-        />
-      </label>
+      <div className={styles.control}>
+        <span>Blend</span>
+        <div className={styles.colorPicker}>
+          <button
+            className={`${styles.colorButton} ${styles.blendButton} ${
+              brush.blend ? styles.selected : ""
+            }`}
+            style={{
+              backgroundColor: brush.blend ? "#000000" : "transparent",
+              border: brush.blend ? "2px solid #666" : "2px solid #666",
+            }}
+            onClick={() => {
+              const newBlendState = !brush.blend;
+              setBrush({ ...brush, blend: newBlendState });
+              if (p5Instance) {
+                p5Instance.blendMode(
+                  newBlendState ? p5Instance.MULTIPLY : p5Instance.BLEND
+                );
+              }
+            }}
+          />
+        </div>
+      </div>
       <button onClick={clearCanvas} className={styles.clearButton}>
         Clear
       </button>
