@@ -21,8 +21,8 @@ const BrushCanvas = () => {
   ];
 
   const [brush, setBrush] = useState({
-    weight: 9,
-    vibration: 6,
+    weight: 21,
+    vibration: 14,
     definition: 2,
     quality: 8,
     opacity: 0.7,
@@ -53,7 +53,10 @@ const BrushCanvas = () => {
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
 
   const setup = (p5, canvasParentRef) => {
-    p5.createCanvas(1000, 800).parent(canvasParentRef);
+    p5.createCanvas(2000, 1600).parent(canvasParentRef);
+    p5.canvas.style.width = "1000px";
+    p5.canvas.style.height = "800px";
+
     p5.background(255);
     p5.noStroke();
     if (brush.blend) {
@@ -63,7 +66,6 @@ const BrushCanvas = () => {
     }
     setP5Instance(p5);
 
-    // Restore canvas data if it exists
     if (canvasData) {
       p5.loadImage(canvasData, (img) => {
         p5.image(img, 0, 0);
@@ -198,6 +200,8 @@ const BrushCanvas = () => {
       tempCanvas.height = currentCanvas.height;
 
       const ctx = tempCanvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(currentCanvas.canvas, 0, 0);
 
       const canvasData = tempCanvas.toDataURL("image/png", 1.0);
@@ -236,7 +240,6 @@ const BrushCanvas = () => {
   const handleDownload = () => {
     if (!p5Instance) return;
     try {
-      // Use p5's built-in save function
       p5Instance.save("drawing.png");
     } catch (err) {
       console.error("Download error:", err);
@@ -269,7 +272,7 @@ const BrushCanvas = () => {
         <input
           type="range"
           min="0"
-          max="20"
+          max="30"
           step="0.5"
           value={brush.vibration}
           onChange={(e) =>
