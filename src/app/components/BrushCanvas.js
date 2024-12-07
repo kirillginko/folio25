@@ -216,104 +216,86 @@ const BrushCanvas = () => {
 
   // Add resize handler
   useEffect(() => {
-    const updateDraggableBounds = () => {
+    gsap.registerPlugin(Draggable);
+
+    const createDraggable = () => {
       if (draggableInstance.current) {
-        // Kill and recreate draggable with new bounds
         draggableInstance.current.kill();
-        createDraggable();
+      }
+
+      draggableInstance.current = Draggable.create(containerRef.current, {
+        type: "x,y",
+        bounds: window,
+        inertia: true,
+        cursor: "grab",
+        activeCursor: "grabbing",
+        edgeResistance: isMinimized ? 0.95 : 0.85,
+        dragResistance: isMinimized ? 0.2 : 0.15,
+        zIndexBoost: true,
+        allowEventDefault: true,
+        onPress: function (e) {
+          if (e.target.closest(`.${styles.canvasWrapper}`)) {
+            this.endDrag(e);
+          }
+        },
+        onDragStart: function () {
+          gsap.to(this.target, {
+            scale: isMinimized ? 1.05 : 1.02,
+            duration: 0.2,
+          });
+        },
+        onDragEnd: function () {
+          gsap.to(this.target, { scale: 1, duration: 0.2 });
+        },
+      })[0];
+    };
+
+    createDraggable();
+
+    // Add resize handler
+    const handleResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Check if the component is outside the viewport
+        if (rect.right > windowWidth) {
+          gsap.to(containerRef.current, {
+            x: windowWidth - rect.width - 20, // 20px padding from edge
+            duration: 0.3,
+          });
+        }
+        if (rect.bottom > windowHeight) {
+          gsap.to(containerRef.current, {
+            y: windowHeight - rect.height - 20,
+            duration: 0.3,
+          });
+        }
+        if (rect.left < 0) {
+          gsap.to(containerRef.current, {
+            x: 20, // 20px padding from left edge
+            duration: 0.3,
+          });
+        }
+        if (rect.top < 0) {
+          gsap.to(containerRef.current, {
+            y: 20,
+            duration: 0.3,
+          });
+        }
       }
     };
 
     // Add resize listener
-    window.addEventListener("resize", updateDraggableBounds);
+    window.addEventListener("resize", handleResize);
 
-    return () => {
-      window.removeEventListener("resize", updateDraggableBounds);
-    };
-  }, [isMinimized]); // Re-run when minimized state changes
-
-  // Move createDraggable to component scope so it can be used by both effects
-  const createDraggable = () => {
-    if (draggableInstance.current) {
-      draggableInstance.current.kill();
-    }
-
-    draggableInstance.current = Draggable.create(containerRef.current, {
-      type: "x,y",
-      bounds: {
-        top: 0,
-        left: 0,
-        width: window.innerWidth,
-        height: window.innerHeight,
-      },
-      inertia: true,
-      cursor: "grab",
-      activeCursor: "grabbing",
-      edgeResistance: isMinimized ? 0.95 : 0.85,
-      dragResistance: isMinimized ? 0.2 : 0.15,
-      zIndexBoost: true,
-      allowEventDefault: true,
-      onPress: function (e) {
-        if (e.target.closest(`.${styles.canvasWrapper}`)) {
-          this.endDrag(e);
-        }
-      },
-      onDragStart: function () {
-        gsap.to(this.target, {
-          scale: isMinimized ? 1.05 : 1.02,
-          duration: 0.2,
-        });
-      },
-      onDragEnd: function () {
-        gsap.to(this.target, { scale: 1, duration: 0.2 });
-      },
-    })[0];
-
-    // Check and adjust position after creating draggable
-    const bounds = document.body.getBoundingClientRect();
-    const element = containerRef.current.getBoundingClientRect();
-    const padding = 20;
-    const expandedWidth = !isMinimized ? 800 : element.width;
-    const expandedHeight = !isMinimized ? 600 : element.height;
-
-    let x = gsap.getProperty(containerRef.current, "x");
-    let y = gsap.getProperty(containerRef.current, "y");
-
-    if (x + expandedWidth > bounds.right - padding) {
-      x = bounds.right - expandedWidth - padding;
-    }
-    if (x < bounds.left + padding) {
-      x = bounds.left + padding;
-    }
-    if (y + expandedHeight > bounds.bottom - padding) {
-      y = bounds.bottom - expandedHeight - padding;
-    }
-    if (y < bounds.top) {
-      y = bounds.top;
-    }
-
-    if (
-      x !== gsap.getProperty(containerRef.current, "x") ||
-      y !== gsap.getProperty(containerRef.current, "y")
-    ) {
-      gsap.to(containerRef.current, {
-        x: x,
-        y: y,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-    }
-  };
-
-  // Initial draggable setup
-  useEffect(() => {
-    gsap.registerPlugin(Draggable);
-    createDraggable();
-
+    // Clean up
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
+      window.removeEventListener("resize", handleResize);
     };
   }, [isMinimized]);
 

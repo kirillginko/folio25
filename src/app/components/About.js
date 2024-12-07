@@ -20,17 +20,12 @@ const About = () => {
 
       draggableInstance.current = Draggable.create(containerRef.current, {
         type: "x,y",
-        bounds: {
-          top: -50,
-          left: -50,
-          width: window.innerWidth + 100,
-          height: window.innerHeight + 50,
-        },
+        bounds: window,
         inertia: true,
         cursor: "grab",
         activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.85 : 0.65,
-        dragResistance: isMinimized ? 0.1 : 0.05,
+        edgeResistance: isMinimized ? 0.95 : 0.85,
+        dragResistance: isMinimized ? 0.2 : 0.15,
         zIndexBoost: true,
         onDragStart: function () {
           gsap.to(this.target, {
@@ -46,20 +41,50 @@ const About = () => {
 
     createDraggable();
 
-    const updateDraggableBounds = () => {
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
-        createDraggable();
+    // Add resize handler
+    const handleResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Check if the component is outside the viewport
+        if (rect.right > windowWidth) {
+          gsap.to(containerRef.current, {
+            x: windowWidth - rect.width - 20, // 20px padding from edge
+            duration: 0.3,
+          });
+        }
+        if (rect.bottom > windowHeight) {
+          gsap.to(containerRef.current, {
+            y: windowHeight - rect.height - 20,
+            duration: 0.3,
+          });
+        }
+        if (rect.left < 0) {
+          gsap.to(containerRef.current, {
+            x: 20, // 20px padding from left edge
+            duration: 0.3,
+          });
+        }
+        if (rect.top < 0) {
+          gsap.to(containerRef.current, {
+            y: 20,
+            duration: 0.3,
+          });
+        }
       }
     };
 
-    window.addEventListener("resize", updateDraggableBounds);
+    // Add resize listener
+    window.addEventListener("resize", handleResize);
 
+    // Clean up
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
-      window.removeEventListener("resize", updateDraggableBounds);
+      window.removeEventListener("resize", handleResize);
     };
   }, [isMinimized]);
 
