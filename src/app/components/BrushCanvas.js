@@ -454,58 +454,74 @@ const BrushCanvas = () => {
   }, [isMinimized]);
 
   useEffect(() => {
-    // Animation for expanding/minimizing
-    if (containerRef.current) {
-      const bounds = document.body.getBoundingClientRect();
-      const element = containerRef.current.getBoundingClientRect();
-      let newX = gsap.getProperty(containerRef.current, "x");
-      let newY = gsap.getProperty(containerRef.current, "y");
+    const adjustPositionAndSize = () => {
+      if (containerRef.current) {
+        const bounds = document.body.getBoundingClientRect();
+        const element = containerRef.current.getBoundingClientRect();
+        let newX = gsap.getProperty(containerRef.current, "x");
+        let newY = gsap.getProperty(containerRef.current, "y");
 
-      // Check if expanded state would put element out of bounds
-      if (!isMinimized) {
-        if (element.right + (800 - element.width) > bounds.right - 20) {
-          newX = bounds.right - 800 - 20; // 800 is expanded width
+        // Calculate expanded dimensions based on viewport size
+        const expandedWidth = Math.min(800, bounds.width - 40); // 40px total padding
+        const expandedHeight = Math.min(600, bounds.height - 40); // 40px total padding
+
+        // Check if expanded state would put element out of bounds
+        if (!isMinimized) {
+          if (element.left + expandedWidth > bounds.width) {
+            newX = bounds.width - expandedWidth - 20; // Adjust to stay within right boundary
+          }
+          if (element.top + expandedHeight > bounds.height) {
+            newY = bounds.height - expandedHeight - 20; // Adjust to stay within bottom boundary
+          }
+        } else {
+          // Ensure minimized state is within bounds
+          if (element.left < 0) {
+            newX = 20; // 20px padding from left edge
+          }
+          if (element.top < 0) {
+            newY = 20; // 20px padding from top edge
+          }
         }
-        if (element.bottom + (600 - element.height) > bounds.bottom - 20) {
-          newY = bounds.bottom - 600 - 20; // 600 is expanded height
-        }
-      }
 
-      // Animate position if needed
-      gsap.to(containerRef.current, {
-        x: newX,
-        y: newY,
-        duration: 0.2,
-        ease: "power2.out",
-      });
+        // Animate position if needed
+        gsap.to(containerRef.current, {
+          x: newX,
+          y: newY,
+          duration: 0.1, // Shorter duration for snappier animation
+          ease: "power1.inOut", // More abrupt easing for a snappy feel
+        });
 
-      // Animate size
-      if (!isMinimized) {
-        gsap.fromTo(
-          containerRef.current.children[1],
-          {
+        // Animate size
+        if (!isMinimized) {
+          gsap.to(containerRef.current.children[1], {
+            height: `${expandedHeight}px`,
+            width: `${expandedWidth}px`,
+            borderRadius: "16px",
+            duration: 0.1, // Shorter duration for snappier animation
+            ease: "power1.inOut", // More abrupt easing for a snappy feel
+          });
+        } else {
+          gsap.to(containerRef.current.children[1], {
             height: "50px",
             width: "100px",
             borderRadius: "25px",
-          },
-          {
-            height: "600px",
-            width: "800px",
-            borderRadius: "16px",
-            duration: 0.2,
-            ease: "power2.out",
-          }
-        );
-      } else {
-        gsap.to(containerRef.current.children[1], {
-          height: "50px",
-          width: "100px",
-          borderRadius: "25px",
-          duration: 0.2,
-          ease: "power2.in",
-        });
+            duration: 0.1, // Shorter duration for snappier animation
+            ease: "power1.inOut", // More abrupt easing for a snappy feel
+          });
+        }
       }
-    }
+    };
+
+    // Initial adjustment
+    adjustPositionAndSize();
+
+    // Add resize listener
+    window.addEventListener("resize", adjustPositionAndSize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", adjustPositionAndSize);
+    };
   }, [isMinimized]);
 
   const toggleMinimized = () => {
@@ -542,7 +558,7 @@ const BrushCanvas = () => {
       >
         {isMinimized ? (
           <div className={styles.minimizedContent}>
-            <span className={styles.minimizedText}>Draw</span>
+            <span className={styles.minimizedText}>Paint</span>
           </div>
         ) : (
           <>
