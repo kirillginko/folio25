@@ -45,3 +45,10 @@
 .recycleIcon {
   font-size: 36px;
 }
+
+/* Add this media query at the end of the file */
+@media (max-width: 768px) {
+  .okokMeter {
+    display: none;
+  }
+}

@@ -165,7 +165,7 @@ const Email = () => {
                 required
               />
               <div className={styles.footer}>
-                <span className={styles.email}>HELLO@KIRILL.STUDIO</span>
+                <span className={styles.email}>HELLO@KIRILL.AGENCY</span>
                 <button
                   type="submit"
                   className={`${styles.submitButton} ${
