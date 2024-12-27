@@ -66,24 +66,26 @@
   draggable: false;
 }
 
-.shuffleButton {
-  font-family: var(--primary-font);
+.buttonContainer {
   position: fixed;
   top: 46px;
-  right: 160px;
+  right: 85px;
+  z-index: 999;
+  display: flex;
+  gap: 10px;
   transform: translateX(-50%);
-  background-color: #948aa8;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-size: 0.6em;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
 }
-.hideButton {
+
+.buttonContainer.open {
+  transform: translateX(calc(-70%));
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.workButton {
   font-family: var(--primary-font);
   position: fixed;
   top: 46px;
@@ -96,7 +98,30 @@
   border-radius: 30px;
   cursor: pointer;
   font-size: 0.6em;
-  z-index: 1000;
+  z-index: 1001;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.workButton:hover {
+  background-color: #7a708f;
+  transform: translateX(-50%) scale(1.05);
+}
+
+.workButton:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.shuffleButton,
+.hideButton {
+  font-family: var(--primary-font);
+  background-color: #948aa8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.6em;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
 }
@@ -110,20 +135,20 @@
 
 .shuffleButton:hover {
   background-color: #7a708f;
-  transform: translateX(-50%) scale(1.05);
+  transform: scale(1.05);
 }
 
 .shuffleButton:active {
-  transform: translateX(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 .hideButton:hover {
   background-color: #7a708f;
-  transform: translateX(-50%) scale(1.05);
+  transform: scale(1.05);
 }
 
 .hideButton:active {
-  transform: translateX(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 
 .selected {

@@ -12,6 +12,7 @@ const ImageGallery = () => {
   const zIndexCounter = useRef(1);
   const [isVisible, setIsVisible] = React.useState(true);
   const [selectedImage, setSelectedImage] = React.useState(null);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const getRandomPosition = () => {
     const padding = 100;
@@ -129,6 +130,10 @@ const ImageGallery = () => {
     }
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   useEffect(() => {
     gsap.registerPlugin(Draggable);
 
@@ -215,12 +220,19 @@ const ImageGallery = () => {
 
   return (
     <>
-      <button onClick={shuffleImages} className={styles.shuffleButton}>
-        Shuffle
+      <button onClick={toggleMenu} className={styles.workButton}>
+        Work
       </button>
-      <button onClick={toggleImages} className={styles.hideButton}>
-        {isVisible ? "Hide" : "Show"}
-      </button>
+      <div
+        className={`${styles.buttonContainer} ${isMenuOpen ? styles.open : ""}`}
+      >
+        <button onClick={shuffleImages} className={styles.shuffleButton}>
+          Shuffle
+        </button>
+        <button onClick={toggleImages} className={styles.hideButton}>
+          {isVisible ? "Hide" : "Show"}
+        </button>
+      </div>
       <div className={styles.galleryContainer}>
         {images.map((image, index) => (
           <div
