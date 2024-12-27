@@ -231,6 +231,8 @@
     width: calc(100vw - 40px);
     height: 120px;
     bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
@@ -287,7 +289,8 @@
   }
 
   .visualizerContainer {
-    width: calc(100vw - 40px); /* Match music container width */
+    width: calc(100vw - 120px);
+    justify-content: center;
   }
 
   .musicContainer {
@@ -296,5 +299,9 @@
     gap: 5px;
     height: 40px;
     margin-top: -54px;
+  }
+  .songDetails {
+    font-size: 12px;
+    min-width: 40px;
   }
 }

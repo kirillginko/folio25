@@ -6,7 +6,7 @@ import { Draggable } from "gsap/Draggable";
 
 const About = () => {
   const containerRef = useRef(null);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const draggableInstance = useRef(null);
 
