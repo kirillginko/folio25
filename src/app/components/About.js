@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "../styles/about.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
+import Image from "next/image";
 
 const About = () => {
   const containerRef = useRef(null);
@@ -94,7 +95,6 @@ const About = () => {
 
   return (
     <div ref={containerRef} className={styles.draggableWrapper}>
-      {/* Green Circle - Now outside the design container but inside draggable wrapper */}
       <div className={styles.greenCircle} onClick={toggleMinimized}></div>
 
       <div
@@ -112,23 +112,37 @@ const About = () => {
             {/* Header Section */}
             <header className={styles.header}>
               <div className={styles.headerContent}>
-                <p>*** Kirill@Kirill.Studio ***</p>
+                <p>*** Kirill@Kirill.Agency ***</p>
               </div>
             </header>
-
+            <div className={styles.imageWrapper}>
+              <Image
+                src="https://res.cloudinary.com/dtps5ugbf/image/upload/c_crop,ar_1:1/v1736362617/ascii-art_n8ttiz.png"
+                alt="ASCII Art"
+                width={600}
+                height={600}
+                priority
+                className={styles.heroImage}
+              />
+            </div>
             {/* Bio Section */}
             <section className={styles.bioSection}>
               <h2 className={styles.bioTitle}>About Me</h2>
               <p className={styles.bioText}>
                 I am a <strong>full-stack creative web developer</strong> with a
                 passion for crafting{" "}
-                <strong> interactive, user-centric digital experiences</strong>.
+                <strong>interactive, user-centric digital experiences</strong>.
                 My expertise spans from front-end development to back-end
                 systems, combining technical skill with artistic vision to build
                 webpages that are both functional and visually engaging. I
                 specialize in using cutting-edge tools like{" "}
                 <strong>React</strong>, <strong>GSAP</strong>, and{" "}
                 <strong>Next.js</strong> to bring ideas to life.
+              </p>
+              <p className={styles.bioText}>
+                I am a <strong>full-stack creative web developer</strong> with a
+                passion for crafting{" "}
+                <strong>interactive, user-centric digital experiences</strong>.
               </p>
             </section>
           </>

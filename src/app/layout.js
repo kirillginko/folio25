@@ -12,6 +12,11 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
+const AustinCyRoman = localFont({
+  src: "./fonts/AustinCy-Roman.woff2",
+  variable: "--font-austin-cy-roman",
+  weight: "100 900",
+});
 
 const instructionFont = localFont({
   src: "./fonts/Instruction.otf",
@@ -28,7 +33,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${instructionFont.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${instructionFont.variable} ${AustinCyRoman.variable}`}
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
