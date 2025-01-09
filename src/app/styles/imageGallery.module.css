@@ -121,7 +121,7 @@
   border-radius: 30px;
   cursor: pointer;
   font-size: 0.6em;
-  margin-right: 30px;
+  margin-right: 35px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
 }
@@ -214,4 +214,22 @@
 
 .selected .detailButton:hover {
   background-color: #e6a400;
+}
+
+.imageContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.imageContainer.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }

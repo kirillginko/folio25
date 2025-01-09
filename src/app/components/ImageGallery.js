@@ -10,7 +10,7 @@ const ImageGallery = () => {
   const imageRefs = useRef([]);
   const draggableInstances = useRef([]);
   const zIndexCounter = useRef(1);
-  const [isVisible, setIsVisible] = React.useState(true);
+  const [isVisible, setIsVisible] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -166,7 +166,7 @@ const ImageGallery = () => {
       imageRefs.current.forEach((ref, index) => {
         if (!ref) return;
 
-        const pos = getRandomPosition();
+        const pos = getOffScreenPosition();
         gsap.set(ref, {
           x: pos.x,
           y: pos.y,
@@ -245,7 +245,7 @@ const ImageGallery = () => {
   return (
     <>
       <button onClick={toggleMenu} className={styles.workButton}>
-        {isVisible ? "Hide" : "Work"}
+        {isVisible ? "Close" : "Work"}
       </button>
       <div
         className={`${styles.buttonContainer} ${isMenuOpen ? styles.open : ""}`}
@@ -254,7 +254,11 @@ const ImageGallery = () => {
           Shuffle
         </button>
       </div>
-      <div className={styles.galleryContainer}>
+      <div
+        className={`${styles.imageContainer} ${
+          isVisible ? styles.visible : ""
+        }`}
+      >
         {images.map((image, index) => (
           <div
             key={image.id}
