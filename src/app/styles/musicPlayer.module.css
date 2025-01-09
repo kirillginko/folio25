@@ -14,7 +14,7 @@
   max-width: calc(100vw - 40px);
   gap: 10px;
   z-index: 2000;
-  margin-top: -43px;
+  margin-top: -40px;
 }
 
 /* Only override what changes in minimized state */
@@ -112,7 +112,7 @@
   background-color: #495a78;
   border-radius: 3px;
   overflow: hidden;
-  margin: 10px;
+  margin: 5px;
   flex: 2;
 }
 
@@ -251,15 +251,22 @@
   position: relative;
   height: 105px;
   margin-bottom: -15px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .visualizerContainer {
-  width: 600px;
+  width: 400px;
   height: 100%;
   border-radius: 8px 8px 30px 30px;
   overflow: hidden;
   background: transparent;
   pointer-events: none;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .musicContainer {

@@ -294,13 +294,12 @@ const MusicPlayer = () => {
       );
       if (!container) return;
 
-      // Create timeline
       const tl = gsap.timeline();
 
       if (isMinimized) {
-        // Minimize animation
+        // Minimize animation - making it smaller
         tl.to(container, {
-          width: "150px",
+          width: "150px", // Changed from 150px
           height: "40px",
           duration: 0.3,
           ease: "power2.inOut",
@@ -319,9 +318,9 @@ const MusicPlayer = () => {
           );
         }
       } else {
-        // Expand animation
+        // Expand animation - making it smaller
         tl.to(container, {
-          width: window.innerWidth <= 640 ? "calc(100vw - 40px)" : "600px",
+          width: window.innerWidth <= 640 ? "calc(100vw - 40px)" : "500px", // Changed from 600px
           height: "60px",
           duration: 0.3,
           ease: "power2.inOut",
