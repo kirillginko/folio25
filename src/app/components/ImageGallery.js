@@ -89,9 +89,11 @@ const ImageGallery = () => {
     });
   };
 
-  const handleDoubleClick = (index) => {
+  const handleDetailClick = (index, e) => {
+    e.stopPropagation();
+
     if (selectedImage === index) {
-      // If already selected, minimize
+      // If clicking the same image, minimize it
       gsap.to(imageRefs.current[index], {
         x: getRandomPosition().x,
         y: getRandomPosition().y,
@@ -105,10 +107,25 @@ const ImageGallery = () => {
         },
       });
     } else {
-      // Maximize and center
+      // If there's already a selected image, minimize it first
+      if (selectedImage !== null) {
+        gsap.to(imageRefs.current[selectedImage], {
+          x: getRandomPosition().x,
+          y: getRandomPosition().y,
+          scale: 1,
+          rotation: Math.random() * 30 - 15,
+          duration: 0.5,
+          ease: "power2.inOut",
+          onComplete: () => {
+            draggableInstances.current[selectedImage].enable();
+          },
+        });
+      }
+
+      // Then maximize the newly selected image
       const windowCenter = {
-        x: window.innerWidth / 2 - 100, // Half of image width
-        y: window.innerHeight / 2 - 100, // Half of image height
+        x: window.innerWidth / 2 - 100,
+        y: window.innerHeight / 2 - 100,
       };
 
       setSelectedImage(index);
@@ -123,7 +140,6 @@ const ImageGallery = () => {
         duration: 0.5,
         ease: "power2.inOut",
         onStart: () => {
-          // Disable dragging while maximized
           draggableInstances.current[index].disable();
         },
       });
@@ -241,8 +257,13 @@ const ImageGallery = () => {
             className={`${styles.imageWrapper} ${
               selectedImage === index ? styles.selected : ""
             }`}
-            onDoubleClick={() => handleDoubleClick(index)}
           >
+            <span
+              className={styles.detailButton}
+              onClick={(e) => handleDetailClick(index, e)}
+            >
+              {selectedImage === index ? "close" : "< more info"}
+            </span>
             <Image
               src={image.url}
               alt={`Image ${image.id}`}
