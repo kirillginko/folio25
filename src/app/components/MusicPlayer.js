@@ -6,6 +6,9 @@ import { Draggable } from "gsap/Draggable";
 import songs from "../../songs"; // Import the songs array
 import Marquee from "react-fast-marquee";
 import AudioVisualizer from "./AudioVisualizer";
+import { IoPlaySharp, IoPauseSharp } from "react-icons/io5";
+import { IoIosSkipBackward, IoIosSkipForward } from "react-icons/io";
+import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 
 const MusicPlayer = () => {
   const containerRef = useRef(null);
@@ -379,7 +382,13 @@ const MusicPlayer = () => {
           preload="auto"
           crossOrigin="anonymous"
         />
-        <div className={styles.greenCircle} onClick={toggleMinimized}></div>
+        <div className={styles.greenCircle} onClick={toggleMinimized}>
+          {isMinimized ? (
+            <BsArrowsAngleExpand className={styles.toggleIcon} />
+          ) : (
+            <BsArrowsAngleContract className={styles.toggleIcon} />
+          )}
+        </div>
         {/* Minimized State with Marquee */}
         {isMinimized ? (
           <div className={styles.minimizedContent}>
@@ -421,21 +430,25 @@ const MusicPlayer = () => {
                 aria-label="Previous"
                 onClick={prevSong}
               >
-                ⏮
+                <IoIosSkipBackward size={20} />
               </button>
               <button
                 className={`${styles.controlButton} ${styles.playButton}`}
                 onClick={togglePlay}
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
-                {isPlaying ? "⏸" : "▶"}
+                {isPlaying ? (
+                  <IoPauseSharp size={20} />
+                ) : (
+                  <IoPlaySharp size={20} />
+                )}
               </button>
               <button
                 className={styles.controlButton}
                 aria-label="Next"
                 onClick={nextSong}
               >
-                ⏭
+                <IoIosSkipForward size={20} />
               </button>
             </div>
 
