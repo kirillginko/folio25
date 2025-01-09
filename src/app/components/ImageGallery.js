@@ -92,6 +92,11 @@ const ImageGallery = () => {
   const handleDetailClick = (index, e) => {
     e.stopPropagation();
 
+    // Add this function to determine scale based on screen size
+    const getScaleForScreen = () => {
+      return window.innerWidth <= 768 ? 1.8 : 3;
+    };
+
     if (selectedImage === index) {
       // If clicking the same image, minimize it
       gsap.to(imageRefs.current[index], {
@@ -148,6 +153,7 @@ const ImageGallery = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    toggleImages();
   };
 
   useEffect(() => {
@@ -176,6 +182,14 @@ const ImageGallery = () => {
           activeCursor: "grabbing",
           edgeResistance: 0.65,
           dragResistance: 0.05,
+          allowEventDefault: true,
+          allowContextMenu: true,
+          onClick: function () {
+            zIndexCounter.current += 1;
+            gsap.set(this.target, {
+              zIndex: zIndexCounter.current,
+            });
+          },
           onDragStart: function () {
             zIndexCounter.current += 1;
             gsap.to(this.target, {
@@ -188,12 +202,6 @@ const ImageGallery = () => {
             gsap.to(this.target, {
               scale: 1,
               duration: 0.2,
-            });
-          },
-          onClick: function () {
-            zIndexCounter.current += 1;
-            gsap.set(this.target, {
-              zIndex: zIndexCounter.current,
             });
           },
         })[0];
@@ -237,16 +245,13 @@ const ImageGallery = () => {
   return (
     <>
       <button onClick={toggleMenu} className={styles.workButton}>
-        Work
+        {isVisible ? "Hide" : "Work"}
       </button>
       <div
         className={`${styles.buttonContainer} ${isMenuOpen ? styles.open : ""}`}
       >
         <button onClick={shuffleImages} className={styles.shuffleButton}>
           Shuffle
-        </button>
-        <button onClick={toggleImages} className={styles.hideButton}>
-          {isVisible ? "Hide" : "Show"}
         </button>
       </div>
       <div className={styles.galleryContainer}>
