@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import styles from "../styles/BrushCanvas.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
+import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 
 const Sketch = dynamic(() => import("react-p5").then((mod) => mod.default), {
   ssr: false,
@@ -550,7 +551,13 @@ const BrushCanvas = () => {
           {notificationState.message}
         </div>
       )}
-      <div className={styles.greenCircle} onClick={toggleMinimized}></div>
+      <div className={styles.greenCircle} onClick={toggleMinimized}>
+        {isMinimized ? (
+          <BsArrowsAngleExpand className={styles.toggleIcon} />
+        ) : (
+          <BsArrowsAngleContract className={styles.toggleIcon} />
+        )}
+      </div>
       <div
         className={`${styles.designContainer} ${
           isMinimized ? styles.minimizedContainer : styles.normalContainer

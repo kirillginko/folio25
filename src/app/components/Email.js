@@ -2,6 +2,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import styles from "../styles/email.module.css";
 import { gsap } from "gsap";
+import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 
 const Email = () => {
   const containerRef = useRef(null);
@@ -131,7 +132,13 @@ const Email = () => {
           {notificationState.message}
         </div>
       )}
-      <div className={styles.greenCircle} onClick={toggleMinimized}></div>
+      <div className={styles.greenCircle} onClick={toggleMinimized}>
+        {isMinimized ? (
+          <BsArrowsAngleExpand className={styles.toggleIcon} />
+        ) : (
+          <BsArrowsAngleContract className={styles.toggleIcon} />
+        )}
+      </div>
 
       <div
         className={`${styles.designContainer} ${

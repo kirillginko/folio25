@@ -4,6 +4,7 @@ import styles from "../styles/about.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import Image from "next/image";
+import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 
 const About = () => {
   const containerRef = useRef(null);
@@ -95,7 +96,13 @@ const About = () => {
 
   return (
     <div ref={containerRef} className={styles.draggableWrapper}>
-      <div className={styles.greenCircle} onClick={toggleMinimized}></div>
+      <div className={styles.greenCircle} onClick={toggleMinimized}>
+        {isMinimized ? (
+          <BsArrowsAngleExpand className={styles.toggleIcon} />
+        ) : (
+          <BsArrowsAngleContract className={styles.toggleIcon} />
+        )}
+      </div>
 
       <div
         className={`${styles.designContainer} ${
