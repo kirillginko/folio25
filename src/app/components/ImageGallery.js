@@ -92,13 +92,24 @@ const ImageGallery = () => {
   const handleDetailClick = (index, e) => {
     e.stopPropagation();
 
-    // Add this function to determine scale based on screen size
     const getScaleForScreen = () => {
-      return window.innerWidth <= 768 ? 1.8 : 3;
+      return window.innerWidth <= 768 ? 1.2 : 3;
+    };
+
+    const getWindowCenter = () => {
+      const isMobile = window.innerWidth <= 768;
+      return {
+        x:
+          window.innerWidth / 2 -
+          (isMobile ? (70 * window.innerWidth) / 200 : 100), // Center based on 70vw width
+        y:
+          window.innerHeight / 2 -
+          (isMobile ? (50 * window.innerHeight) / 200 : 100), // Center based on 50vh height
+      };
     };
 
     if (selectedImage === index) {
-      // If clicking the same image, minimize it
+      // Minimize
       gsap.to(imageRefs.current[index], {
         x: getRandomPosition().x,
         y: getRandomPosition().y,
@@ -127,19 +138,14 @@ const ImageGallery = () => {
         });
       }
 
-      // Then maximize the newly selected image
-      const windowCenter = {
-        x: window.innerWidth / 2 - 100,
-        y: window.innerHeight / 2 - 100,
-      };
-
+      const windowCenter = getWindowCenter();
       setSelectedImage(index);
       zIndexCounter.current += 1;
 
       gsap.to(imageRefs.current[index], {
         x: windowCenter.x,
         y: windowCenter.y,
-        scale: 3,
+        scale: getScaleForScreen(),
         rotation: 0,
         zIndex: zIndexCounter.current,
         duration: 0.5,

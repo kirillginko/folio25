@@ -133,12 +133,15 @@
   }
 
   .selected {
-    transform-origin: center !important;
+    width: 65vmin !important;
+    height: 65vmin !important;
+    max-height: none !important;
   }
 
   .selected .image {
-    max-width: 100vw !important;
-    max-height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
   }
 }
 
