@@ -261,24 +261,32 @@ const ImageGallery = () => {
         }`}
       >
         {selectedImage !== null && (
-          <div className={styles.imageInfo}>
-            <h2>{images[selectedImage].title}</h2>
-            <p>{images[selectedImage].description}</p>
-            <div className={styles.imageMetadata}>
-              <p>Year: {images[selectedImage].year}</p>
-              <p>Tech: {images[selectedImage].technologies}</p>
-              {images[selectedImage].link && (
-                <a
-                  href={images[selectedImage].link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.projectLink}
-                >
-                  View Project →
-                </a>
-              )}
+          <>
+            <div
+              className={styles.backdrop}
+              onClick={() =>
+                handleDetailClick(selectedImage, { stopPropagation: () => {} })
+              }
+            />
+            <div className={styles.imageInfo}>
+              <h2>{images[selectedImage].title}</h2>
+              <p>{images[selectedImage].description}</p>
+              <div className={styles.imageMetadata}>
+                <p>Year: {images[selectedImage].year}</p>
+                <p>Tech: {images[selectedImage].technologies}</p>
+                {images[selectedImage].link && (
+                  <a
+                    href={images[selectedImage].link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.projectLink}
+                  >
+                    View Project →
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
         {images.map((image, index) => (
           <div
