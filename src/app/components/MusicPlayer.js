@@ -138,7 +138,7 @@ const MusicPlayer = () => {
           });
       }
     }
-  }, [currentSongIndex]);
+  }, [currentSongIndex, isPlaying]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -168,36 +168,61 @@ const MusicPlayer = () => {
         const rect = containerRef.current.getBoundingClientRect();
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
+        const padding = 20;
 
-        // Check if the component is outside the viewport
+        // Calculate new position
+        let newX = gsap.getProperty(containerRef.current, "x");
+        let newY = gsap.getProperty(containerRef.current, "y");
+
+        // Check right boundary
         if (rect.right > windowWidth) {
-          gsap.to(containerRef.current, {
-            x: windowWidth - rect.width - 20, // 20px padding from edge
-            duration: 0.3,
-          });
+          newX = windowWidth - rect.width - padding;
         }
+
+        // Check bottom boundary
         if (rect.bottom > windowHeight) {
-          gsap.to(containerRef.current, {
-            y: windowHeight - rect.height - 20,
-            duration: 0.3,
-          });
+          newY = windowHeight - rect.height - padding;
         }
-        if (rect.left < 0) {
-          gsap.to(containerRef.current, {
-            x: 20, // 20px padding from left edge
-            duration: 0.3,
-          });
+
+        // Check left boundary
+        if (rect.left < padding) {
+          newX = padding;
         }
-        if (rect.top < 0) {
+
+        // Check top boundary
+        if (rect.top < padding) {
+          newY = padding;
+        }
+
+        // Animate to new position if needed
+        if (newX !== rect.x || newY !== rect.y) {
           gsap.to(containerRef.current, {
-            y: 20,
+            x: newX,
+            y: newY,
             duration: 0.3,
+            ease: "power2.out",
           });
         }
       }
     };
 
-    // Add resize listener
+    // Initial positioning
+    const initializePosition = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Position in bottom right corner by default
+        gsap.set(containerRef.current, {
+          x: windowWidth - rect.width - 40,
+          y: windowHeight - rect.height - 40,
+        });
+      }
+    };
+
+    // Set initial position and add resize listener
+    initializePosition();
     window.addEventListener("resize", handleResize);
 
     // Clean up
@@ -224,7 +249,7 @@ const MusicPlayer = () => {
     } catch (error) {
       console.error("Error setting up audio context:", error);
     }
-  }, []);
+  }, [audioContext]);
 
   useEffect(() => {
     if (!analyser || !isPlaying) {
@@ -300,15 +325,14 @@ const MusicPlayer = () => {
       const tl = gsap.timeline();
 
       if (isMinimized) {
-        // Minimize animation - making it smaller
+        // Minimize animation
         tl.to(container, {
-          width: "150px", // Changed from 150px
+          width: "150px",
           height: "40px",
           duration: 0.3,
           ease: "power2.inOut",
         });
 
-        // Only animate content if it exists
         const minimizedContent = container.querySelector(
           `.${styles.minimizedContent}`
         );
@@ -321,21 +345,20 @@ const MusicPlayer = () => {
           );
         }
       } else {
-        // Expand animation - making it smaller
+        // Expand animation - using fixed width instead of responsive
         tl.to(container, {
-          width: window.innerWidth <= 640 ? "calc(100vw - 40px)" : "500px", // Changed from 600px
+          width: "500px", // Fixed width regardless of screen size
           height: "60px",
           duration: 0.3,
           ease: "power2.inOut",
         });
 
-        // Only animate elements if they exist
         const elements = [
           container.querySelector(`.${styles.controls}`),
           container.querySelector(`.${styles.progressBar}`),
           container.querySelector(`.${styles.timeInfo}`),
           container.querySelector(`.${styles.songDetails}`),
-        ].filter(Boolean); // Remove null values
+        ].filter(Boolean);
 
         if (elements.length) {
           tl.fromTo(

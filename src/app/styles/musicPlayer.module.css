@@ -9,9 +9,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
-  width: 600px;
+  width: 500px;
   height: 60px;
-  max-width: calc(100vw - 40px);
+  max-width: min(500px, calc(100vw - 40px));
   gap: 10px;
   z-index: 2000;
   margin-top: -40px;
@@ -258,9 +258,9 @@
 }
 
 .musicPlayerWrapper {
-  position: absolute;
-  top: 750px;
-  right: 320px;
+  position: fixed;
+  top: auto;
+  right: auto;
   touch-action: none;
   user-select: none;
   width: auto;
