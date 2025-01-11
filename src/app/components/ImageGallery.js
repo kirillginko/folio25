@@ -89,23 +89,18 @@ const ImageGallery = () => {
     });
   };
 
+  const getWindowCenter = () => {
+    return {
+      x: (window.innerWidth - 200) / 2, // 200 is the base image width
+      y: (window.innerHeight - 200) / 2, // 200 is the base image height
+    };
+  };
+
   const handleDetailClick = (index, e) => {
     e.stopPropagation();
 
     const getScaleForScreen = () => {
       return window.innerWidth <= 768 ? 1.2 : 3;
-    };
-
-    const getWindowCenter = () => {
-      const isMobile = window.innerWidth <= 768;
-      return {
-        x:
-          window.innerWidth / 2 -
-          (isMobile ? (70 * window.innerWidth) / 200 : 100), // Center based on 70vw width
-        y:
-          window.innerHeight / 2 -
-          (isMobile ? (50 * window.innerHeight) / 200 : 100), // Center based on 50vh height
-      };
     };
 
     if (selectedImage === index) {
@@ -265,6 +260,26 @@ const ImageGallery = () => {
           isVisible ? styles.visible : ""
         }`}
       >
+        {selectedImage !== null && (
+          <div className={styles.imageInfo}>
+            <h2>{images[selectedImage].title}</h2>
+            <p>{images[selectedImage].description}</p>
+            <div className={styles.imageMetadata}>
+              <p>Year: {images[selectedImage].year}</p>
+              <p>Tech: {images[selectedImage].technologies}</p>
+              {images[selectedImage].link && (
+                <a
+                  href={images[selectedImage].link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.projectLink}
+                >
+                  View Project →
+                </a>
+              )}
+            </div>
+          </div>
+        )}
         {images.map((image, index) => (
           <div
             key={image.id}
