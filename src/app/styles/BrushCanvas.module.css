@@ -1,7 +1,7 @@
 .container {
-  position: relative;
-  top: 1000px;
-  left: 80px;
+  /* position: relative;
+  top: 20px;
+  right: 20px; */
   z-index: 10;
 }
 .designContainer {
@@ -19,14 +19,27 @@
   transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   overflow: hidden;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+}
+
+.canvasWrapper {
+  position: relative;
+  width: 100%;
+  height: calc(100%); /* Subtract controls height */
+  overflow: hidden;
+  background-color: white; /* Add explicit background color */
 }
 
 .canvasWrapper canvas {
   display: block;
   width: 100% !important;
   height: 100% !important;
-  margin: auto;
+  object-fit: contain;
+  margin: 0;
+  padding: 0;
   cursor: crosshair;
+  background-color: white; /* Add explicit background color */
 }
 
 .minimizedContainer {
@@ -257,8 +270,8 @@
 }
 
 .draggableWrapper {
-  position: absolute;
-  top: 160px;
+  position: fixed;
+  top: 100px;
   left: 20px;
   z-index: 10;
 }

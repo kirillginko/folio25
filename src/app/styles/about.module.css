@@ -97,7 +97,7 @@
 
 .headerContent {
   font-weight: bold;
-  font-size: 0.8em;
+  font-size: 0.9em;
 }
 
 .parentContainer {
@@ -150,8 +150,8 @@
 /* Add draggable wrapper */
 .draggableWrapper {
   position: absolute;
-  top: 160px;
-  right: 20px;
+  top: 190px;
+  right: 80px;
   z-index: 10;
 }
 

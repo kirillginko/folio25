@@ -8,7 +8,7 @@ import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 
 const About = () => {
   const containerRef = useRef(null);
-  const [isMinimized, setIsMinimized] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const draggableInstance = useRef(null);
 

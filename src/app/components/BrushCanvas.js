@@ -22,8 +22,8 @@ const BrushCanvas = () => {
   ];
 
   const [brush, setBrush] = useState({
-    weight: 21,
-    vibration: 14,
+    weight: 7,
+    vibration: 10,
     definition: 2,
     quality: 8,
     opacity: 0.7,
@@ -54,9 +54,10 @@ const BrushCanvas = () => {
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
 
   const setup = (p5, canvasParentRef) => {
-    p5.createCanvas(2000, 1600).parent(canvasParentRef);
-    p5.canvas.style.width = "1000px";
-    p5.canvas.style.height = "800px";
+    const canvas = p5.createCanvas(1000, 800).parent(canvasParentRef);
+
+    canvas.style("width", "100%");
+    canvas.style("height", "100%");
 
     p5.background(255);
     p5.noStroke();
@@ -77,8 +78,15 @@ const BrushCanvas = () => {
   // Add clear canvas function
   const clearCanvas = () => {
     if (p5Instance) {
+      const currentWidth = p5Instance.width;
+      const currentHeight = p5Instance.height;
+
       p5Instance.blendMode(p5Instance.BLEND); // Reset blend mode
       p5Instance.background(255);
+
+      // Resize canvas to maintain dimensions
+      p5Instance.resizeCanvas(currentWidth, currentHeight);
+
       if (brush.blend) {
         p5Instance.blendMode(p5Instance.MULTIPLY); // Reapply blend mode
       }
@@ -457,39 +465,47 @@ const BrushCanvas = () => {
   useEffect(() => {
     const adjustPositionAndSize = () => {
       if (containerRef.current) {
-        const bounds = document.body.getBoundingClientRect();
+        // Use viewport dimensions instead of body bounds
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
         const element = containerRef.current.getBoundingClientRect();
         let newX = gsap.getProperty(containerRef.current, "x");
         let newY = gsap.getProperty(containerRef.current, "y");
 
         // Calculate expanded dimensions based on viewport size
-        const expandedWidth = Math.min(800, bounds.width - 40); // 40px total padding
-        const expandedHeight = Math.min(600, bounds.height - 40); // 40px total padding
+        const maxHeight = viewportHeight - 40;
+        const maxWidth = viewportWidth - 40;
+        const expandedHeight = Math.min(600, maxHeight);
+        const expandedWidth = Math.min(800, maxWidth);
 
         // Check if expanded state would put element out of bounds
         if (!isMinimized) {
-          if (element.left + expandedWidth > bounds.width) {
-            newX = bounds.width - expandedWidth - 20; // Adjust to stay within right boundary
+          if (newX + expandedWidth > viewportWidth) {
+            newX = viewportWidth - expandedWidth - 20;
           }
-          if (element.top + expandedHeight > bounds.height) {
-            newY = bounds.height - expandedHeight - 20; // Adjust to stay within bottom boundary
+          if (newY + expandedHeight > viewportHeight) {
+            newY = viewportHeight - expandedHeight - 20;
           }
         } else {
           // Ensure minimized state is within bounds
-          if (element.left < 0) {
-            newX = 20; // 20px padding from left edge
+          if (newX + element.width > viewportWidth) {
+            newX = viewportWidth - element.width - 20;
           }
-          if (element.top < 0) {
-            newY = 20; // 20px padding from top edge
+          if (newY + element.height > viewportHeight) {
+            newY = viewportHeight - element.height - 20;
           }
         }
+
+        // Ensure position is never negative
+        newX = Math.max(20, newX);
+        newY = Math.max(20, newY);
 
         // Animate position if needed
         gsap.to(containerRef.current, {
           x: newX,
           y: newY,
-          duration: 0.1, // Shorter duration for snappier animation
-          ease: "power1.inOut", // More abrupt easing for a snappy feel
+          duration: 0.1,
+          ease: "power1.inOut",
         });
 
         // Animate size
@@ -498,16 +514,16 @@ const BrushCanvas = () => {
             height: `${expandedHeight}px`,
             width: `${expandedWidth}px`,
             borderRadius: "16px",
-            duration: 0.1, // Shorter duration for snappier animation
-            ease: "power1.inOut", // More abrupt easing for a snappy feel
+            duration: 0.1,
+            ease: "power1.inOut",
           });
         } else {
           gsap.to(containerRef.current.children[1], {
             height: "50px",
             width: "100px",
             borderRadius: "25px",
-            duration: 0.1, // Shorter duration for snappier animation
-            ease: "power1.inOut", // More abrupt easing for a snappy feel
+            duration: 0.1,
+            ease: "power1.inOut",
           });
         }
       }

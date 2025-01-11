@@ -259,8 +259,8 @@
 
 .musicPlayerWrapper {
   position: absolute;
-  top: 550px;
-  right: 40px;
+  top: 750px;
+  right: 320px;
   touch-action: none;
   user-select: none;
   width: auto;
