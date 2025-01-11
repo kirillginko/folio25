@@ -22,7 +22,7 @@ const BrushCanvas = () => {
   ];
 
   const [brush, setBrush] = useState({
-    weight: 7,
+    weight: 15,
     vibration: 10,
     definition: 2,
     quality: 8,
