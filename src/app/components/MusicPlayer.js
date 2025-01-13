@@ -216,7 +216,7 @@ const MusicPlayer = () => {
         // Position in bottom right corner by default
         gsap.set(containerRef.current, {
           x: windowWidth - rect.width - 40,
-          y: windowHeight - rect.height - 40,
+          y: windowHeight - rect.height - 150,
         });
       }
     };

@@ -315,14 +315,16 @@
 @media (max-width: 768px) {
   .imageInfo {
     position: fixed;
-    left: 20px;
-    right: 20px;
-    bottom: 20px;
-    top: auto;
-    transform: none;
-    width: auto;
-    max-height: 30vh;
-    overflow-y: auto;
+    top: 680px;
+    left: 0%;
+    width: calc(100% - 50px);
+    max-width: 500px;
+    background: rgba(0, 0, 0, 0.8);
+    margin-left: 5%;
+    padding: 20px;
+    border-radius: 12px;
+    z-index: 1001;
+    border: 1px solid #7a708f;
   }
 
   .imageInfo h2 {
@@ -331,5 +333,24 @@
 
   .imageInfo p {
     font-size: 0.9rem;
+  }
+
+  .selected {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 70% !important;
+    transform: translate(-50%, -95%) !important;
+    z-index: 1000 !important;
+  }
+
+  .backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
   }
 }
