@@ -316,11 +316,13 @@
   .imageInfo {
     position: fixed;
     top: 680px;
-    left: 0%;
-    width: calc(100% - 50px);
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: calc(100% - 60px);
     max-width: 500px;
     background: rgba(0, 0, 0, 0.8);
-    margin-left: 5%;
     padding: 20px;
     border-radius: 12px;
     z-index: 1001;
@@ -339,7 +341,8 @@
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
-    width: 70% !important;
+    width: 350px !important;
+    height: 350px !important;
     transform: translate(-50%, -95%) !important;
     z-index: 1000 !important;
   }
