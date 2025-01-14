@@ -1,0 +1,23 @@
+.themeButton {
+  position: fixed;
+  top: 46px;
+  right: 20px;
+  background-color: #948aa8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.6em;
+  z-index: 51;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: opacity 1s ease; /* Match the other buttons' transition */
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Add this class for when the button should be visible */
+.visible {
+  opacity: 1;
+  transition: opacity 0.3s ease; /* Quick fade in */
+}

@@ -9,6 +9,7 @@ import AudioVisualizer from "./AudioVisualizer";
 import { IoPlaySharp, IoPauseSharp } from "react-icons/io5";
 import { IoIosSkipBackward, IoIosSkipForward } from "react-icons/io";
 import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
+import { useGlobalState } from "../context/GlobalStateContext";
 
 const MusicPlayer = () => {
   const containerRef = useRef(null);
@@ -22,6 +23,7 @@ const MusicPlayer = () => {
   const [audioContext, setAudioContext] = useState(null);
   const [analyser, setAnalyser] = useState(null);
   const animationFrameRef = useRef(null);
+  const { showMusicPlayer } = useGlobalState();
 
   const currentSong = songs[currentSongIndex]; // Get the current song
 
@@ -379,109 +381,115 @@ const MusicPlayer = () => {
   }, [isMinimized]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`${styles.musicPlayerWrapper} ${
-        isMinimized ? styles.minimizedContainer : ""
-      }`}
-    >
-      {!isMinimized && (
-        <div className={styles.visualizerWrapper}>
-          <div className={styles.visualizerContainer}>
-            {analyser && <AudioVisualizer analyserNode={analyser} />}
-          </div>
-        </div>
-      )}
-
+    <div style={{ display: showMusicPlayer ? "block" : "none" }}>
       <div
-        className={`${styles.musicContainer} ${
+        ref={containerRef}
+        className={`${styles.musicPlayerWrapper} ${
           isMinimized ? styles.minimizedContainer : ""
         }`}
       >
-        <audio
-          ref={audioRef}
-          src={currentSong.link}
-          onEnded={handleSongEnd}
-          preload="auto"
-          crossOrigin="anonymous"
-        />
-        <div className={styles.greenCircle} onClick={toggleMinimized}>
+        {!isMinimized && (
+          <div className={styles.visualizerWrapper}>
+            <div className={styles.visualizerContainer}>
+              {analyser && <AudioVisualizer analyserNode={analyser} />}
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`${styles.musicContainer} ${
+            isMinimized ? styles.minimizedContainer : ""
+          }`}
+        >
+          <audio
+            ref={audioRef}
+            src={currentSong.link}
+            onEnded={handleSongEnd}
+            preload="auto"
+            crossOrigin="anonymous"
+          />
+          <div className={styles.greenCircle} onClick={toggleMinimized}>
+            {isMinimized ? (
+              <BsArrowsAngleExpand className={styles.toggleIcon} />
+            ) : (
+              <BsArrowsAngleContract className={styles.toggleIcon} />
+            )}
+          </div>
+          {/* Minimized State with Marquee */}
           {isMinimized ? (
-            <BsArrowsAngleExpand className={styles.toggleIcon} />
+            <div className={styles.minimizedContent}>
+              <Marquee gradient={false} speed={30} pauseOnHover={true}>
+                <span className={styles.minimizedText}>
+                  <span className={styles.artistName}>
+                    {currentSong.artist}
+                  </span>
+                  &nbsp;&nbsp;-&nbsp;&nbsp;
+                  <span className={styles.songName}>{currentSong.name}</span>
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+                </span>
+              </Marquee>
+            </div>
           ) : (
-            <BsArrowsAngleContract className={styles.toggleIcon} />
+            <>
+              {/* Song Info */}
+              <div className={styles.songDetails}>
+                <h3 className={styles.songTitle}>{currentSong.name}</h3>
+                <p className={styles.songArtist}>{currentSong.artist}</p>
+              </div>
+
+              {/* Progress Bar */}
+              <div
+                className={styles.progressBar}
+                onClick={handleProgressClick}
+                style={{ cursor: "pointer" }} // Add cursor pointer
+              >
+                <div
+                  className={styles.progress}
+                  style={{
+                    width: duration
+                      ? `${(currentTime / duration) * 100}%`
+                      : "0%",
+                  }}
+                ></div>
+              </div>
+
+              {/* Controls */}
+              <div className={styles.controls}>
+                <button
+                  className={styles.controlButton}
+                  aria-label="Previous"
+                  onClick={prevSong}
+                >
+                  <IoIosSkipBackward size={20} />
+                </button>
+                <button
+                  className={`${styles.controlButton} ${styles.playButton}`}
+                  onClick={togglePlay}
+                  aria-label={isPlaying ? "Pause" : "Play"}
+                >
+                  {isPlaying ? (
+                    <IoPauseSharp size={20} />
+                  ) : (
+                    <IoPlaySharp size={20} />
+                  )}
+                </button>
+                <button
+                  className={styles.controlButton}
+                  aria-label="Next"
+                  onClick={nextSong}
+                >
+                  <IoIosSkipForward size={20} />
+                </button>
+              </div>
+
+              {/* Time */}
+              <div className={styles.timeInfo}>
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </>
           )}
         </div>
-        {/* Minimized State with Marquee */}
-        {isMinimized ? (
-          <div className={styles.minimizedContent}>
-            <Marquee gradient={false} speed={30} pauseOnHover={true}>
-              <span className={styles.minimizedText}>
-                <span className={styles.artistName}>{currentSong.artist}</span>
-                &nbsp;&nbsp;-&nbsp;&nbsp;
-                <span className={styles.songName}>{currentSong.name}</span>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-              </span>
-            </Marquee>
-          </div>
-        ) : (
-          <>
-            {/* Song Info */}
-            <div className={styles.songDetails}>
-              <h3 className={styles.songTitle}>{currentSong.name}</h3>
-              <p className={styles.songArtist}>{currentSong.artist}</p>
-            </div>
-
-            {/* Progress Bar */}
-            <div
-              className={styles.progressBar}
-              onClick={handleProgressClick}
-              style={{ cursor: "pointer" }} // Add cursor pointer
-            >
-              <div
-                className={styles.progress}
-                style={{
-                  width: duration ? `${(currentTime / duration) * 100}%` : "0%",
-                }}
-              ></div>
-            </div>
-
-            {/* Controls */}
-            <div className={styles.controls}>
-              <button
-                className={styles.controlButton}
-                aria-label="Previous"
-                onClick={prevSong}
-              >
-                <IoIosSkipBackward size={20} />
-              </button>
-              <button
-                className={`${styles.controlButton} ${styles.playButton}`}
-                onClick={togglePlay}
-                aria-label={isPlaying ? "Pause" : "Play"}
-              >
-                {isPlaying ? (
-                  <IoPauseSharp size={20} />
-                ) : (
-                  <IoPlaySharp size={20} />
-                )}
-              </button>
-              <button
-                className={styles.controlButton}
-                aria-label="Next"
-                onClick={nextSong}
-              >
-                <IoIosSkipForward size={20} />
-              </button>
-            </div>
-
-            {/* Time */}
-            <div className={styles.timeInfo}>
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

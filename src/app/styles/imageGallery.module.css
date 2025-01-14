@@ -70,7 +70,7 @@
   position: fixed;
   top: 46px;
   right: 85px;
-  z-index: 1700;
+  z-index: 10;
   display: flex;
   gap: 10px;
   transform: translateX(-50%);
@@ -98,7 +98,7 @@
   border-radius: 30px;
   cursor: pointer;
   font-size: 0.6em;
-  z-index: 1700;
+  z-index: 500;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
 }
@@ -316,13 +316,11 @@
   .imageInfo {
     position: fixed;
     top: 680px;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
+    left: 0%;
     width: calc(100% - 60px);
     max-width: 500px;
     background: rgba(0, 0, 0, 0.8);
+    margin-left: 6%;
     padding: 20px;
     border-radius: 12px;
     z-index: 1001;
@@ -355,5 +353,40 @@
     bottom: 0;
     background: rgba(0, 0, 0, 0.8);
     z-index: 999;
+  }
+}
+
+.navButton {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 20px;
+  color: white;
+  cursor: pointer;
+  z-index: 1600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: transparent;
+  border: none;
+}
+
+.navButton:hover {
+  color: #ffb120;
+}
+
+.prevButton {
+  left: 0;
+}
+
+.nextButton {
+  right: 0;
+}
+
+@media (max-width: 768px) {
+  .navButton {
+    font-size: 20px;
   }
 }

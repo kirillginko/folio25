@@ -1,6 +1,7 @@
 import { Providers } from "./providers";
 import localFont from "next/font/local";
 import "./globals.css";
+import { GlobalStateProvider } from "./context/GlobalStateContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -38,13 +39,15 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${instructionFont.variable} ${AustinCyRoman.variable} ${ABCDiatype.variable}`}
-        suppressHydrationWarning
-      >
-        <Providers>{children}</Providers>
-      </body>
-    </html>
+    <GlobalStateProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${instructionFont.variable} ${AustinCyRoman.variable} ${ABCDiatype.variable}`}
+          suppressHydrationWarning
+        >
+          <Providers>{children}</Providers>
+        </body>
+      </html>
+    </GlobalStateProvider>
   );
 }

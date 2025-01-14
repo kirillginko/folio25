@@ -5,12 +5,14 @@ import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import Image from "next/image";
 import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
+import { useGlobalState } from "../context/GlobalStateContext";
 
 const About = () => {
   const containerRef = useRef(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const draggableInstance = useRef(null);
+  const { showAbout } = useGlobalState();
 
   useEffect(() => {
     gsap.registerPlugin(Draggable);
@@ -95,7 +97,11 @@ const About = () => {
   };
 
   return (
-    <div ref={containerRef} className={styles.draggableWrapper}>
+    <div
+      ref={containerRef}
+      className={styles.draggableWrapper}
+      style={{ display: showAbout ? "block" : "none" }}
+    >
       <div className={styles.greenCircle} onClick={toggleMinimized}>
         {isMinimized ? (
           <BsArrowsAngleExpand className={styles.toggleIcon} />

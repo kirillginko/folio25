@@ -5,6 +5,7 @@ import styles from "../styles/BrushCanvas.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
+import { useGlobalState } from "../context/GlobalStateContext";
 
 const Sketch = dynamic(() => import("react-p5").then((mod) => mod.default), {
   ssr: false,
@@ -52,6 +53,8 @@ const BrushCanvas = () => {
   const [canvasData, setCanvasData] = useState(null);
 
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
+
+  const { showBrushCanvas } = useGlobalState();
 
   const setup = (p5, canvasParentRef) => {
     const canvas = p5.createCanvas(1000, 800).parent(canvasParentRef);
@@ -557,40 +560,42 @@ const BrushCanvas = () => {
   };
 
   return (
-    <div ref={containerRef} className={styles.draggableWrapper}>
-      {notificationState.show && (
-        <div
-          className={`${styles.notification} 
-                     ${styles[notificationState.type]}
-                     ${isNotificationExiting ? styles.exit : ""}`}
-        >
-          {notificationState.message}
-        </div>
-      )}
-      <div className={styles.greenCircle} onClick={toggleMinimized}>
-        {isMinimized ? (
-          <BsArrowsAngleExpand className={styles.toggleIcon} />
-        ) : (
-          <BsArrowsAngleContract className={styles.toggleIcon} />
-        )}
-      </div>
-      <div
-        className={`${styles.designContainer} ${
-          isMinimized ? styles.minimizedContainer : styles.normalContainer
-        }`}
-      >
-        {isMinimized ? (
-          <div className={styles.minimizedContent}>
-            <span className={styles.minimizedText}>Paint</span>
+    <div style={{ display: showBrushCanvas ? "block" : "none" }}>
+      <div ref={containerRef} className={styles.draggableWrapper}>
+        {notificationState.show && (
+          <div
+            className={`${styles.notification} 
+                       ${styles[notificationState.type]}
+                       ${isNotificationExiting ? styles.exit : ""}`}
+          >
+            {notificationState.message}
           </div>
-        ) : (
-          <>
-            {controls}
-            <div className={styles.canvasWrapper}>
-              <Sketch setup={setup} draw={draw} />
-            </div>
-          </>
         )}
+        <div className={styles.greenCircle} onClick={toggleMinimized}>
+          {isMinimized ? (
+            <BsArrowsAngleExpand className={styles.toggleIcon} />
+          ) : (
+            <BsArrowsAngleContract className={styles.toggleIcon} />
+          )}
+        </div>
+        <div
+          className={`${styles.designContainer} ${
+            isMinimized ? styles.minimizedContainer : styles.normalContainer
+          }`}
+        >
+          {isMinimized ? (
+            <div className={styles.minimizedContent}>
+              <span className={styles.minimizedText}>Paint</span>
+            </div>
+          ) : (
+            <>
+              {controls}
+              <div className={styles.canvasWrapper}>
+                <Sketch setup={setup} draw={draw} />
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

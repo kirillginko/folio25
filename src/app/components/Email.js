@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect } from "react";
 import styles from "../styles/email.module.css";
 import { gsap } from "gsap";
 import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
+import { useGlobalState } from "../context/GlobalStateContext";
 
 const Email = () => {
   const containerRef = useRef(null);
@@ -18,6 +19,7 @@ const Email = () => {
     message: "",
     type: "success", // or 'error'
   });
+  const { showEmail } = useGlobalState();
 
   useEffect(() => {
     // Animation for expanding/minimizing
@@ -124,70 +126,74 @@ const Email = () => {
   };
 
   return (
-    <div ref={containerRef} className={styles.draggableWrapper}>
-      {notificationState.show && (
-        <div
-          className={`${styles.notification} ${styles[notificationState.type]}`}
-        >
-          {notificationState.message}
-        </div>
-      )}
-      <div className={styles.greenCircle} onClick={toggleMinimized}>
-        {isMinimized ? (
-          <BsArrowsAngleExpand className={styles.toggleIcon} />
-        ) : (
-          <BsArrowsAngleContract className={styles.toggleIcon} />
-        )}
-      </div>
-
-      <div
-        className={`${styles.designContainer} ${
-          isMinimized ? styles.minimizedContainer : styles.normalContainer
-        }`}
-      >
-        {isMinimized ? (
-          <div className={styles.minimizedContent}>
-            <span className={styles.minimizedText}>Contact</span>
+    <div style={{ display: showEmail ? "block" : "none" }}>
+      <div ref={containerRef} className={styles.draggableWrapper}>
+        {notificationState.show && (
+          <div
+            className={`${styles.notification} ${
+              styles[notificationState.type]
+            }`}
+          >
+            {notificationState.message}
           </div>
-        ) : (
-          <form onSubmit={handleSend}>
-            <div className={styles.header}>
-              <span>FROM: </span>
-              <input
-                className={styles.headerInput}
-                type="email"
-                placeholder="[Your Email Here]"
-                value={fromEmail}
-                onChange={(e) => setFromEmail(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            <div className={styles.content}>
-              <textarea
-                className={styles.messageInput}
-                placeholder="Hi my name is"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                required
-              />
-              <div className={styles.footer}>
-                <span className={styles.email}>HELLO@KIRILL.AGENCY</span>
-                <button
-                  type="submit"
-                  className={`${styles.submitButton} ${
-                    isLoading ? styles.loading : ""
-                  }`}
-                  disabled={isLoading}
-                >
-                  SEND MESSAGE
-                </button>
-              </div>
-            </div>
-            {error && <p className={styles.error}>{error}</p>}
-            {isSent && <p className={styles.confirmation}>Message Sent!</p>}
-          </form>
         )}
+        <div className={styles.greenCircle} onClick={toggleMinimized}>
+          {isMinimized ? (
+            <BsArrowsAngleExpand className={styles.toggleIcon} />
+          ) : (
+            <BsArrowsAngleContract className={styles.toggleIcon} />
+          )}
+        </div>
+
+        <div
+          className={`${styles.designContainer} ${
+            isMinimized ? styles.minimizedContainer : styles.normalContainer
+          }`}
+        >
+          {isMinimized ? (
+            <div className={styles.minimizedContent}>
+              <span className={styles.minimizedText}>Contact</span>
+            </div>
+          ) : (
+            <form onSubmit={handleSend}>
+              <div className={styles.header}>
+                <span>FROM: </span>
+                <input
+                  className={styles.headerInput}
+                  type="email"
+                  placeholder="[Your Email Here]"
+                  value={fromEmail}
+                  onChange={(e) => setFromEmail(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className={styles.content}>
+                <textarea
+                  className={styles.messageInput}
+                  placeholder="Hi my name is"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                />
+                <div className={styles.footer}>
+                  <span className={styles.email}>HELLO@KIRILL.AGENCY</span>
+                  <button
+                    type="submit"
+                    className={`${styles.submitButton} ${
+                      isLoading ? styles.loading : ""
+                    }`}
+                    disabled={isLoading}
+                  >
+                    SEND MESSAGE
+                  </button>
+                </div>
+              </div>
+              {error && <p className={styles.error}>{error}</p>}
+              {isSent && <p className={styles.confirmation}>Message Sent!</p>}
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

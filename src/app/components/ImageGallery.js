@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import images from "../images";
 import styles from "../styles/imageGallery.module.css";
+import { useGlobalState } from "../context/GlobalStateContext";
 
 const ImageGallery = () => {
   const imageRefs = useRef([]);
@@ -13,6 +14,8 @@ const ImageGallery = () => {
   const [isVisible, setIsVisible] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { setShowAbout, setShowBrushCanvas, setShowMusicPlayer, setShowEmail } =
+    useGlobalState();
 
   const getRandomPosition = () => {
     const padding = 100;
@@ -112,9 +115,15 @@ const ImageGallery = () => {
         rotation: Math.random() * 30 - 15,
         duration: 0.5,
         ease: "power2.inOut",
+        onStart: () => {
+          draggableInstances.current[index].enable();
+        },
         onComplete: () => {
           setSelectedImage(null);
-          draggableInstances.current[index].enable();
+          setShowAbout(true);
+          setShowBrushCanvas(true);
+          setShowMusicPlayer(true);
+          setShowEmail(true);
         },
       });
     } else {
@@ -127,7 +136,7 @@ const ImageGallery = () => {
           rotation: Math.random() * 30 - 15,
           duration: 0.5,
           ease: "power2.inOut",
-          onComplete: () => {
+          onStart: () => {
             draggableInstances.current[selectedImage].enable();
           },
         });
@@ -135,6 +144,10 @@ const ImageGallery = () => {
 
       const windowCenter = getWindowCenter();
       setSelectedImage(index);
+      setShowAbout(false);
+      setShowBrushCanvas(false);
+      setShowMusicPlayer(false);
+      setShowEmail(false);
       zIndexCounter.current += 1;
 
       gsap.to(imageRefs.current[index], {
@@ -157,10 +170,26 @@ const ImageGallery = () => {
     toggleImages();
   };
 
+  const navigateImage = (direction) => {
+    if (selectedImage === null) return;
+
+    const newIndex =
+      direction === "next"
+        ? (selectedImage + 1) % images.length
+        : (selectedImage - 1 + images.length) % images.length;
+
+    handleDetailClick(newIndex, { stopPropagation: () => {} });
+  };
+
   useEffect(() => {
+    // Register the Draggable plugin first
+    if (!gsap.registerPlugin) {
+      return;
+    }
     gsap.registerPlugin(Draggable);
 
     const createDraggables = () => {
+      // Kill existing draggables first
       draggableInstances.current.forEach((instance) => instance?.kill());
       draggableInstances.current = [];
 
@@ -207,10 +236,11 @@ const ImageGallery = () => {
           },
         })[0];
 
-        draggableInstances.current.push(draggable);
+        draggableInstances.current[index] = draggable;
       });
     };
 
+    // Call createDraggables immediately
     createDraggables();
 
     const handleResize = () => {
@@ -241,7 +271,7 @@ const ImageGallery = () => {
       window.removeEventListener("resize", handleResize);
       draggableInstances.current.forEach((instance) => instance?.kill());
     };
-  }, []);
+  }, []); // Empty dependency array to run only once on mount
 
   return (
     <>
@@ -255,6 +285,7 @@ const ImageGallery = () => {
           Shuffle
         </button>
       </div>
+
       <div
         className={`${styles.imageContainer} ${
           isVisible ? styles.visible : ""
@@ -264,10 +295,23 @@ const ImageGallery = () => {
           <>
             <div
               className={styles.backdrop}
-              onClick={() =>
-                handleDetailClick(selectedImage, { stopPropagation: () => {} })
-              }
+              onClick={(e) => {
+                handleDetailClick(selectedImage, { stopPropagation: () => {} });
+                setShowAbout(false);
+              }}
             />
+            <button
+              className={`${styles.navButton} ${styles.prevButton}`}
+              onClick={() => navigateImage("prev")}
+            >
+              ←
+            </button>
+            <button
+              className={`${styles.navButton} ${styles.nextButton}`}
+              onClick={() => navigateImage("next")}
+            >
+              →
+            </button>
             <div className={styles.imageInfo}>
               <h2>{images[selectedImage].title}</h2>
               <p>{images[selectedImage].description}</p>

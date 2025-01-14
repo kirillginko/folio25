@@ -10,7 +10,7 @@ const Stamp = () => {
         MANUFACTURED, AND PRODUCED
       </p>
       <p className={styles.text}>
-        BY <span className={styles.boldOutline}>Kirill.SERVICES</span>
+        BY <span className={styles.boldOutline}>Kirill.Agency</span>
       </p>
       <div className={styles.icons}>
         <span className={styles.recycleIcon}>♻ツ</span>
@@ -18,7 +18,7 @@ const Stamp = () => {
         <span className={styles.text}>EMOTIONAL Web Design</span>
       </div>
       <p className={styles.text}>
-        © {new Date().getFullYear()} PROPERTY OF Kirill.Studio SERVICES
+        © {new Date().getFullYear()} PROPERTY OF Kirill.Agency SERVICES
       </p>
     </div>
   );
