@@ -47,7 +47,6 @@ const FluidBackground = forwardRef((props, ref) => {
     let ripples;
     let renderPass;
     const initCurtains = async () => {
-      console.log("Initializing Curtains");
       // Check for WebGL support
       const canvas = document.createElement("canvas");
       const gl =
@@ -60,13 +59,11 @@ const FluidBackground = forwardRef((props, ref) => {
         const { Curtains, Vec2, PingPongPlane, ShaderPass } = await import(
           "curtainsjs"
         );
-        console.log("Curtains library imported successfully");
         curtains = new Curtains({
           container: canvasRef.current,
           pixelRatio: Math.min(1.5, window.devicePixelRatio),
           alpha: true, // Enable alpha channel
         });
-        console.log("Curtains instance created", curtains);
         const mouse = {
           last: new Vec2(),
           current: new Vec2(),
@@ -75,7 +72,6 @@ const FluidBackground = forwardRef((props, ref) => {
           lastTime: null,
         };
         const curtainsBBox = curtains.getBoundingRect();
-        console.log("Curtains bounding box", curtainsBBox);
         // Create ripples plane
         ripples = new PingPongPlane(curtains, canvasRef.current, {
           vertexShader: ripplesVs,
@@ -134,7 +130,6 @@ const FluidBackground = forwardRef((props, ref) => {
             },
           },
         });
-        console.log("Ripples plane created", ripples);
         ripples
           .onRender(() => {
             mouse.velocity.set(
@@ -233,13 +228,11 @@ const FluidBackground = forwardRef((props, ref) => {
         };
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("touchmove", onMouseMove);
-        console.log("Initialization complete");
         // Clean up function
         return () => {
           window.removeEventListener("mousemove", onMouseMove);
           window.removeEventListener("touchmove", onMouseMove);
           if (curtains) {
-            console.log("Disposing Curtains");
             curtains.dispose();
           }
         };
@@ -250,7 +243,6 @@ const FluidBackground = forwardRef((props, ref) => {
     initCurtains();
     return () => {
       if (curtains) {
-        console.log("Disposing Curtains");
         curtains.dispose();
       }
     };
@@ -261,7 +253,6 @@ const FluidBackground = forwardRef((props, ref) => {
       renderPassRef.current.uniforms.bgColor.value = backgroundColor;
     }
   }, [backgroundColor]);
-  console.log("Rendering FluidBackground component");
   return (
     <>
       <div ref={canvasRef} className={styles.canvasContainer}></div>
