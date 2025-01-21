@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /private
+Disallow: /admin
+
+# Host
+Host: https://kirill.agency
+
+# Sitemaps
+Sitemap: https://kirill.agency/sitemap.xml
