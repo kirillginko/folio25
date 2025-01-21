@@ -11,12 +11,14 @@ import Stamp from "./components/Stamp";
 import FluidBackground from "./components/fluid/Fluid";
 import ImageGallery from "./components/ImageGallery";
 import BrushCanvas from "./components/BrushCanvas";
+import { useGlobalState } from "./context/GlobalStateContext";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
+  const { showAbout } = useGlobalState();
 
   useEffect(() => {
     setMounted(true);
@@ -43,17 +45,19 @@ export default function Home() {
     <div className={styles.page}>
       <FluidBackground />
       <main className={styles.main}>
-        <div
-          className={`
-            ${styles.flowerContainer} 
-            ${isTransitioning ? styles.transitioning : ""} 
-            ${isRotating ? styles.rotating : ""}
-          `}
-          onClick={toggleTheme}
-        >
-          <Image src={flower} alt="Flower" width={88} height={88} />
-          <span className={styles.flowerLabel}>theme</span>
-        </div>
+        {showAbout && (
+          <div
+            className={`
+              ${styles.flowerContainer} 
+              ${isTransitioning ? styles.transitioning : ""} 
+              ${isRotating ? styles.rotating : ""}
+            `}
+            onClick={toggleTheme}
+          >
+            <Image src={flower} alt="Flower" width={88} height={88} />
+            <span className={styles.flowerLabel}>theme</span>
+          </div>
+        )}
         <About />
         <MusicPlayer />
         <Email />

@@ -251,17 +251,18 @@
 .imageInfo {
   position: fixed;
   right: calc(50% + 320px);
-  top: 40%;
+  top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.8);
   padding: 20px;
   border-radius: 10px;
   color: white;
   width: 400px;
-  height: 400px;
+  height: 600px;
   z-index: 1600;
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
+  border: 1px solid #7a708f;
 }
 
 .imageInfo h2 {

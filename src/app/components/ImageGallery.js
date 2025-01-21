@@ -275,16 +275,22 @@ const ImageGallery = () => {
 
   return (
     <>
-      <button onClick={toggleMenu} className={styles.workButton}>
-        {isVisible ? "Close" : "Work"}
-      </button>
-      <div
-        className={`${styles.buttonContainer} ${isMenuOpen ? styles.open : ""}`}
-      >
-        <button onClick={shuffleImages} className={styles.shuffleButton}>
-          Shuffle
-        </button>
-      </div>
+      {selectedImage === null && (
+        <>
+          <button onClick={toggleMenu} className={styles.workButton}>
+            {isVisible ? "Close" : "Work"}
+          </button>
+          <div
+            className={`${styles.buttonContainer} ${
+              isMenuOpen ? styles.open : ""
+            }`}
+          >
+            <button onClick={shuffleImages} className={styles.shuffleButton}>
+              Shuffle
+            </button>
+          </div>
+        </>
+      )}
 
       <div
         className={`${styles.imageContainer} ${
