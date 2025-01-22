@@ -1,0 +1,21 @@
+{
+  "redirects": [
+    {
+      "source": "http://:domain/:path*",
+      "destination": "https://www.:domain/:path*",
+      "permanent": true
+    },
+    {
+      "source": "https://:domain/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?!www.).*"
+        }
+      ],
+      "destination": "https://www.:domain/:path*",
+      "permanent": true
+    }
+  ],
+  "trailingSlash": false
+} 

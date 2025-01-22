@@ -35,6 +35,10 @@ const instructionFont = localFont({
 export const metadata = {
   title: "Kirill Ginko | Creative Developer",
   description: "Kirill Ginko is a creative developer based in New York.",
+  metadataBase: new URL("https://www.kirill.agency"),
+  alternates: {
+    canonical: "/",
+  },
   keywords: [
     "creative developer",
     "web developer",
@@ -48,7 +52,7 @@ export const metadata = {
   openGraph: {
     title: "Kirill Ginko | Creative Developer",
     description: "Kirill Ginko is a creative developer based in New York.",
-    url: "https://kirill.agency", // Replace with your actual URL
+    url: "https://www.kirill.agency",
     siteName: "Kirill Ginko Portfolio",
     images: [
       {
@@ -77,6 +81,9 @@ export const metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  verification: {
+    google: "your-google-verification-code", // Add your Google Search Console verification code
   },
 };
 
