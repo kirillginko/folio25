@@ -11,6 +11,7 @@ import Stamp from "./components/Stamp";
 import FluidBackground from "./components/fluid/Fluid";
 import ImageGallery from "./components/ImageGallery";
 import BrushCanvas from "./components/BrushCanvas";
+import Marquee from "./components/Marquee";
 import { useGlobalState } from "./context/GlobalStateContext";
 
 export default function Home() {
@@ -58,6 +59,7 @@ export default function Home() {
             <span className={styles.flowerLabel}>theme</span>
           </div>
         )}
+        <Marquee />
         <About />
         <MusicPlayer />
         <Email />
