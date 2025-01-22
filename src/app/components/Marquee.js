@@ -27,6 +27,8 @@ function Marquee() {
       <span className={styles.item}>•</span>
       <span className={styles.item}>kirill.agency</span>
       <span className={styles.item}>•</span>
+      <span className={styles.item}>kirill.agency</span>
+      <span className={styles.item}>•</span>
     </FastMarquee>
   );
 }

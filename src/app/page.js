@@ -59,7 +59,7 @@ export default function Home() {
             <span className={styles.flowerLabel}>theme</span>
           </div>
         )}
-        <Marquee />
+        {/* <Marquee /> */}
         <About />
         <MusicPlayer />
         <Email />
