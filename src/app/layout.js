@@ -3,23 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { GlobalStateProvider } from "./context/GlobalStateContext";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
-const ABCDiatype = localFont({
-  src: "./fonts/ABCDiatype-Medium.woff2",
-  variable: "--font-abc-diatype",
-  weight: "100 900",
-});
-
 const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",
   variable: "--font-austin-cy-roman",
@@ -35,7 +18,9 @@ const instructionFont = localFont({
 export const metadata = {
   title: "Kirill Ginko | Creative Developer",
   description: "Kirill Ginko is a creative developer based in New York.",
-  metadataBase: new URL("https://www.kirill.agency"),
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : new URL("https://www.kirill.agency"),
   alternates: {
     canonical: "/",
   },
@@ -92,7 +77,7 @@ export default function RootLayout({ children }) {
     <GlobalStateProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${instructionFont.variable} ${AustinCyRoman.variable} ${ABCDiatype.variable}`}
+          className={`${instructionFont.variable} ${AustinCyRoman.variable}`}
           suppressHydrationWarning
         >
           <Providers>{children}</Providers>
