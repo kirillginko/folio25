@@ -10,87 +10,45 @@ import { useGlobalState } from "../context/GlobalStateContext";
 const About = () => {
   const containerRef = useRef(null);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const draggableInstance = useRef(null);
   const { showAbout } = useGlobalState();
 
-  useEffect(() => {
-    gsap.registerPlugin(Draggable);
-
-    const createDraggable = () => {
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
-      }
-
+  const createDraggable = () => {
+    if (containerRef.current) {
       draggableInstance.current = Draggable.create(containerRef.current, {
         type: "x,y",
-        bounds: window,
+        bounds: "body",
         inertia: true,
-        cursor: "grab",
-        activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.95 : 0.85,
-        dragResistance: isMinimized ? 0.2 : 0.15,
-        zIndexBoost: true,
-        onDragStart: function () {
-          gsap.to(this.target, {
-            scale: isMinimized ? 1.05 : 1.02,
-            duration: 0.2,
-          });
-        },
-        onDragEnd: function () {
-          gsap.to(this.target, { scale: 1, duration: 0.2 });
-        },
       })[0];
+    }
+  };
+
+  useEffect(() => {
+    // Add mobile check
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
     };
 
-    createDraggable();
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
 
-    // Add resize handler
-    const handleResize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        // Check if the component is outside the viewport
-        if (rect.right > windowWidth) {
-          gsap.to(containerRef.current, {
-            x: windowWidth - rect.width - 20, // 20px padding from edge
-            duration: 0.3,
-          });
-        }
-        if (rect.bottom > windowHeight) {
-          gsap.to(containerRef.current, {
-            y: windowHeight - rect.height - 20,
-            duration: 0.3,
-          });
-        }
-        if (rect.left < 0) {
-          gsap.to(containerRef.current, {
-            x: 20, // 20px padding from left edge
-            duration: 0.3,
-          });
-        }
-        if (rect.top < 0) {
-          gsap.to(containerRef.current, {
-            y: 20,
-            duration: 0.3,
-          });
-        }
-      }
-    };
-
-    // Add resize listener
-    window.addEventListener("resize", handleResize);
+    // Enable draggable when minimized, disable when expanded on mobile
+    if (isMinimized || !isMobile) {
+      gsap.registerPlugin(Draggable);
+      createDraggable();
+    } else if (draggableInstance.current) {
+      draggableInstance.current.kill();
+    }
 
     // Clean up
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", checkMobile);
     };
-  }, [isMinimized]);
+  }, [isMinimized, isMobile]);
 
   const toggleMinimized = () => {
     setIsMinimized((prev) => !prev);
@@ -99,7 +57,9 @@ const About = () => {
   return (
     <div
       ref={containerRef}
-      className={styles.draggableWrapper}
+      className={`${styles.draggableWrapper} ${
+        isMobile && !isMinimized ? styles.mobileFixed : ""
+      }`}
       style={{ display: showAbout ? "block" : "none" }}
     >
       <div className={styles.greenCircle} onClick={toggleMinimized}>

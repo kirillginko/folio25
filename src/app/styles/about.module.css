@@ -16,6 +16,28 @@
   user-select: none;
   transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* For Firefox */
+}
+
+/* Webkit scrollbar styling (Chrome, Safari, newer Edge) */
+.designContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.designContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.designContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.designContainer::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 /* Normal container (default state) */
@@ -151,9 +173,10 @@
 
 /* Add draggable wrapper */
 .draggableWrapper {
-  position: absolute;
-  top: 190px;
-  right: 80px;
+  position: fixed;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
   z-index: 10;
 }
 
@@ -171,4 +194,22 @@
 .heroImage {
   width: 100% !important;
   height: auto !important;
+}
+
+.mobileFixed {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 320px !important;
+  height: 400px !important;
+  z-index: 1000;
+  margin: 0 !important;
+}
+
+.mobileFixed .designContainer {
+  height: 100%;
+  max-height: 400px;
+  width: 100%;
+  overflow-y: auto;
 }
