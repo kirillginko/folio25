@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "9.0.0-alpha.8",
+    "cannon-es": "^0.20.0",
     "curtainsjs": "^8.1.6",
     "gsap": "^3.12.5",
     "next": "15.0.3",

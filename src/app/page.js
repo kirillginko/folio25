@@ -12,6 +12,7 @@ import FluidBackground from "./components/fluid/Fluid";
 import ImageGallery from "./components/ImageGallery";
 import BrushCanvas from "./components/BrushCanvas";
 import Marquee from "./components/Marquee";
+import FallingText from "./components/FallingText";
 import { useGlobalState } from "./context/GlobalStateContext";
 
 export default function Home() {
@@ -63,6 +64,7 @@ export default function Home() {
           </div>
         )}
         {/* <Marquee /> */}
+        <FallingText />
         <About />
         <MusicPlayer />
         <Email />
