@@ -16,8 +16,9 @@ const instructionFont = localFont({
 });
 
 export const metadata = {
-  title: "Kirill Ginko | Creative Developer",
-  description: "Kirill Ginko is a creative developer based in New York.",
+  title: "Kirill Ginko | Creative Developer & Web Designer in New York",
+  description:
+    "Award-winning creative developer specializing in interactive web experiences, custom web development, and UI design in New York City. Expert in React, Next.js, and modern web technologies.",
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL
     ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
     : new URL("https://www.kirill.agency"),
@@ -25,13 +26,18 @@ export const metadata = {
     canonical: "/",
   },
   keywords: [
-    "creative developer",
-    "web developer",
-    "frontend developer",
-    "New York developer",
-    "UI designer",
+    "creative developer NYC",
+    "web developer New York",
+    "frontend developer NYC",
+    "interactive web design",
+    "UI/UX designer New York",
+    "React developer NYC",
+    "Next.js developer",
+    "custom web development",
     "interactive websites",
     "Kirill Ginko",
+    "digital experiences",
+    "web animation specialist",
   ],
   creator: "Kirill Ginko",
   openGraph: {
@@ -68,7 +74,8 @@ export const metadata = {
     },
   },
   verification: {
-    google: "your-google-verification-code", // Add your Google Search Console verification code
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    bing: process.env.BING_SITE_VERIFICATION,
   },
 };
 
