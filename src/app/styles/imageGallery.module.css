@@ -359,6 +359,20 @@
     z-index: 999;
   }
 }
+.detailButton {
+  position: absolute;
+  top: 0px;
+  right: -70px;
+  border-radius: 50px; /* Changed to make pill shaped */
+  padding: 5px 10px;
+  /* border: 1px solid #7a708f; */
+  background-color: #7a708f;
+  cursor: pointer;
+  font-size: 0.4em;
+  letter-spacing: 0.05em;
+  z-index: 1;
+  transition: background-color 0.2s;
+}
 
 .navButton {
   position: fixed;
