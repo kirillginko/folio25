@@ -17,9 +17,13 @@ import { useGlobalState } from "./context/GlobalStateContext";
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isRotating, setIsRotating] = useState(false);
-  const { showAbout } = useGlobalState();
+  const {
+    showAbout,
+    isTransitioning,
+    setIsTransitioning,
+    isRotating,
+    setIsRotating,
+  } = useGlobalState();
 
   useEffect(() => {
     setMounted(true);
@@ -34,10 +38,9 @@ export default function Home() {
       setIsTransitioning(false);
     }, 300);
 
-    // Reset rotation after animation completes
     setTimeout(() => {
       setIsRotating(false);
-    }, 500); // Match this with animation duration
+    }, 500);
   };
 
   if (!mounted) return null;

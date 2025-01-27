@@ -12,7 +12,6 @@
   border: 1px solid var(--border-color);
   color: var(--flower-color);
   padding: 1rem;
-  touch-action: none;
   user-select: none;
   transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -63,6 +62,7 @@
   overflow: hidden;
   justify-content: center;
   align-items: center;
+  touch-action: none;
 }
 
 /* Green circle */
@@ -205,6 +205,7 @@
   height: 400px !important;
   z-index: 1000;
   margin: 0 !important;
+  touch-action: auto !important;
 }
 
 .mobileFixed .designContainer {

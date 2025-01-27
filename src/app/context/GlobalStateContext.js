@@ -9,6 +9,8 @@ export function GlobalStateProvider({ children }) {
   const [showMusicPlayer, setShowMusicPlayer] = useState(true);
   const [showEmail, setShowEmail] = useState(true);
   const [showThemeButton, setShowThemeButton] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
 
   return (
     <GlobalStateContext.Provider
@@ -23,6 +25,10 @@ export function GlobalStateProvider({ children }) {
         setShowEmail,
         showThemeButton,
         setShowThemeButton,
+        isTransitioning,
+        setIsTransitioning,
+        isRotating,
+        setIsRotating,
       }}
     >
       {children}

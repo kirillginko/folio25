@@ -100,7 +100,14 @@ const ImageGallery = () => {
   };
 
   const handleDetailClick = (index, e) => {
+    // Ensure we have a proper event object even if called programmatically
+    e = e || { stopPropagation: () => {} };
     e.stopPropagation();
+
+    // Prevent any default touch behavior
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
 
     const getScaleForScreen = () => {
       return window.innerWidth <= 768 ? 1.2 : 3;
@@ -349,6 +356,9 @@ const ImageGallery = () => {
             <span
               className={styles.detailButton}
               onClick={(e) => handleDetailClick(index, e)}
+              onTouchEnd={(e) => handleDetailClick(index, e)}
+              role="button"
+              tabIndex={0}
             >
               {selectedImage === index ? "close" : "< more info"}
             </span>
