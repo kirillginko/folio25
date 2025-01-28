@@ -1,15 +1,9 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame, Canvas } from "@react-three/fiber";
-import { Text, OrbitControls, Grid } from "@react-three/drei";
+import { Text, OrbitControls } from "@react-three/drei";
 import * as CANNON from "cannon-es";
-import localFont from "next/font/local";
-
-const austin = localFont({
-  src: "../fonts/AustinCy-Roman.woff2",
-  variable: "--font-austin",
-});
-
+import styles from "../styles/fallingtext.module.css";
 // Create a physics world
 const world = new CANNON.World();
 world.gravity.set(0, -20, 0);
@@ -20,16 +14,16 @@ const groundShape = new CANNON.Plane();
 const groundBody = new CANNON.Body({ mass: 0 });
 groundBody.addShape(groundShape);
 groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-groundBody.position.set(0, -50, 0); // Moved ground much lower
+groundBody.position.set(0, -50, 0);
 world.addBody(groundBody);
 
-const FallingLetter = ({
+const FallingLetter = React.memo(function FallingLetter({
   letter,
   position,
   size,
   color = "white",
   startFalling,
-}) => {
+}) {
   const meshRef = useRef();
   const [body, setBody] = useState(null);
   const [isPhysicsEnabled, setIsPhysicsEnabled] = useState(false);
@@ -43,17 +37,15 @@ const FallingLetter = ({
         shape,
       });
 
-      // Add more initial randomness to the falling motion
       body.angularVelocity.set(
-        Math.random() * 4 - 2, // Increased rotation range
+        Math.random() * 4 - 2,
         Math.random() * 4 - 2,
         Math.random() * 4 - 2
       );
 
-      // Add some initial velocity
       body.velocity.set(
         Math.random() * 2 - 1,
-        Math.random() * -2, // Initial downward velocity
+        Math.random() * -2,
         Math.random() * 2 - 1
       );
 
@@ -72,18 +64,9 @@ const FallingLetter = ({
       meshRef.current.position.copy(body.position);
       meshRef.current.quaternion.copy(body.quaternion);
 
-      // Reset position if falls too far
       if (body.position.y < -60) {
-        body.position.set(
-          Math.random() * 20 - 10, // Wider range for x position
-          40, // Higher reset position
-          Math.random() * 20 - 10 // Wider range for z position
-        );
-        body.velocity.set(
-          Math.random() * 4 - 2, // More horizontal velocity
-          0,
-          Math.random() * 4 - 2
-        );
+        body.position.set(Math.random() * 20 - 10, 40, Math.random() * 20 - 10);
+        body.velocity.set(Math.random() * 4 - 2, 0, Math.random() * 4 - 2);
         body.angularVelocity.set(
           Math.random() * 4 - 2,
           Math.random() * 4 - 2,
@@ -103,13 +86,15 @@ const FallingLetter = ({
       color={color}
       anchorX="center"
       anchorY="middle"
-      font={austin.src}
+      font="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qC0s.woff"
       characters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?"
+      castShadow
+      receiveShadow
     >
       {letter}
     </Text>
   );
-};
+});
 
 const PhysicsUpdate = () => {
   useFrame(() => {
@@ -118,54 +103,97 @@ const PhysicsUpdate = () => {
   return null;
 };
 
-const Scene = () => {
-  const textRows = ["Kirill Ginko", "Creative Developer"];
-  const letterSpacing = 6;
-  const rowSpacing = 12;
+const Scene = ({ onComplete }) => {
+  const letterSpacing = 18;
+  const rowSpacing = 35;
   const [visibleLetters, setVisibleLetters] = useState(0);
   const [startFalling, setStartFalling] = useState(false);
 
-  // Flatten the rows into a single array of letters with their row information
-  const letters = textRows.flatMap((row, rowIndex) =>
-    row.split("").map((letter) => ({
-      letter,
-      row: rowIndex,
-    }))
+  // First, memoize the raw text array
+  const rawTextRows = useMemo(() => ["Creating Unique", "Web Experiences"], []);
+
+  // Then, memoize the processed text rows with style information
+  const textRows = useMemo(
+    () =>
+      rawTextRows.map((text) =>
+        text.split("").map((letter) => ({
+          char: letter,
+          isItalic:
+            letter.toLowerCase() === "u" ||
+            letter.toLowerCase() === "n" ||
+            letter.toLowerCase() === "i" ||
+            letter.toLowerCase() === "q" ||
+            letter.toLowerCase() === "u" ||
+            letter.toLowerCase() === "e",
+        }))
+      ),
+    [rawTextRows]
+  );
+
+  // Memoize letters array using the memoized textRows
+  const letters = useMemo(
+    () =>
+      textRows.flatMap((row, rowIndex) =>
+        row.map((letterObj, letterIndex) => ({
+          letter: letterObj.char,
+          isItalic: letterObj.isItalic,
+          row: rowIndex,
+          columnIndex: letterIndex,
+        }))
+      ),
+    [textRows]
   );
 
   useEffect(() => {
     if (visibleLetters < letters.length) {
       const timeout = setTimeout(() => {
         setVisibleLetters((prev) => prev + 1);
-      }, 100);
+      }, 150);
       return () => clearTimeout(timeout);
     } else {
       const fallTimeout = setTimeout(() => {
         setStartFalling(true);
-      }, 1000);
-      return () => clearTimeout(fallTimeout);
+      }, 2000);
+
+      const completeTimeout = setTimeout(() => {
+        onComplete?.();
+      }, 7000);
+
+      return () => {
+        clearTimeout(fallTimeout);
+        clearTimeout(completeTimeout);
+      };
     }
-  }, [visibleLetters, letters.length]);
+  }, [visibleLetters, letters.length, onComplete]);
+
+  const startX = -125;
+  const startY = 55;
 
   return (
     <>
       <PhysicsUpdate />
-      <ambientLight intensity={1.5} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} />
-      <Grid
-        infiniteGrid
-        fadeDistance={50}
-        fadeStrength={5}
-        position={[0, -50, 0]} // Moved grid to match ground plane
+      <ambientLight intensity={0.5} />
+      <directionalLight
+        position={[10, 20, 10]}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-near={0.5}
+        shadow-camera-far={50}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
       />
 
       {letters.map((letterObj, i) => {
         if (i >= visibleLetters) return null;
 
-        // Calculate position based on the letter's row
-        const rowLength = textRows[letterObj.row].length;
-        const x = (i - letters.length / 2) * letterSpacing;
-        const y = 30 - letterObj.row * rowSpacing; // Higher starting position
+        // Center each row independently
+        const rowStartX = startX;
+        const x = rowStartX + letterObj.columnIndex * letterSpacing;
+        const y = startY - letterObj.row * rowSpacing;
         const z = 0;
 
         return (
@@ -173,9 +201,10 @@ const Scene = () => {
             key={i}
             letter={letterObj.letter}
             position={[x, y, z]}
-            size={8}
-            color="#ffffff"
+            size={35}
+            color="#6cf318"
             startFalling={startFalling}
+            italic={letterObj.isItalic}
           />
         );
       })}
@@ -183,21 +212,27 @@ const Scene = () => {
   );
 };
 
-const FallingTextScene = () => {
+const FallingTextScene = ({ onComplete }) => {
   return (
-    <Canvas
-      camera={{ position: [0, 0, 80], fov: 70 }} // Increased FOV for better view
-      style={{ width: "100%", height: "100vh" }}
-    >
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        maxPolarAngle={Math.PI / 2}
-      />
-      <Scene />
-    </Canvas>
+    <div className={styles.canvasContainer}>
+      <Canvas
+        camera={{ position: [0, 0, 100], fov: 75 }}
+        className={styles.canvas}
+      >
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          maxPolarAngle={Math.PI / 2}
+        />
+        <Scene onComplete={onComplete} />
+      </Canvas>
+    </div>
   );
 };
 
-export default FallingTextScene;
+const FallingText = ({ onComplete }) => {
+  return <FallingTextScene onComplete={onComplete} />;
+};
+
+export default FallingText;

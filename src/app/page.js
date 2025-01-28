@@ -11,13 +11,14 @@ import Stamp from "./components/Stamp";
 import FluidBackground from "./components/fluid/Fluid";
 import ImageGallery from "./components/ImageGallery";
 import BrushCanvas from "./components/BrushCanvas";
-import Marquee from "./components/Marquee";
 import FallingText from "./components/FallingText";
 import { useGlobalState } from "./context/GlobalStateContext";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const {
     showAbout,
     isTransitioning,
@@ -28,6 +29,11 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 20000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleTheme = () => {
@@ -48,30 +54,36 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
-      <FluidBackground />
-      <main className={styles.main}>
-        {showAbout && (
-          <div
-            className={`
-              ${styles.flowerContainer} 
-              ${isTransitioning ? styles.transitioning : ""} 
-              ${isRotating ? styles.rotating : ""}
-            `}
-            onClick={toggleTheme}
-          >
-            <Image src={flower} alt="Flower" width={88} height={88} />
-            <span className={styles.flowerLabel}>theme</span>
-          </div>
-        )}
-        {/* <Marquee /> */}
-        <FallingText />
-        <About />
-        <MusicPlayer />
-        <Email />
-        <Stamp />
-        <ImageGallery />
-        <BrushCanvas />
-      </main>
+      {loading ? (
+        <>
+          <FallingText onComplete={() => setLoading(false)} />
+        </>
+      ) : (
+        <>
+          <FluidBackground />
+          <main className={`${styles.main} ${!loading ? styles.visible : ""}`}>
+            {showAbout && (
+              <div
+                className={`
+                  ${styles.flowerContainer} 
+                  ${isTransitioning ? styles.transitioning : ""} 
+                  ${isRotating ? styles.rotating : ""}
+                `}
+                onClick={toggleTheme}
+              >
+                <Image src={flower} alt="Flower" width={88} height={88} />
+                <span className={styles.flowerLabel}>theme</span>
+              </div>
+            )}
+            <About />
+            <MusicPlayer />
+            <Email />
+            <Stamp />
+            <ImageGallery />
+            <BrushCanvas />
+          </main>
+        </>
+      )}
     </div>
   );
 }
