@@ -29,8 +29,8 @@ export default function TennisBallScene() {
         width: "300px",
         height: "300px",
         position: "absolute",
-        top: "10px",
-        left: "10px",
+        top: "60%",
+        left: "20%",
         pointerEvents: "none",
       }}
     >
