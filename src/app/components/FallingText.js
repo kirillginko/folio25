@@ -148,16 +148,16 @@ const Scene = ({ onComplete }) => {
     if (visibleLetters < letters.length) {
       const timeout = setTimeout(() => {
         setVisibleLetters((prev) => prev + 1);
-      }, 150);
+      }, 140);
       return () => clearTimeout(timeout);
     } else {
       const fallTimeout = setTimeout(() => {
         setStartFalling(true);
-      }, 2000);
+      }, 550);
 
       const completeTimeout = setTimeout(() => {
         onComplete?.();
-      }, 7000);
+      }, 5500);
 
       return () => {
         clearTimeout(fallTimeout);
