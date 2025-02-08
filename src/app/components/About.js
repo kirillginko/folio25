@@ -60,7 +60,15 @@ const About = () => {
       className={`${styles.draggableWrapper} ${
         isMobile && !isMinimized ? styles.mobileFixed : ""
       }`}
-      style={{ display: showAbout ? "block" : "none" }}
+      style={{
+        display: showAbout ? "block" : "none",
+        ...(!(isMobile && !isMinimized) && {
+          position: "fixed",
+          top: "50%",
+          right: "50%",
+          transform: "translate(50%, -50%)",
+        }),
+      }}
     >
       <div className={styles.greenCircle} onClick={toggleMinimized}>
         {isMinimized ? (
