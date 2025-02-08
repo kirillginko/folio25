@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../styles/musicPlayer.module.css";
 import { gsap } from "gsap";
@@ -18,16 +19,11 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0); // Track current playback time
   const [duration, setDuration] = useState(0); // Track song duration
   const draggableInstance = useRef(null);
+  const [audioContext, setAudioContext] = useState(null);
+  const [analyser, setAnalyser] = useState(null);
+  const animationFrameRef = useRef(null);
   const { showMusicPlayer, isMusicPlayerMinimized, setIsMusicPlayerMinimized } =
     useGlobalState();
-
-  // Use refs for AudioContext and AnalyserNode since they don't need to trigger re-renders
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const sourceNodeRef = useRef(null);
-
-  // Add new ref for tracking position
-  const positionRef = useRef({ x: 0, y: 0 });
 
   const currentSong = songs[currentSongIndex]; // Get the current song
 
@@ -56,52 +52,13 @@ const MusicPlayer = () => {
         },
         onDragEnd: function () {
           gsap.to(this.target, { scale: 1, duration: 0.2 });
-          // Store the current position
-          positionRef.current = {
-            x: this.x,
-            y: this.y,
-          };
         },
       })[0];
     };
 
     createDraggable();
 
-    // Add resize handler
-    const handleResize = () => {
-      if (!containerRef.current || !draggableInstance.current) return;
-
-      const container = containerRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-
-      // Check if the player is outside viewport and adjust if necessary
-      let newX = positionRef.current.x;
-      let newY = positionRef.current.y;
-
-      if (newX + containerRect.width > windowWidth) {
-        newX = windowWidth - containerRect.width;
-      }
-      if (newX < 0) {
-        newX = 0;
-      }
-      if (newY + containerRect.height > windowHeight) {
-        newY = windowHeight - containerRect.height;
-      }
-      if (newY < 0) {
-        newY = 0;
-      }
-
-      // Update position
-      gsap.set(container, { x: newX, y: newY });
-      positionRef.current = { x: newX, y: newY };
-    };
-
-    window.addEventListener("resize", handleResize);
-
     return () => {
-      window.removeEventListener("resize", handleResize);
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
@@ -109,114 +66,15 @@ const MusicPlayer = () => {
   }, [isMusicPlayerMinimized]);
 
   const toggleMinimized = () => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const content = container.querySelector(`.${styles.songDetails}`);
-    const controls = container.querySelector(`.${styles.controls}`);
-    const timeInfo = container.querySelector(`.${styles.timeInfo}`);
-    const progressBar = container.querySelector(`.${styles.progressBar}`);
-    const containerDuration = 0.15; // Even faster container animation
-    const contentDuration = 0.4; // Slower content animation
-
-    if (!isMusicPlayerMinimized) {
-      // Transitioning to minimized state
-      const elements = [content, controls, timeInfo, progressBar].filter(
-        Boolean
-      );
-      if (elements.length > 0) {
-        gsap
-          .timeline({
-            defaults: { ease: "expo.inOut" },
-          })
-          .to(elements, {
-            opacity: 0,
-            x: -20,
-            duration: contentDuration,
-            stagger: 0.05,
-            ease: "power2.inOut",
-          })
-          .to(
-            container,
-            {
-              width: "140px",
-              height: "60px",
-              duration: containerDuration,
-              onComplete: () => setIsMusicPlayerMinimized(true),
-            },
-            "-=0.35"
-          ); // Larger overlap so container starts shrinking while content is still fading
-      } else {
-        gsap.to(container, {
-          width: "140px",
-          height: "60px",
-          duration: containerDuration,
-          ease: "power2.inOut",
-          onComplete: () => setIsMusicPlayerMinimized(true),
-        });
-      }
-    } else {
-      // Transitioning to expanded state
-      setIsMusicPlayerMinimized(false);
-
-      gsap.to(container, {
-        width: "500px",
-        height: "400px",
-        duration: containerDuration,
-        ease: "power2.inOut",
-        onComplete: () => {
-          const elements = [content, controls, timeInfo, progressBar].filter(
-            Boolean
-          );
-          if (elements.length > 0) {
-            gsap.from(elements, {
-              opacity: 0,
-              x: -20,
-              duration: contentDuration,
-              stagger: 0.05,
-              ease: "power2.out",
-              clearProps: "all",
-            });
-          }
-        },
-      });
-    }
+    setIsMusicPlayerMinimized((prev) => !prev);
   };
 
-  useEffect(() => {
-    return () => {
-      // Clean up audio context and source node
-      if (sourceNodeRef.current) {
-        sourceNodeRef.current.disconnect();
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close().then(() => {
-          console.log("AudioContext closed");
-        });
-      }
-    };
-  }, []);
-
   const togglePlay = async () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !audioContext) return;
 
     try {
-      if (!audioContextRef.current) {
-        // Initialize AudioContext and AnalyserNode if they don't exist
-        audioContextRef.current = new (window.AudioContext ||
-          window.webkitAudioContext)();
-        analyserRef.current = audioContextRef.current.createAnalyser();
-        analyserRef.current.fftSize = 2048;
-        analyserRef.current.smoothingTimeConstant = 0.8;
-
-        sourceNodeRef.current =
-          audioContextRef.current.createMediaElementSource(audioRef.current);
-        sourceNodeRef.current.connect(analyserRef.current);
-        analyserRef.current.connect(audioContextRef.current.destination);
-      }
-
-      if (audioContextRef.current.state === "suspended") {
-        await audioContextRef.current.resume();
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
       }
 
       if (isPlaying) {
@@ -303,8 +161,223 @@ const MusicPlayer = () => {
   };
 
   const handleSongEnd = () => {
-    nextSong(); // Automatically play the next song
+    nextSong(); // This will automatically play the next song since we removed setIsPlaying(false) earlier
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const padding = 20;
+
+        // Calculate new position
+        let newX = gsap.getProperty(containerRef.current, "x");
+        let newY = gsap.getProperty(containerRef.current, "y");
+
+        // Check right boundary
+        if (rect.right > windowWidth) {
+          newX = windowWidth - rect.width - padding;
+        }
+
+        // Check bottom boundary
+        if (rect.bottom > windowHeight) {
+          newY = windowHeight - rect.height - padding;
+        }
+
+        // Check left boundary
+        if (rect.left < padding) {
+          newX = padding;
+        }
+
+        // Check top boundary
+        if (rect.top < padding) {
+          newY = padding;
+        }
+
+        // Animate to new position if needed
+        if (newX !== rect.x || newY !== rect.y) {
+          gsap.to(containerRef.current, {
+            x: newX,
+            y: newY,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
+      }
+    };
+
+    // Initial positioning
+    const initializePosition = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Position in bottom right corner by default
+        gsap.set(containerRef.current, {
+          x: windowWidth - rect.width - 40,
+          y: windowHeight - rect.height - 150,
+        });
+      }
+    };
+
+    // Set initial position and add resize listener
+    initializePosition();
+    window.addEventListener("resize", handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!audioRef.current || audioContext) return;
+
+    try {
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      const analyzerNode = context.createAnalyser();
+      analyzerNode.fftSize = 2048;
+      analyzerNode.smoothingTimeConstant = 0.8;
+
+      const source = context.createMediaElementSource(audioRef.current);
+      source.connect(analyzerNode);
+      analyzerNode.connect(context.destination);
+
+      setAudioContext(context);
+      setAnalyser(analyzerNode);
+    } catch (error) {
+      console.error("Error setting up audio context:", error);
+    }
+  }, [audioContext]);
+
+  useEffect(() => {
+    if (!analyser || !isPlaying) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      return;
+    }
+
+    const analyzeFrequency = () => {
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(dataArray);
+
+      // Calculate average frequency for different ranges
+      // Sub-bass (20-60 Hz)
+      const subBass = dataArray.slice(1, 3).reduce((a, b) => a + b) / 2;
+
+      // Bass (60-250 Hz)
+      const bass = dataArray.slice(3, 12).reduce((a, b) => a + b) / 9;
+
+      // Low Mids (250-500 Hz)
+      const lowMids = dataArray.slice(12, 24).reduce((a, b) => a + b) / 12;
+
+      // Mids (500-2000 Hz)
+      const mids = dataArray.slice(24, 96).reduce((a, b) => a + b) / 72;
+
+      // High Mids (2000-4000 Hz)
+      const highMids = dataArray.slice(96, 192).reduce((a, b) => a + b) / 96;
+
+      // Presence (4000-6000 Hz)
+      const presence = dataArray.slice(192, 288).reduce((a, b) => a + b) / 96;
+
+      // Brilliance (6000-20000 Hz)
+      const brilliance =
+        dataArray.slice(288, 1024).reduce((a, b) => a + b) / 736;
+
+      // Calculate overall volume (RMS of all frequencies)
+      const volume = Math.sqrt(
+        dataArray.reduce((a, b) => a + b * b, 0) / dataArray.length
+      );
+
+      console.log("Frequency Analysis:", {
+        subBass: Math.round(subBass),
+        bass: Math.round(bass),
+        lowMids: Math.round(lowMids),
+        mids: Math.round(mids),
+        highMids: Math.round(highMids),
+        presence: Math.round(presence),
+        brilliance: Math.round(brilliance),
+        volume: Math.round(volume),
+      });
+
+      animationFrameRef.current = requestAnimationFrame(analyzeFrequency);
+    };
+
+    analyzeFrequency();
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [analyser, isPlaying]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const container = containerRef.current.querySelector(
+        `.${styles.musicContainer}`
+      );
+      if (!container) return;
+
+      const tl = gsap.timeline();
+
+      if (isMusicPlayerMinimized) {
+        // Minimize animation
+        tl.to(container, {
+          width: "150px",
+          height: "40px",
+          duration: 0.3,
+          ease: "power2.inOut",
+        });
+
+        const minimizedContent = container.querySelector(
+          `.${styles.minimizedContent}`
+        );
+        if (minimizedContent) {
+          tl.fromTo(
+            minimizedContent,
+            { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.2 },
+            "-=0.1"
+          );
+        }
+      } else {
+        // Expand animation
+        tl.to(container, {
+          width: "500px",
+          height: "60px",
+          duration: 0.3,
+          ease: "power2.inOut",
+        });
+
+        const elements = [
+          container.querySelector(`.${styles.controls}`),
+          container.querySelector(`.${styles.progressBar}`),
+          container.querySelector(`.${styles.timeInfo}`),
+          container.querySelector(`.${styles.songDetails}`),
+        ].filter(Boolean);
+
+        if (elements.length) {
+          tl.fromTo(
+            elements,
+            { opacity: 0, scale: 0.8 },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 0.2,
+              stagger: 0.05,
+              ease: "power2.out",
+            },
+            "-=0.1"
+          );
+        }
+      }
+    }
+  }, [isMusicPlayerMinimized]);
 
   return (
     <div style={{ display: showMusicPlayer ? "block" : "none" }}>
@@ -314,19 +387,13 @@ const MusicPlayer = () => {
           isMusicPlayerMinimized ? styles.minimizedContainer : ""
         }`}
       >
-        <div
-          className={`${styles.visualizerWrapper} ${
-            isMusicPlayerMinimized ? styles.fadeOut : styles.fadeIn
-          }`}
-        >
-          {!isMusicPlayerMinimized && (
+        {!isMusicPlayerMinimized && (
+          <div className={styles.visualizerWrapper}>
             <div className={styles.visualizerContainer}>
-              {analyserRef.current && (
-                <AudioVisualizer analyserNode={analyserRef.current} />
-              )}
+              {analyser && <AudioVisualizer analyserNode={analyser} />}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div
           className={`${styles.musicContainer} ${
@@ -347,7 +414,6 @@ const MusicPlayer = () => {
               <BsArrowsAngleContract className={styles.toggleIcon} />
             )}
           </div>
-          {/* Minimized State with Marquee */}
           {isMusicPlayerMinimized ? (
             <div className={styles.minimizedContent}>
               <Marquee gradient={false} speed={30} pauseOnHover={true}>
@@ -363,17 +429,15 @@ const MusicPlayer = () => {
             </div>
           ) : (
             <>
-              {/* Song Info */}
               <div className={styles.songDetails}>
                 <h3 className={styles.songTitle}>{currentSong.name}</h3>
                 <p className={styles.songArtist}>{currentSong.artist}</p>
               </div>
 
-              {/* Progress Bar */}
               <div
                 className={styles.progressBar}
                 onClick={handleProgressClick}
-                style={{ cursor: "pointer" }} // Add cursor pointer
+                style={{ cursor: "pointer" }}
               >
                 <div
                   className={styles.progress}
@@ -385,7 +449,6 @@ const MusicPlayer = () => {
                 ></div>
               </div>
 
-              {/* Controls */}
               <div className={styles.controls}>
                 <button
                   className={styles.controlButton}
@@ -414,7 +477,6 @@ const MusicPlayer = () => {
                 </button>
               </div>
 
-              {/* Time */}
               <div className={styles.timeInfo}>
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
