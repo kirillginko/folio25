@@ -11,6 +11,7 @@ export function GlobalStateProvider({ children }) {
   const [showThemeButton, setShowThemeButton] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
+  const [isMusicPlayerMinimized, setIsMusicPlayerMinimized] = useState(false);
 
   return (
     <GlobalStateContext.Provider
@@ -29,6 +30,8 @@ export function GlobalStateProvider({ children }) {
         setIsTransitioning,
         isRotating,
         setIsRotating,
+        isMusicPlayerMinimized,
+        setIsMusicPlayerMinimized,
       }}
     >
       {children}

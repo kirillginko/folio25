@@ -13,13 +13,13 @@ import { useGlobalState } from "../context/GlobalStateContext";
 const MusicPlayer = () => {
   const containerRef = useRef(null);
   const audioRef = useRef(null); // Ref for the audio element
-  const [isMinimized, setIsMinimized] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSongIndex, setCurrentSongIndex] = useState(0); // Track current song
   const [currentTime, setCurrentTime] = useState(0); // Track current playback time
   const [duration, setDuration] = useState(0); // Track song duration
   const draggableInstance = useRef(null);
-  const { showMusicPlayer } = useGlobalState();
+  const { showMusicPlayer, isMusicPlayerMinimized, setIsMusicPlayerMinimized } =
+    useGlobalState();
 
   // Use refs for AudioContext and AnalyserNode since they don't need to trigger re-renders
   const audioContextRef = useRef(null);
@@ -106,10 +106,81 @@ const MusicPlayer = () => {
         draggableInstance.current.kill();
       }
     };
-  }, [isMinimized]);
+  }, [isMusicPlayerMinimized]);
 
   const toggleMinimized = () => {
-    setIsMinimized((prev) => !prev);
+    const container = containerRef.current;
+    if (!container) return;
+
+    const content = container.querySelector(`.${styles.songDetails}`);
+    const controls = container.querySelector(`.${styles.controls}`);
+    const timeInfo = container.querySelector(`.${styles.timeInfo}`);
+    const progressBar = container.querySelector(`.${styles.progressBar}`);
+    const containerDuration = 0.15; // Even faster container animation
+    const contentDuration = 0.4; // Slower content animation
+
+    if (!isMusicPlayerMinimized) {
+      // Transitioning to minimized state
+      const elements = [content, controls, timeInfo, progressBar].filter(
+        Boolean
+      );
+      if (elements.length > 0) {
+        gsap
+          .timeline({
+            defaults: { ease: "expo.inOut" },
+          })
+          .to(elements, {
+            opacity: 0,
+            x: -20,
+            duration: contentDuration,
+            stagger: 0.05,
+            ease: "power2.inOut",
+          })
+          .to(
+            container,
+            {
+              width: "140px",
+              height: "60px",
+              duration: containerDuration,
+              onComplete: () => setIsMusicPlayerMinimized(true),
+            },
+            "-=0.35"
+          ); // Larger overlap so container starts shrinking while content is still fading
+      } else {
+        gsap.to(container, {
+          width: "140px",
+          height: "60px",
+          duration: containerDuration,
+          ease: "power2.inOut",
+          onComplete: () => setIsMusicPlayerMinimized(true),
+        });
+      }
+    } else {
+      // Transitioning to expanded state
+      setIsMusicPlayerMinimized(false);
+
+      gsap.to(container, {
+        width: "500px",
+        height: "400px",
+        duration: containerDuration,
+        ease: "power2.inOut",
+        onComplete: () => {
+          const elements = [content, controls, timeInfo, progressBar].filter(
+            Boolean
+          );
+          if (elements.length > 0) {
+            gsap.from(elements, {
+              opacity: 0,
+              x: -20,
+              duration: contentDuration,
+              stagger: 0.05,
+              ease: "power2.out",
+              clearProps: "all",
+            });
+          }
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -240,22 +311,26 @@ const MusicPlayer = () => {
       <div
         ref={containerRef}
         className={`${styles.musicPlayerWrapper} ${
-          isMinimized ? styles.minimizedContainer : ""
+          isMusicPlayerMinimized ? styles.minimizedContainer : ""
         }`}
       >
-        {!isMinimized && (
-          <div className={styles.visualizerWrapper}>
+        <div
+          className={`${styles.visualizerWrapper} ${
+            isMusicPlayerMinimized ? styles.fadeOut : styles.fadeIn
+          }`}
+        >
+          {!isMusicPlayerMinimized && (
             <div className={styles.visualizerContainer}>
               {analyserRef.current && (
                 <AudioVisualizer analyserNode={analyserRef.current} />
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <div
           className={`${styles.musicContainer} ${
-            isMinimized ? styles.minimizedContainer : ""
+            isMusicPlayerMinimized ? styles.minimizedContainer : ""
           }`}
         >
           <audio
@@ -266,14 +341,14 @@ const MusicPlayer = () => {
             crossOrigin="anonymous"
           />
           <div className={styles.greenCircle} onClick={toggleMinimized}>
-            {isMinimized ? (
+            {isMusicPlayerMinimized ? (
               <BsArrowsAngleExpand className={styles.toggleIcon} />
             ) : (
               <BsArrowsAngleContract className={styles.toggleIcon} />
             )}
           </div>
           {/* Minimized State with Marquee */}
-          {isMinimized ? (
+          {isMusicPlayerMinimized ? (
             <div className={styles.minimizedContent}>
               <Marquee gradient={false} speed={30} pauseOnHover={true}>
                 <span className={styles.minimizedText}>
