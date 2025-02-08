@@ -128,42 +128,39 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      <FluidBackground ref={fluidBackgroundRef} />
       {loading ? (
         <div ref={loadingContainerRef} className={styles.loadingContainer}>
           <FallingText onComplete={handleLoadingComplete} />
-          <FluidBackground ref={fluidBackgroundRef} />
         </div>
       ) : (
-        <>
-          <FluidBackground ref={fluidBackgroundRef} />
-          <main
-            ref={mainContentRef}
-            className={styles.main}
-            style={{ opacity: 0 }}
-          >
-            {showAbout && (
-              <div
-                className={`
-                  ${styles.flowerContainer} 
-                  ${isTransitioning ? styles.transitioning : ""} 
-                  ${isRotating ? styles.rotating : ""}
-                `}
-                onClick={toggleTheme}
-              >
-                <Image src={flower} alt="Flower" width={88} height={88} />
-                <span className={styles.flowerLabel}>theme</span>
-              </div>
-            )}
-            <About />
-            <MusicPlayer />
-            <Email />
-            <Stamp />
-            <div className="interactive-element">
-              <ImageGallery />
+        <main
+          ref={mainContentRef}
+          className={styles.main}
+          style={{ opacity: 0 }}
+        >
+          {showAbout && (
+            <div
+              className={`
+                ${styles.flowerContainer} 
+                ${isTransitioning ? styles.transitioning : ""} 
+                ${isRotating ? styles.rotating : ""}
+              `}
+              onClick={toggleTheme}
+            >
+              <Image src={flower} alt="Flower" width={88} height={88} />
+              <span className={styles.flowerLabel}>theme</span>
             </div>
-            <BrushCanvas />
-          </main>
-        </>
+          )}
+          <About />
+          <MusicPlayer />
+          <Email />
+          <Stamp />
+          <div className="interactive-element">
+            <ImageGallery />
+          </div>
+          <BrushCanvas />
+        </main>
       )}
     </div>
   );
