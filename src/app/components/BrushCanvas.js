@@ -56,8 +56,25 @@ const BrushCanvas = () => {
 
   const { showBrushCanvas } = useGlobalState();
 
+  // Add isMobile state at the top with other states
+  const [isMobile, setIsMobile] = useState(false);
+
   const setup = (p5, canvasParentRef) => {
-    const canvas = p5.createCanvas(1000, 800).parent(canvasParentRef);
+    let canvasWidth = 1000;
+    let canvasHeight = 800;
+
+    // Adjust canvas size for mobile
+    if (isMobile) {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      canvasWidth = viewportWidth * 1; // 85% of viewport width
+      canvasHeight = viewportHeight * 0.7; // 60% of viewport height
+    }
+
+    const canvas = p5
+      .createCanvas(canvasWidth, canvasHeight)
+      .parent(canvasParentRef);
 
     canvas.style("width", "100%");
     canvas.style("height", "100%");
@@ -380,160 +397,129 @@ const BrushCanvas = () => {
     </div>
   );
 
-  // Add resize handler
+  // Modify the useEffect that handles draggable
   useEffect(() => {
     gsap.registerPlugin(Draggable);
 
+    // Add mobile check
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
     const createDraggable = () => {
-      if (draggableInstance.current) {
+      // Only create draggable if minimized or not on mobile
+      if (isMinimized || !isMobile) {
+        if (draggableInstance.current) {
+          draggableInstance.current.kill();
+        }
+
+        draggableInstance.current = Draggable.create(containerRef.current, {
+          type: "x,y",
+          bounds: window,
+          inertia: true,
+          cursor: "grab",
+          activeCursor: "grabbing",
+          edgeResistance: isMinimized ? 0.95 : 0.85,
+          dragResistance: isMinimized ? 0.2 : 0.15,
+          zIndexBoost: true,
+          allowEventDefault: true,
+          onPress: function (e) {
+            if (e.target.closest(`.${styles.canvasWrapper}`)) {
+              this.endDrag(e);
+            }
+          },
+          onDragStart: function () {
+            gsap.to(this.target, {
+              scale: isMinimized ? 1.05 : 1.02,
+              duration: 0.2,
+            });
+          },
+          onDragEnd: function () {
+            gsap.to(this.target, { scale: 1, duration: 0.2 });
+          },
+        })[0];
+      } else if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
-
-      draggableInstance.current = Draggable.create(containerRef.current, {
-        type: "x,y",
-        bounds: window,
-        inertia: true,
-        cursor: "grab",
-        activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.95 : 0.85,
-        dragResistance: isMinimized ? 0.2 : 0.15,
-        zIndexBoost: true,
-        allowEventDefault: true,
-        onPress: function (e) {
-          if (e.target.closest(`.${styles.canvasWrapper}`)) {
-            this.endDrag(e);
-          }
-        },
-        onDragStart: function () {
-          gsap.to(this.target, {
-            scale: isMinimized ? 1.05 : 1.02,
-            duration: 0.2,
-          });
-        },
-        onDragEnd: function () {
-          gsap.to(this.target, { scale: 1, duration: 0.2 });
-        },
-      })[0];
     };
 
     createDraggable();
-
-    // Add resize handler
-    const handleResize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        // Check if the component is outside the viewport
-        if (rect.right > windowWidth) {
-          gsap.to(containerRef.current, {
-            x: windowWidth - rect.width - 20, // 20px padding from edge
-            duration: 0.3,
-          });
-        }
-        if (rect.bottom > windowHeight) {
-          gsap.to(containerRef.current, {
-            y: windowHeight - rect.height - 20,
-            duration: 0.3,
-          });
-        }
-        if (rect.left < 0) {
-          gsap.to(containerRef.current, {
-            x: 20, // 20px padding from left edge
-            duration: 0.3,
-          });
-        }
-        if (rect.top < 0) {
-          gsap.to(containerRef.current, {
-            y: 20,
-            duration: 0.3,
-          });
-        }
-      }
-    };
-
-    // Add resize listener
-    window.addEventListener("resize", handleResize);
 
     // Clean up
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", checkMobile);
     };
-  }, [isMinimized]);
+  }, [isMinimized, isMobile]);
 
   useEffect(() => {
     const adjustPositionAndSize = () => {
       if (containerRef.current) {
-        // Use viewport dimensions instead of body bounds
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const element = containerRef.current.getBoundingClientRect();
-        let newX = gsap.getProperty(containerRef.current, "x");
-        let newY = gsap.getProperty(containerRef.current, "y");
 
-        // Calculate expanded dimensions based on viewport size
-        const maxHeight = viewportHeight - 40;
-        const maxWidth = viewportWidth - 40;
-        const expandedHeight = Math.min(600, maxHeight);
-        const expandedWidth = Math.min(800, maxWidth);
+        if (isMobile && !isMinimized) {
+          // Center in viewport when expanded on mobile
+          gsap.to(containerRef.current, {
+            x: 0,
+            y: 0,
+            duration: 0.3,
+            ease: "power2.out",
+          });
 
-        // Check if expanded state would put element out of bounds
-        if (!isMinimized) {
-          if (newX + expandedWidth > viewportWidth) {
-            newX = viewportWidth - expandedWidth - 20;
-          }
-          if (newY + expandedHeight > viewportHeight) {
-            newY = viewportHeight - expandedHeight - 20;
-          }
-        } else {
-          // Ensure minimized state is within bounds
-          if (newX + element.width > viewportWidth) {
-            newX = viewportWidth - element.width - 20;
-          }
-          if (newY + element.height > viewportHeight) {
-            newY = viewportHeight - element.height - 20;
-          }
-        }
-
-        // Ensure position is never negative
-        newX = Math.max(20, newX);
-        newY = Math.max(20, newY);
-
-        // Animate position if needed
-        gsap.to(containerRef.current, {
-          x: newX,
-          y: newY,
-          duration: 0.1,
-          ease: "power1.inOut",
-        });
-
-        // Animate size
-        if (!isMinimized) {
+          // Set size for expanded mobile view
           gsap.to(containerRef.current.children[1], {
-            height: `${expandedHeight}px`,
-            width: `${expandedWidth}px`,
+            width: `${viewportWidth * 0.9}px`,
+            height: `${viewportHeight * 0.8}px`,
             borderRadius: "16px",
-            duration: 0.1,
-            ease: "power1.inOut",
+            duration: 0.3,
+            ease: "power2.out",
           });
         } else {
+          // Handle minimized state or desktop
+          const element = containerRef.current.getBoundingClientRect();
+          let newX =
+            gsap.getProperty(containerRef.current, "x") ||
+            (viewportWidth - element.width) / 2;
+          let newY =
+            gsap.getProperty(containerRef.current, "y") ||
+            (viewportHeight - element.height) / 2;
+
+          // Ensure element stays within viewport
+          newX = Math.max(
+            20,
+            Math.min(newX, viewportWidth - element.width - 20)
+          );
+          newY = Math.max(
+            20,
+            Math.min(newY, viewportHeight - element.height - 20)
+          );
+
+          gsap.to(containerRef.current, {
+            x: newX,
+            y: newY,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+
           gsap.to(containerRef.current.children[1], {
-            height: "50px",
-            width: "100px",
-            borderRadius: "25px",
-            duration: 0.1,
-            ease: "power1.inOut",
+            width: isMinimized ? "100px" : "800px",
+            height: isMinimized ? "50px" : "600px",
+            borderRadius: isMinimized ? "25px" : "16px",
+            duration: 0.3,
+            ease: "power2.out",
           });
         }
       }
     };
 
     // Initial adjustment
-    adjustPositionAndSize();
+    setTimeout(adjustPositionAndSize, 100);
 
     // Add resize listener
     window.addEventListener("resize", adjustPositionAndSize);
@@ -542,7 +528,7 @@ const BrushCanvas = () => {
     return () => {
       window.removeEventListener("resize", adjustPositionAndSize);
     };
-  }, [isMinimized]);
+  }, [isMinimized, isMobile]);
 
   const toggleMinimized = () => {
     if (!isMinimized) {
@@ -559,9 +545,48 @@ const BrushCanvas = () => {
     }
   };
 
+  // Add a resize handler to update canvas when window is resized
+  useEffect(() => {
+    const handleResize = () => {
+      if (p5Instance && isMobile) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        const newWidth = viewportWidth * 0.85;
+        const newHeight = viewportHeight * 0.6;
+
+        p5Instance.resizeCanvas(newWidth, newHeight);
+        p5Instance.background(255);
+
+        // Redraw saved canvas data if it exists
+        if (canvasData) {
+          p5Instance.loadImage(canvasData, (img) => {
+            p5Instance.image(img, 0, 0);
+          });
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [p5Instance, isMobile, canvasData]);
+
   return (
     <div style={{ display: showBrushCanvas ? "block" : "none" }}>
-      <div ref={containerRef} className={styles.draggableWrapper}>
+      <div
+        ref={containerRef}
+        className={styles.draggableWrapper}
+        style={{
+          ...(isMobile &&
+            !isMinimized && {
+              position: "fixed",
+              top: "10%",
+              left: "5%",
+              width: "90vw",
+              maxWidth: "100%",
+            }),
+        }}
+      >
         {notificationState.show && (
           <div
             className={`${styles.notification} 
