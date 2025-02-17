@@ -9,7 +9,7 @@ import { useGlobalState } from "../context/GlobalStateContext";
 
 const About = () => {
   const containerRef = useRef(null);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const draggableInstance = useRef(null);
   const { showAbout } = useGlobalState();

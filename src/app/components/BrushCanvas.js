@@ -68,8 +68,8 @@ const BrushCanvas = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      canvasWidth = viewportWidth * 1; // 85% of viewport width
-      canvasHeight = viewportHeight * 0.7; // 60% of viewport height
+      canvasWidth = viewportWidth * 1.1; // viewport width
+      canvasHeight = viewportHeight * 0.7; // viewport height
     }
 
     const canvas = p5
@@ -511,13 +511,18 @@ const BrushCanvas = () => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
+        // Common animation config
+        const animConfig = {
+          duration: 0.3, // Consistent duration
+          ease: "power3.inOut", // Smoother easing function
+        };
+
         if (isMobile && !isMinimized) {
           // Center in viewport when expanded on mobile
           gsap.to(containerRef.current, {
             x: 0,
             y: 0,
-            duration: 0.3,
-            ease: "power2.out",
+            ...animConfig,
           });
 
           // Set size for expanded mobile view
@@ -525,8 +530,7 @@ const BrushCanvas = () => {
             width: `${viewportWidth * 0.9}px`,
             height: `${viewportHeight * 0.8}px`,
             borderRadius: "16px",
-            duration: 0.3,
-            ease: "power2.out",
+            ...animConfig,
           });
         } else {
           // Handle minimized state or desktop
@@ -551,16 +555,14 @@ const BrushCanvas = () => {
           gsap.to(containerRef.current, {
             x: newX,
             y: newY,
-            duration: 0.3,
-            ease: "power2.out",
+            ...animConfig,
           });
 
           gsap.to(containerRef.current.children[1], {
             width: isMinimized ? "100px" : "800px",
             height: isMinimized ? "50px" : "600px",
             borderRadius: isMinimized ? "25px" : "16px",
-            duration: 0.3,
-            ease: "power2.out",
+            ...animConfig,
           });
         }
       }
@@ -569,12 +571,19 @@ const BrushCanvas = () => {
     // Initial adjustment
     setTimeout(adjustPositionAndSize, 100);
 
-    // Add resize listener
-    window.addEventListener("resize", adjustPositionAndSize);
+    // Add resize listener with consistent debounce
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(adjustPositionAndSize, 100);
+    };
+
+    window.addEventListener("resize", handleResize);
 
     // Clean up
     return () => {
-      window.removeEventListener("resize", adjustPositionAndSize);
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimeout);
     };
   }, [isMinimized, isMobile]);
 

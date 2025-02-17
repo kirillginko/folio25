@@ -16,7 +16,8 @@
   padding: 0;
   touch-action: none;
   user-select: none;
-  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease,
+    all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   max-width: calc(100vw - 40px);
@@ -50,6 +51,7 @@
   background-color: #e6e6e6;
   padding: 5px;
   overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .minimizedContent {
