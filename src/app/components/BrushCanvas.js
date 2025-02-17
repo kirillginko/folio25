@@ -221,17 +221,32 @@ const BrushCanvas = () => {
 
     setIsLoading(true);
     try {
-      p5Instance.redraw();
-      const currentCanvas = p5Instance.get();
-
+      // Create a temporary canvas with white background
       const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = currentCanvas.width;
-      tempCanvas.height = currentCanvas.height;
+      // Use the actual canvas dimensions
+      tempCanvas.width = p5Instance.width;
+      tempCanvas.height = p5Instance.height;
 
       const ctx = tempCanvas.getContext("2d");
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(currentCanvas.canvas, 0, 0);
+      // Fill with white background
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      // Get the original canvas element
+      const originalCanvas = p5Instance.canvas;
+
+      // Draw the p5 canvas content on top at full size
+      ctx.drawImage(
+        originalCanvas,
+        0,
+        0,
+        originalCanvas.width,
+        originalCanvas.height, // source dimensions
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height // destination dimensions
+      );
 
       const canvasData = tempCanvas.toDataURL("image/png", 1.0);
 
@@ -269,7 +284,40 @@ const BrushCanvas = () => {
   const handleDownload = () => {
     if (!p5Instance) return;
     try {
-      p5Instance.save("drawing.png");
+      // Create a temporary canvas with white background
+      const tempCanvas = document.createElement("canvas");
+      // Use the actual canvas dimensions
+      tempCanvas.width = p5Instance.width;
+      tempCanvas.height = p5Instance.height;
+
+      const ctx = tempCanvas.getContext("2d");
+      // Fill with white background
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      // Get the original canvas element
+      const originalCanvas = p5Instance.canvas;
+
+      // Draw the p5 canvas content on top at full size
+      ctx.drawImage(
+        originalCanvas,
+        0,
+        0,
+        originalCanvas.width,
+        originalCanvas.height, // source dimensions
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height // destination dimensions
+      );
+
+      // Create temporary link for download
+      const link = document.createElement("a");
+      link.download = "drawing.png";
+      link.href = tempCanvas.toDataURL("image/png", 1.0);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error("Download error:", err);
       showNotification("Failed to download drawing", "error");
