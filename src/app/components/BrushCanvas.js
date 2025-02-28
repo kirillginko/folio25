@@ -513,19 +513,17 @@ const BrushCanvas = () => {
 
         // Common animation config
         const animConfig = {
-          duration: 0.3, // Consistent duration
-          ease: "power3.inOut", // Smoother easing function
+          duration: 0.15, // Reduced from 0.3 to 0.15 seconds
+          ease: "power2.out", // Changed to a snappier easing
         };
 
         if (isMobile && !isMinimized) {
-          // Center in viewport when expanded on mobile
           gsap.to(containerRef.current, {
             x: 0,
             y: 0,
             ...animConfig,
           });
 
-          // Set size for expanded mobile view
           gsap.to(containerRef.current.children[1], {
             width: `${viewportWidth * 0.9}px`,
             height: `${viewportHeight * 0.8}px`,
@@ -533,7 +531,6 @@ const BrushCanvas = () => {
             ...animConfig,
           });
         } else {
-          // Handle minimized state or desktop
           const element = containerRef.current.getBoundingClientRect();
           let newX =
             gsap.getProperty(containerRef.current, "x") ||
@@ -542,7 +539,6 @@ const BrushCanvas = () => {
             gsap.getProperty(containerRef.current, "y") ||
             (viewportHeight - element.height) / 2;
 
-          // Ensure element stays within viewport
           newX = Math.max(
             20,
             Math.min(newX, viewportWidth - element.width - 20)
