@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { PiPaintBrushFill } from "react-icons/pi";
 
 const Sketch = dynamic(() => import("react-p5").then((mod) => mod.default), {
   ssr: false,
@@ -662,9 +663,7 @@ const BrushCanvas = () => {
           }`}
         >
           {isMinimized ? (
-            <div className={styles.minimizedContent}>
-              <span className={styles.minimizedText}>Paint</span>
-            </div>
+            <PiPaintBrushFill className={styles.minimizedText} />
           ) : (
             <>
               {controls}

@@ -4,8 +4,13 @@ import styles from "../styles/about.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import Image from "next/image";
-import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
+import {
+  BsArrowsAngleExpand,
+  BsArrowsAngleContract,
+  BsInfoCircleFill,
+} from "react-icons/bs";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { HiOutlineUserCircle } from "react-icons/hi";
 
 const About = () => {
   const containerRef = useRef(null);
@@ -20,6 +25,20 @@ const About = () => {
         type: "x,y",
         bounds: "body",
         inertia: true,
+        cursor: "grab",
+        activeCursor: "grabbing",
+        edgeResistance: isMinimized ? 0.95 : 0.85,
+        dragResistance: isMinimized ? 0.2 : 0.15,
+        zIndexBoost: true,
+        onDragStart: function () {
+          gsap.to(this.target, {
+            scale: isMinimized ? 1.05 : 1.02,
+            duration: 0.2,
+          });
+        },
+        onDragEnd: function () {
+          gsap.to(this.target, { scale: 1, duration: 0.2 });
+        },
       })[0];
     }
   };
@@ -86,7 +105,7 @@ const About = () => {
         {/* Minimized State */}
         {isMinimized ? (
           <div className={styles.minimizedContent}>
-            <span className={styles.minimizedDots}>About</span>
+            <BsInfoCircleFill className={styles.minimizedText} />
           </div>
         ) : (
           <>
