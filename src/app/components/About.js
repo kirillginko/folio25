@@ -9,6 +9,7 @@ import {
   BsArrowsAngleContract,
   BsInfoCircleFill,
 } from "react-icons/bs";
+import { ImInfo } from "react-icons/im";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { HiOutlineUserCircle } from "react-icons/hi";
 
@@ -105,7 +106,7 @@ const About = () => {
         {/* Minimized State */}
         {isMinimized ? (
           <div className={styles.minimizedContent}>
-            <BsInfoCircleFill className={styles.minimizedText} />
+            <ImInfo className={styles.minimizedText} />
           </div>
         ) : (
           <>

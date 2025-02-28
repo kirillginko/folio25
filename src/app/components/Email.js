@@ -34,9 +34,9 @@ const Email = () => {
             borderRadius: "30px",
           },
           {
-            height: "550px",
-            width: "380px",
-            borderRadius: "16px",
+            height: window.innerWidth <= 768 ? "100vh" : "550px",
+            width: window.innerWidth <= 768 ? "100vw" : "380px",
+            borderRadius: window.innerWidth <= 768 ? "0px" : "16px",
             duration: 0.3,
             ease: "power2.out",
           }
@@ -87,15 +87,13 @@ const Email = () => {
       const data = await response.json();
 
       setIsSent(true);
-      setFromEmail("");
-      setMessage("");
       setNotificationState({
         show: true,
         message: "Message sent successfully!",
         type: "success",
       });
 
-      // Hide notification and minimize after 3 seconds
+      // Hide notification and minimize after 1 second, clear fields after animation
       setTimeout(() => {
         setIsSent(false);
         setIsMinimized(true);
@@ -103,7 +101,13 @@ const Email = () => {
           ...prev,
           show: false,
         }));
-      }, 3000);
+
+        // Clear fields after minimizing animation completes
+        setTimeout(() => {
+          setFromEmail("");
+          setMessage("");
+        }, 300); // 300ms matches the GSAP animation duration
+      }, 1000);
     } catch (err) {
       console.error("Send error:", err);
       setError(err.message || "Failed to send message. Please try again.");
@@ -113,13 +117,13 @@ const Email = () => {
         type: "error",
       });
 
-      // Hide error notification after 3 seconds
+      // Hide error notification after 1 second instead of 3
       setTimeout(() => {
         setNotificationState((prev) => ({
           ...prev,
           show: false,
         }));
-      }, 3000);
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +141,12 @@ const Email = () => {
             {notificationState.message}
           </div>
         )}
-        <div className={styles.greenCircle} onClick={toggleMinimized}>
+        <div
+          className={`${styles.greenCircle} ${
+            !isMinimized ? styles.mobileFixed : ""
+          }`}
+          onClick={toggleMinimized}
+        >
           {isMinimized ? (
             <BsArrowsAngleExpand className={styles.toggleIcon} />
           ) : (
@@ -148,7 +157,7 @@ const Email = () => {
         <div
           className={`${styles.designContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer
-          }`}
+          } ${!isMinimized ? styles.mobileFullscreen : ""}`}
         >
           {isMinimized ? (
             <div className={styles.minimizedContent}>
