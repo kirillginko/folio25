@@ -104,13 +104,21 @@ const PhysicsUpdate = () => {
 };
 
 const Scene = ({ onComplete }) => {
-  const letterSpacing = 18;
-  const rowSpacing = 35;
+  const isMobile = window.innerWidth < 768;
+  const letterSpacing = isMobile ? 6 : 17.5;
+  const rowSpacing = isMobile ? 12 : 35;
+  const fontSize = isMobile ? 12 : 35;
   const [visibleLetters, setVisibleLetters] = useState(0);
   const [startFalling, setStartFalling] = useState(false);
 
-  // First, memoize the raw text array
-  const rawTextRows = useMemo(() => ["Creating Unique", "Web Experiences"], []);
+  // First, memoize the raw text array - split into individual words for mobile
+  const rawTextRows = useMemo(
+    () =>
+      isMobile
+        ? ["Creating", "Unique", "Web", "Experiences"]
+        : ["Creating Unique", "Web Experiences"],
+    [isMobile]
+  );
 
   // Then, memoize the processed text rows with style information
   const textRows = useMemo(
@@ -153,11 +161,11 @@ const Scene = ({ onComplete }) => {
     } else {
       const fallTimeout = setTimeout(() => {
         setStartFalling(true);
-      }, 550);
+      }, 1000);
 
       const completeTimeout = setTimeout(() => {
         onComplete?.();
-      }, 5500);
+      }, 6000);
 
       return () => {
         clearTimeout(fallTimeout);
@@ -166,8 +174,8 @@ const Scene = ({ onComplete }) => {
     }
   }, [visibleLetters, letters.length, onComplete]);
 
-  const startX = -125;
-  const startY = 55;
+  const startX = isMobile ? -40 : -125;
+  const startY = isMobile ? 50 : 55; // Adjusted for more words on mobile
 
   return (
     <>
@@ -190,18 +198,29 @@ const Scene = ({ onComplete }) => {
       {letters.map((letterObj, i) => {
         if (i >= visibleLetters) return null;
 
-        // Center each row independently
-        const rowStartX = startX;
-        const x = rowStartX + letterObj.columnIndex * letterSpacing;
-        const y = startY - letterObj.row * rowSpacing;
-        const z = 0;
+        let x, y;
+
+        if (isMobile) {
+          // Calculate the total width of each word to center it
+          const currentWord = textRows[letterObj.row];
+          const wordWidth = currentWord.length * letterSpacing;
+          const wordCenterOffset = wordWidth / 2;
+
+          // Center each word horizontally and stack vertically
+          x = -wordCenterOffset + letterObj.columnIndex * letterSpacing;
+          y = startY - letterObj.row * 25;
+        } else {
+          // Original horizontal arrangement for desktop
+          x = startX + letterObj.columnIndex * letterSpacing;
+          y = startY - letterObj.row * rowSpacing;
+        }
 
         return (
           <FallingLetter
             key={i}
             letter={letterObj.letter}
-            position={[x, y, z]}
-            size={35}
+            position={[x, y, 0]}
+            size={fontSize}
             color="#6cf318"
             startFalling={startFalling}
             italic={letterObj.isItalic}
