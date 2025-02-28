@@ -57,6 +57,7 @@ const FallingLetter = React.memo(function FallingLetter({
         world.removeBody(body);
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [position, size, startFalling]);
 
   useFrame(() => {
@@ -165,7 +166,7 @@ const Scene = ({ onComplete }) => {
 
       const completeTimeout = setTimeout(() => {
         onComplete?.();
-      }, 6000);
+      }, 5000);
 
       return () => {
         clearTimeout(fallTimeout);
