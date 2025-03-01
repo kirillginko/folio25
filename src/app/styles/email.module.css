@@ -36,7 +36,7 @@
   background: transparent;
   border: none;
   font-family: monospace;
-  font-size: 16px;
+  font-size: 16px !important;
   outline: none;
   color: #000;
   width: 100%;
@@ -44,7 +44,7 @@
   padding-top: 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   caret-color: #000;
-  -webkit-text-size-adjust: none;
+  -webkit-text-size-adjust: 100%;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -66,13 +66,13 @@
   background: transparent;
   border: none;
   font-family: monospace;
-  font-size: 16px;
+  font-size: 16px !important;
   resize: none;
   outline: none;
   color: #000;
   padding: 0;
   margin-bottom: 2rem;
-  -webkit-text-size-adjust: none;
+  -webkit-text-size-adjust: 100%;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -184,6 +184,13 @@
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.expandedCircle {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 100000 !important;
+}
+
 .greenCircle:hover {
   background-color: #ffb120;
 }
@@ -247,34 +254,46 @@
 
 @media (max-width: 768px) {
   .normalContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     padding: 1rem;
-    display: flex;
-    flex-direction: column;
+    border-radius: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    height: calc(100vh - 200px); /* Adjust based on your header/footer height */
   }
 
   .messageInput {
     flex: 1;
     height: auto;
-    min-height: 400px;
-    max-height: calc(100vh - 200px);
+    min-height: 200px;
+    max-height: none;
   }
 
   .footer {
-    margin-top: auto;
-    padding-top: 1rem;
     position: relative;
-    bottom: 0;
+    padding-top: 1rem;
+    margin-top: auto;
+  }
+
+  /* Prevent any zoom behaviors */
+  input[type="text"],
+  input[type="email"],
+  textarea {
+    font-size: 16px !important;
+    transform: scale(1) !important;
+    transform-origin: left top;
   }
 
   .draggableWrapper {
@@ -292,6 +311,20 @@
   .messageInput:focus {
     /* removed */
   }
+
+  .greenCircle {
+    position: absolute;
+    top: -25px;
+    right: 5px;
+    transform: none !important;
+  }
+
+  .expandedCircle {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    transform: none !important;
+  }
 }
 
 .mobileFullscreen {
@@ -307,10 +340,6 @@
 
 .mobileFixed {
   @media (max-width: 768px) {
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    z-index: 1001;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Remove existing positioning */
   }
 }
