@@ -181,7 +181,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: none;
+  transition: none !important;
 }
 
 /* Create a separate container for the circle */
@@ -192,6 +192,7 @@
   width: 100%;
   height: 0;
   z-index: 10000;
+  pointer-events: none;
 }
 
 .expandedCircle {
@@ -265,52 +266,45 @@
 
 @media (max-width: 768px) {
   .normalContainer {
-    width: 100%;
-    height: 550px; /* Same as desktop */
-    max-height: 90vh; /* Prevent overflow */
-    padding: 1.5rem;
+    width: 380px; /* Match desktop width */
+    height: 550px; /* Match desktop height */
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    transform-origin: bottom left;
     border-radius: 16px;
-    overflow-y: auto;
-    position: relative; /* Change from fixed */
-    top: auto;
-    left: auto;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: auto; /* Remove calc */
-  }
-
-  .messageInput {
-    height: 315px; /* Same as desktop */
-    min-height: auto;
-    max-height: none;
-  }
-
-  /* Remove all zoom prevention styles that might interfere */
-  input[type="text"],
   input[type="email"],
-  textarea,
+  textarea {
+    font-size: 16px !important;
+    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Completely remove any transform scaling */
   .headerInput,
   .messageInput {
-    font-size: 16px;
-    transform: none;
-    -webkit-text-size-adjust: none;
-  }
-}
-
-/* Remove or simplify these classes that might be affecting the layout */
-.mobileFullscreen {
-  @media (max-width: 768px) {
-    position: relative !important;
     transform: none !important;
   }
 }
 
-.mobileFixed {
+/* Remove all mobile-specific fullscreen overrides */
+.mobileFullscreen {
   @media (max-width: 768px) {
+    all: unset;
+  }
+}
+
+.mobileFixed {
+  @media (max-content: 768px) {
     /* Remove all positioning */
   }
+}
+
+.greenCircle {
+  pointer-events: auto;
 }
