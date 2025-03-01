@@ -275,9 +275,13 @@
     border-radius: 16px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    background-color: #d7d7d8;
   }
 
-  /* Replace element selectors with class selectors */
+  .designContainer {
+    background-color: #e6e6e6;
+  }
+
   .headerInput,
   .messageInput {
     font-size: 16px !important;
