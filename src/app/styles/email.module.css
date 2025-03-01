@@ -266,8 +266,8 @@
 
 @media (max-width: 768px) {
   .normalContainer {
-    width: 380px; /* Match desktop width */
-    height: 550px; /* Match desktop height */
+    width: 380px;
+    height: 550px;
     position: fixed;
     bottom: 20px;
     left: 20px;
@@ -277,17 +277,13 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  input[type="email"],
-  textarea {
+  /* Replace element selectors with class selectors */
+  .headerInput,
+  .messageInput {
     font-size: 16px !important;
     touch-action: manipulation;
     -webkit-user-select: text;
     user-select: text;
-  }
-
-  /* Completely remove any transform scaling */
-  .headerInput,
-  .messageInput {
     transform: none !important;
   }
 }
