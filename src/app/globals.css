@@ -47,7 +47,7 @@ body {
   font-family: var(--font-instruction), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  filter: brightness(1.1);
+  /* filter: brightness(1.1); */
 }
 
 html:not(.dark) body {
