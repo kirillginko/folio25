@@ -20,29 +20,36 @@ const Email = () => {
     type: "success", // or 'error'
   });
   const { showEmail } = useGlobalState();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     // Animation for expanding/minimizing
     if (containerRef.current) {
       if (!isMinimized) {
-        // Expand animation
-        gsap.fromTo(
-          containerRef.current.children[1], // The designContainer
-          {
-            height: "40px",
-            width: "100px",
-            borderRadius: "30px",
-          },
-          {
-            height: "550px",
-            width: "380px",
-            borderRadius: "16px",
-            duration: 0.3,
-            ease: "power2.out",
-          }
-        );
+        if (window.innerWidth <= 768) {
+          // Mobile expansion
+          setIsExpanded(true);
+        } else {
+          // Desktop expansion - keep original animation
+          gsap.fromTo(
+            containerRef.current.children[1],
+            {
+              height: "40px",
+              width: "100px",
+              borderRadius: "30px",
+            },
+            {
+              height: "550px",
+              width: "380px",
+              borderRadius: "16px",
+              duration: 0.3,
+              ease: "power2.out",
+            }
+          );
+        }
       } else {
-        // Minimize animation
+        setIsExpanded(false);
+        // Minimize animation - keep original
         gsap.to(containerRef.current.children[1], {
           height: "40px",
           width: "100px",
@@ -148,7 +155,7 @@ const Email = () => {
         <div
           className={`${styles.designContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer
-          }`}
+          } ${isExpanded ? styles.expanded : ""}`}
         >
           {isMinimized ? (
             <div className={styles.minimizedContent}>
@@ -165,7 +172,6 @@ const Email = () => {
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
                   required
-                  autoFocus
                 />
               </div>
               <div className={styles.content}>

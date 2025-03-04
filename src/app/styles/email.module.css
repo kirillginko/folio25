@@ -163,7 +163,7 @@
   z-index: 9999;
 }
 
-/* Keep the green circle positioning */
+/* Keep the original green circle positioning for minimized state */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -245,9 +245,41 @@
     /* max-height: 550px; */
   }
 
-  .draggableWrapper {
-    bottom: 10px;
-    left: 10px;
+  .normalContainer.expanded {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+    z-index: 999;
+    padding: 2rem;
+  }
+
+  /* Adjust the wrapper when expanded */
+  .draggableWrapper .expanded {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: auto;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Only change position when the container is expanded */
+  .draggableWrapper:has(.expanded) .greenCircle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+  }
+
+  /* Adjust the message input height for fullscreen */
+  .expanded .messageInput {
+    height: calc(100vh - 250px);
   }
 
   .messageInput {
@@ -263,5 +295,9 @@
   .headerInput:focus,
   .messageInput:focus {
     /* removed */
+  }
+
+  .greenCircle {
+    transition: all 0.3s ease;
   }
 }
