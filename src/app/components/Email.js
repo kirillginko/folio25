@@ -25,12 +25,9 @@ const Email = () => {
   useEffect(() => {
     // Animation for expanding/minimizing
     if (containerRef.current) {
-      if (!isMinimized) {
-        if (window.innerWidth <= 768) {
-          // Mobile expansion
-          setIsExpanded(true);
-        } else {
-          // Desktop expansion - keep original animation
+      if (window.innerWidth > 768) {
+        // Only use GSAP for desktop
+        if (!isMinimized) {
           gsap.fromTo(
             containerRef.current.children[1],
             {
@@ -46,17 +43,18 @@ const Email = () => {
               ease: "power2.out",
             }
           );
+        } else {
+          gsap.to(containerRef.current.children[1], {
+            height: "40px",
+            width: "100px",
+            borderRadius: "30px",
+            duration: 0.3,
+            ease: "power2.in",
+          });
         }
       } else {
-        setIsExpanded(false);
-        // Minimize animation - keep original
-        gsap.to(containerRef.current.children[1], {
-          height: "40px",
-          width: "100px",
-          borderRadius: "30px",
-          duration: 0.3,
-          ease: "power2.in",
-        });
+        // For mobile, just toggle the state without animation
+        setIsExpanded(!isMinimized);
       }
     }
   }, [isMinimized]);

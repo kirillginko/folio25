@@ -286,7 +286,7 @@
 
   /* Adjust the message input height for fullscreen */
   .expanded .messageInput {
-    height: calc(100vh -450px);
+    height: calc(100vh - 300px);
   }
 
   .headerInput,
@@ -300,7 +300,20 @@
     /* removed */
   }
 
+  /* Remove any transitions that might interfere */
   .greenCircle {
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease; /* Only transition the hover effect */
+  }
+
+  .draggableWrapper:has(.expanded) .greenCircle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+  }
+
+  .draggableWrapper:not(:has(.expanded)) .greenCircle {
+    position: absolute;
+    top: -25px;
+    right: 5px;
   }
 }
