@@ -277,13 +277,16 @@
     right: 20px;
   }
 
-  /* Adjust the message input height for fullscreen */
-  .expanded .messageInput {
-    height: calc(100vh - 250px);
+  /* Reset position when minimized */
+  .draggableWrapper:not(:has(.expanded)) .greenCircle {
+    position: absolute;
+    top: -25px;
+    right: 5px;
   }
 
-  .messageInput {
-    height: 300px;
+  /* Adjust the message input height for fullscreen */
+  .expanded .messageInput {
+    height: calc(100vh -450px);
   }
 
   .headerInput,
