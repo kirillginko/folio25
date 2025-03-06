@@ -161,7 +161,7 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  /* z-index: 9999; */
+  z-index: 1; /* Lower z-index when not expanded */
 }
 
 /* Base green circle styles */
@@ -247,6 +247,11 @@
     /* max-height: 550px; */
   }
 
+  /* Only increase z-index when expanded */
+  .draggableWrapper:has(.expanded) {
+    z-index: 100000;
+  }
+
   .normalContainer.expanded {
     position: fixed;
     top: 0;
@@ -257,7 +262,7 @@
     max-height: 100vh;
     margin: 0;
     border-radius: 0;
-    z-index: 999;
+    z-index: 100000;
     padding: 2rem 2rem 0 2rem;
   }
 
@@ -279,11 +284,35 @@
     margin-bottom: 80px; /* Add space for fixed footer */
   }
 
-  /* When expanded, position the button relative to viewport */
+  /* Update notification styling for mobile */
+  .draggableWrapper:has(.expanded) .notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100002;
+    width: fit-content;
+    padding: 16px 32px;
+    font-size: 16px;
+    border-radius: 12px;
+    min-width: 280px;
+    text-align: center;
+  }
+
+  /* Keep original notification style when not expanded */
+  .draggableWrapper:not(:has(.expanded)) .notification {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* When expanded, position the button relative to viewport with matching z-index */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
     right: 20px;
+    z-index: 100001;
   }
 
   .headerInput,

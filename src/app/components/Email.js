@@ -13,7 +13,6 @@ const Email = () => {
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [notificationState, setNotificationState] = useState({
     show: false,
     message: "",
@@ -61,11 +60,7 @@ const Email = () => {
   }, [isMinimized]);
 
   const toggleMinimized = () => {
-    setIsAnimating(true);
     setIsMinimized((prev) => !prev);
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 300);
   };
 
   const handleSend = async (e) => {
@@ -89,8 +84,6 @@ const Email = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to send message");
       }
-
-      const data = await response.json();
 
       setIsSent(true);
       setFromEmail("");
