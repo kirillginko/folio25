@@ -161,7 +161,12 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  z-index: 1; /* Lower z-index when not expanded */
+  z-index: 1; /* Base z-index when minimized */
+}
+
+/* Desktop expanded state */
+.draggableWrapper:has(.normalContainer):not(:has(.expanded)) {
+  z-index: 100000;
 }
 
 /* Base green circle styles */
@@ -247,7 +252,7 @@
     /* max-height: 550px; */
   }
 
-  /* Only increase z-index when expanded */
+  /* Mobile expanded state */
   .draggableWrapper:has(.expanded) {
     z-index: 100000;
   }
