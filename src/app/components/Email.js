@@ -26,7 +26,7 @@ const Email = () => {
     // Animation for expanding/minimizing
     if (containerRef.current) {
       if (window.innerWidth > 768) {
-        // Only use GSAP for desktop
+        // Desktop animation
         if (!isMinimized) {
           gsap.fromTo(
             containerRef.current.children[1],
@@ -34,6 +34,7 @@ const Email = () => {
               height: "40px",
               width: "100px",
               borderRadius: "30px",
+              transformOrigin: "bottom left",
             },
             {
               height: "550px",

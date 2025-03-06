@@ -6,7 +6,7 @@
   padding: 1.5rem;
   user-select: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transform-origin: bottom center;
+  transform-origin: bottom left;
   overflow: hidden;
 }
 
@@ -161,12 +161,10 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  z-index: 9999;
-  width: 100px;
-  height: 40px;
+  /* z-index: 9999; */
 }
 
-/* Base green circle styles - always relative to draggableWrapper */
+/* Base green circle styles */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -181,6 +179,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform-origin: bottom left;
 }
 
 .greenCircle:hover {
@@ -259,7 +258,7 @@
     margin: 0;
     border-radius: 0;
     z-index: 999;
-    padding: 2rem 2rem 0 2rem; /* Remove bottom padding */
+    padding: 2rem 2rem 0 2rem;
   }
 
   /* Add fixed footer for mobile expanded view */
