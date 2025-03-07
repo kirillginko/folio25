@@ -1,5 +1,5 @@
 :root {
-  --background-color: #ffffff;
+  --background-color:rgb(225, 225, 225);
   background: radial-gradient(
     circle at center,
     #ffffff 0%,
@@ -51,8 +51,8 @@ body {
 }
 
 html:not(.dark) body {
-  background-color: #ffffff;
-  backdrop-filter: brightness(1.05);
+  background-color:rgb(225, 225, 225);
+  /* backdrop-filter: brightness(1.05); */
 }
 
 * {
