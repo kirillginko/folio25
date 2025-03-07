@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle styles - this will NEVER change for minimized state */
+/* Base green circle - this is the ONLY position for minimized state */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -311,8 +311,16 @@
     transform: translateX(-50%);
   }
 
-  /* ONLY apply this style when the container is expanded */
-  .expanded ~ .greenCircle {
+  /* Target the button when container is expanded */
+  .draggableWrapper:has(.expanded) .greenCircle {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 100001 !important;
+  }
+
+  /* ONLY this rule changes the position for expanded state */
+  .draggableWrapper:has(.normalContainer.expanded) .greenCircle {
     position: fixed;
     top: 20px;
     right: 20px;
