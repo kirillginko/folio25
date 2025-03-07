@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle - this is the default minimized position that never changes */
+/* Base green circle - this NEVER changes for minimized state */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -272,7 +272,7 @@
     background-color: #d7d7d8;
   }
 
-  /* ONLY this rule for expanded button - higher z-index than container */
+  /* Only change position in expanded state, keep all other styles from base .greenCircle */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
