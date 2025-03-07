@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle styles - this is the default minimized position */
+/* Base green circle styles - this is the ONLY default position */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -311,7 +311,7 @@
     transform: translateX(-50%);
   }
 
-  /* Only change position when expanded */
+  /* Fix for expanded state green circle */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
