@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle - this NEVER changes for minimized state */
+/* Base green circle - this is the minimized state */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -189,6 +189,7 @@
 .greenCircle:hover {
   background-color: #ffb120;
 }
+
 .toggleIcon {
   width: 12px;
   height: 12px;
@@ -197,6 +198,7 @@
   justify-content: center;
   color: #000;
 }
+
 .toggleIcon:hover {
   width: 12px;
   height: 12px;
@@ -272,7 +274,7 @@
     background-color: #d7d7d8;
   }
 
-  /* Only change position in expanded state, keep all other styles from base .greenCircle */
+  /* ONLY change position and z-index in expanded state */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
