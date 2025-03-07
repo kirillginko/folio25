@@ -8,45 +8,60 @@ import Model from "./Model";
 
 // Tennis ball with physics
 function TennisBall() {
+  const [isVisible, setIsVisible] = useState(false);
   const [ref, api] = useSphere(() => ({
     mass: 1,
-    position: [0, 5, -15], // Position further back and not as high
-    args: [1.2], // Larger collision radius
+    position: [0, 5, 20], // Closer to camera
+    args: [1.2],
     material: { restitution: 0.8 },
     userData: { type: "ball" },
     linearDamping: 0.1,
     angularDamping: 0.1,
   }));
 
-  // Launch ball directly at letters with more force
   useEffect(() => {
-    // Strong forward motion toward the letters
-    api.velocity.set(0, 0, 20); // Much stronger Z velocity to ensure hit
+    console.log("TennisBall mounted, starting visibility timer");
 
-    // Log position to debug
+    // Make ball visible immediately
+    setIsVisible(true);
+    console.log("Ball visibility set to true");
+
+    // Launch after a delay
+    const launchTimer = setTimeout(() => {
+      console.log("Launching ball");
+      api.velocity.set(0, 0, -25); // Faster velocity toward letters
+      api.position.set(0, 5, 20); // Ensure position is set
+    }, 2000);
+
+    // Debug position
     const unsubPosition = api.position.subscribe((v) => {
       console.log(
-        `Ball: ${v[0].toFixed(1)}, ${v[1].toFixed(1)}, ${v[2].toFixed(1)}`
-      );
-    });
-
-    // Log velocity to debug
-    const unsubVelocity = api.velocity.subscribe((v) => {
-      console.log(
-        `Velocity: ${v[0].toFixed(1)}, ${v[1].toFixed(1)}, ${v[2].toFixed(1)}`
+        `Ball position: ${v[0].toFixed(1)}, ${v[1].toFixed(1)}, ${v[2].toFixed(
+          1
+        )}`
       );
     });
 
     return () => {
+      clearTimeout(launchTimer);
       unsubPosition();
-      unsubVelocity();
     };
   }, [api]);
 
+  // Debug render
+  console.log("TennisBall rendering, visible:", isVisible);
+
   return (
-    <mesh ref={ref} castShadow>
-      <Model scale={[1.2, 1.2, 1.2]} />
-    </mesh>
+    <group>
+      <mesh ref={ref} castShadow visible={true}>
+        {" "}
+        {/* Force visible true */}
+        <Model scale={[1.2, 1.2, 1.2]} />
+        {/* Add a visible sphere for debugging */}
+        <sphereGeometry args={[1.2]} />
+        <meshStandardMaterial color="yellow" transparent opacity={0.5} />
+      </mesh>
+    </group>
   );
 }
 
@@ -207,8 +222,7 @@ function Letter({ letter, position }) {
 }
 
 function Scene() {
-  // Create "TENNIS" text
-  const letters = "TENNIS";
+  const letters = "Kirill";
   const letterPositions = letters.split("").map((letter, i) => {
     return {
       letter,
@@ -218,20 +232,20 @@ function Scene() {
 
   return (
     <>
-      <ambientLight intensity={0.5} />
+      {/* Increased ambient light intensity */}
+      <ambientLight intensity={0.8} />
+
+      {/* Increased directional light intensity */}
       <directionalLight
         position={[10, 10, 5]}
-        intensity={1}
+        intensity={1.5}
         castShadow
         shadow-mapSize={[2048, 2048]}
       />
 
-      {/* Increase the intensity for better visibility */}
-      <pointLight position={[0, 10, 0]} intensity={1} />
-
-      <TennisBall />
+      <pointLight position={[0, 10, 0]} intensity={1.5} />
       <Ground />
-
+      <TennisBall />
       {letterPositions.map((item, i) => (
         <Letter key={i} letter={item.letter} position={item.position} />
       ))}
@@ -245,19 +259,29 @@ export default function FallingText() {
       className={styles.canvasContainer}
       style={{ width: "100%", height: "100vh" }}
     >
-      <Canvas shadows camera={{ position: [0, 0, 20], fov: 60 }}>
+      <Canvas
+        shadows
+        camera={{
+          position: [-7.83, 6.79, 17.1],
+          rotation: [-0.38, -0.4, -0.15],
+          fov: 60,
+        }}
+      >
         <Physics
           gravity={[0, -20, 0]}
           defaultContactMaterial={{ restitution: 0.7 }}
           iterations={20}
         >
-          {/* Use Debug to visualize physics bodies */}
           <Debug scale={1.1} color="red">
             <Scene />
           </Debug>
         </Physics>
-
-        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          target={[0, 0, 0]}
+        />
         <Environment preset="sunset" />
       </Canvas>
     </div>

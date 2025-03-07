@@ -13,7 +13,6 @@ import FluidBackground from "./components/fluid/Fluid";
 import ImageGallery from "./components/ImageGallery";
 import BrushCanvas from "./components/BrushCanvas";
 import FallingText from "./components/FallingText";
-import TennisBallScene from "./components/TennisBallScene";
 import { useGlobalState } from "./context/GlobalStateContext";
 
 export default function Home() {
