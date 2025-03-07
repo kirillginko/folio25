@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle - this is the minimized state */
+/* Minimized state button */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -186,8 +186,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Hover for both states */
 .greenCircle:hover {
   background-color: #ffb120;
+}
+
+@media (max-width: 768px) {
+  /* Expanded state - completely separate rule */
+  .normalContainer.expanded + .greenCircle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999999;
+  }
 }
 
 .toggleIcon {
