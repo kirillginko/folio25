@@ -311,14 +311,16 @@
     transform: translateX(-50%);
   }
 
-  /* Only modify position when expanded */
+  /* Update green circle positioning for expanded state */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
     right: 20px;
+    z-index: 100001; /* Higher than expanded container */
+    pointer-events: auto; /* Ensure clickability */
   }
 
-  /* Explicitly reset position when minimized */
+  /* Reset for minimized state */
   .draggableWrapper:not(:has(.expanded)) .greenCircle {
     position: absolute;
     top: -25px;
