@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle styles */
+/* Base green circle styles - keep original position for minimized state */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -184,7 +184,6 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transform-origin: bottom left;
 }
 
 .greenCircle:hover {
@@ -312,12 +311,18 @@
     transform: translateX(-50%);
   }
 
-  /* When expanded, position the button relative to viewport with matching z-index */
+  /* Only modify position when expanded */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 100001;
+  }
+
+  /* Explicitly reset position when minimized */
+  .draggableWrapper:not(:has(.expanded)) .greenCircle {
+    position: absolute;
+    top: -25px;
+    right: 5px;
   }
 
   .headerInput,
