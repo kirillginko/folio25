@@ -169,7 +169,7 @@
   z-index: 100000;
 }
 
-/* Base green circle styles - keep original position for minimized state */
+/* Base green circle styles - this is the default minimized position */
 .greenCircle {
   position: absolute;
   width: 20px;
@@ -311,20 +311,12 @@
     transform: translateX(-50%);
   }
 
-  /* Update green circle positioning for expanded state */
+  /* Only change position when expanded */
   .draggableWrapper:has(.expanded) .greenCircle {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 100001; /* Higher than expanded container */
-    pointer-events: auto; /* Ensure clickability */
-  }
-
-  /* Reset for minimized state */
-  .draggableWrapper:not(:has(.expanded)) .greenCircle {
-    position: absolute;
-    top: -25px;
-    right: 5px;
+    z-index: 100001;
   }
 
   .headerInput,
