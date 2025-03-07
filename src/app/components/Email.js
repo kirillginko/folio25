@@ -19,42 +19,36 @@ const Email = () => {
     type: "success", // or 'error'
   });
   const { showEmail } = useGlobalState();
-  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     // Animation for expanding/minimizing
     if (containerRef.current) {
-      if (window.innerWidth > 768) {
-        // Desktop animation
-        if (!isMinimized) {
-          gsap.fromTo(
-            containerRef.current.children[1],
-            {
-              height: "40px",
-              width: "100px",
-              borderRadius: "30px",
-              transformOrigin: "bottom left",
-            },
-            {
-              height: "550px",
-              width: "380px",
-              borderRadius: "16px",
-              duration: 0.3,
-              ease: "power2.out",
-            }
-          );
-        } else {
-          gsap.to(containerRef.current.children[1], {
+      if (!isMinimized) {
+        // Expand animation
+        gsap.fromTo(
+          containerRef.current.children[1], // The designContainer
+          {
             height: "40px",
             width: "100px",
             borderRadius: "30px",
+          },
+          {
+            height: window.innerWidth <= 768 ? "100vh" : "550px",
+            width: window.innerWidth <= 768 ? "100vw" : "380px",
+            borderRadius: window.innerWidth <= 768 ? "0px" : "16px",
             duration: 0.3,
-            ease: "power2.in",
-          });
-        }
+            ease: "power2.out",
+          }
+        );
       } else {
-        // For mobile, just toggle the state without animation
-        setIsExpanded(!isMinimized);
+        // Minimize animation
+        gsap.to(containerRef.current.children[1], {
+          height: "40px",
+          width: "100px",
+          borderRadius: "30px",
+          duration: 0.3,
+          ease: "power2.in",
+        });
       }
     }
   }, [isMinimized]);
@@ -85,16 +79,16 @@ const Email = () => {
         throw new Error(errorData.error || "Failed to send message");
       }
 
+      await response.json();
+
       setIsSent(true);
-      setFromEmail("");
-      setMessage("");
       setNotificationState({
         show: true,
         message: "Message sent successfully!",
         type: "success",
       });
 
-      // Hide notification and minimize after 3 seconds
+      // Hide notification and minimize after 1 second, clear fields after animation
       setTimeout(() => {
         setIsSent(false);
         setIsMinimized(true);
@@ -102,7 +96,13 @@ const Email = () => {
           ...prev,
           show: false,
         }));
-      }, 3000);
+
+        // Clear fields after minimizing animation completes
+        setTimeout(() => {
+          setFromEmail("");
+          setMessage("");
+        }, 300); // 300ms matches the GSAP animation duration
+      }, 1000);
     } catch (err) {
       console.error("Send error:", err);
       setError(err.message || "Failed to send message. Please try again.");
@@ -112,13 +112,13 @@ const Email = () => {
         type: "error",
       });
 
-      // Hide error notification after 3 seconds
+      // Hide error notification after 1 second instead of 3
       setTimeout(() => {
         setNotificationState((prev) => ({
           ...prev,
           show: false,
         }));
-      }, 3000);
+      }, 1000);
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +136,12 @@ const Email = () => {
             {notificationState.message}
           </div>
         )}
-        <div className={styles.greenCircle} onClick={toggleMinimized}>
+        <div
+          className={`${styles.greenCircle} ${
+            !isMinimized ? styles.mobileFixed : ""
+          }`}
+          onClick={toggleMinimized}
+        >
           {isMinimized ? (
             <BsArrowsAngleExpand className={styles.toggleIcon} />
           ) : (
@@ -147,7 +152,7 @@ const Email = () => {
         <div
           className={`${styles.designContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer
-          } ${isExpanded ? styles.expanded : ""}`}
+          } ${!isMinimized ? styles.mobileFullscreen : ""}`}
         >
           {isMinimized ? (
             <div className={styles.minimizedContent}>
@@ -164,6 +169,7 @@ const Email = () => {
                   value={fromEmail}
                   onChange={(e) => setFromEmail(e.target.value)}
                   required
+                  autoFocus
                 />
               </div>
               <div className={styles.content}>
