@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Text, OrbitControls, Environment } from "@react-three/drei";
-import { Physics, useBox, useSphere, Debug } from "@react-three/cannon";
+import { Physics, useBox, useSphere } from "@react-three/cannon";
 import styles from "../styles/fallingtext.module.css";
 import Model from "./Model";
 
@@ -70,14 +70,20 @@ function Ground() {
   const [ref] = useBox(() => ({
     type: "Static",
     position: [0, -2, 0],
-    args: [50, 1, 50],
+    args: [100, 1, 100],
     material: { restitution: 0.5 },
   }));
 
   return (
     <mesh ref={ref} receiveShadow position={[0, -2, 0]}>
-      <boxGeometry args={[50, 1, 50]} />
-      <meshStandardMaterial color="#303030" />
+      <boxGeometry args={[100, 1, 100]} />
+      <meshStandardMaterial
+        color="#ffffff"
+        transparent={true}
+        opacity={0}
+        roughness={0}
+        metalness={0}
+      />
     </mesh>
   );
 }
@@ -221,14 +227,27 @@ function Letter({ letter, position }) {
   );
 }
 
-function Scene() {
-  const letters = "Kirill";
+function Scene({ onComplete }) {
+  const letters = "Kirill.Agency";
   const letterPositions = letters.split("").map((letter, i) => {
     return {
       letter,
-      position: [(i - 2.5) * 3, 0, 0],
+      position: [(i - 3.9) * 3, 0, 0],
     };
   });
+
+  // Add effect to trigger onComplete after ball launch and collision
+  useEffect(() => {
+    // Wait for:
+    // - Initial delay (2000ms)
+    // - Ball travel time (~1000ms)
+    // - Collision and fragment animation (2000ms)
+    const timer = setTimeout(() => {
+      onComplete?.();
+    }, 5000); // Increased to 5 seconds total
+
+    return () => clearTimeout(timer);
+  }, [onComplete]);
 
   return (
     <>
@@ -253,7 +272,7 @@ function Scene() {
   );
 }
 
-export default function FallingText() {
+export default function FallingText({ onComplete }) {
   return (
     <div
       className={styles.canvasContainer}
@@ -264,7 +283,7 @@ export default function FallingText() {
         camera={{
           position: [-7.83, 6.79, 17.1],
           rotation: [-0.38, -0.4, -0.15],
-          fov: 60,
+          fov: 55,
         }}
       >
         <Physics
@@ -272,9 +291,7 @@ export default function FallingText() {
           defaultContactMaterial={{ restitution: 0.7 }}
           iterations={20}
         >
-          <Debug scale={1.1} color="red">
-            <Scene />
-          </Debug>
+          <Scene onComplete={onComplete} />
         </Physics>
         <OrbitControls
           enablePan={true}

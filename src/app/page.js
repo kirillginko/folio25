@@ -35,15 +35,9 @@ export default function Home() {
     if (!mounted) {
       setMounted(true);
       if (!theme) {
-        setTheme("light");
+        setTheme("dark");
       }
     }
-
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 20000);
-
-    return () => clearTimeout(timer);
   }, [theme, setTheme, mounted]);
 
   const toggleTheme = () => {
@@ -70,58 +64,61 @@ export default function Home() {
       });
     }
 
-    // Fade out loading container
-    gsap.to(loadingContainerRef.current, {
-      opacity: 0,
-      duration: 1,
-      ease: "power2.inOut",
-      onComplete: () => {
-        setLoading(false);
+    // Add a longer delay before starting the transition
+    setTimeout(() => {
+      // Fade out loading container
+      gsap.to(loadingContainerRef.current, {
+        opacity: 0,
+        duration: 1.5,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setLoading(false);
 
-        requestAnimationFrame(() => {
-          if (mainContentRef.current) {
-            // Fade in main content
-            gsap.fromTo(
-              mainContentRef.current,
-              {
-                opacity: 0,
-                visibility: "visible",
-                pointerEvents: "auto", // Ensure interactions work
-              },
-              {
-                opacity: 1,
-                duration: 1.5,
-                ease: "power2.inOut",
-              }
-            );
+          // Add delay before fading in main content
+          setTimeout(() => {
+            if (mainContentRef.current) {
+              // Fade in main content
+              gsap.fromTo(
+                mainContentRef.current,
+                {
+                  opacity: 0,
+                  visibility: "visible",
+                  pointerEvents: "auto",
+                },
+                {
+                  opacity: 1,
+                  duration: 1.5,
+                  ease: "power2.inOut",
+                }
+              );
 
-            // Stagger fade-in for child components
-            // Use a different selector that excludes interactive elements
-            const nonInteractiveElements = Array.from(
-              mainContentRef.current.children
-            ).filter(
-              (child) => !child.classList.contains("interactive-element")
-            ); // Add this class to elements that should maintain interaction
+              // Stagger fade-in for child components
+              const nonInteractiveElements = Array.from(
+                mainContentRef.current.children
+              ).filter(
+                (child) => !child.classList.contains("interactive-element")
+              );
 
-            gsap.fromTo(
-              nonInteractiveElements,
-              {
-                opacity: 0,
-                y: 20,
-              },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 1,
-                stagger: 0.1,
-                ease: "power2.out",
-                clearProps: "all", // Clear GSAP-added properties after animation
-              }
-            );
-          }
-        });
-      },
-    });
+              gsap.fromTo(
+                nonInteractiveElements,
+                {
+                  opacity: 0,
+                  y: 20,
+                },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 1,
+                  stagger: 0.1,
+                  ease: "power2.out",
+                  clearProps: "all",
+                }
+              );
+            }
+          }, 1500); // 1.5 second delay before showing main content
+        },
+      });
+    }, 2000); // Increased to 2 seconds delay before starting transition
   };
 
   if (!mounted) return null;
