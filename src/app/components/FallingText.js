@@ -1,258 +1,265 @@
 "use client";
-import React, { useRef, useEffect, useState, useMemo } from "react";
-import { useFrame, Canvas } from "@react-three/fiber";
-import { Text, OrbitControls } from "@react-three/drei";
-import * as CANNON from "cannon-es";
+import React, { useState, useEffect } from "react";
+import { Canvas } from "@react-three/fiber";
+import { Text, OrbitControls, Environment } from "@react-three/drei";
+import { Physics, useBox, useSphere, Debug } from "@react-three/cannon";
 import styles from "../styles/fallingtext.module.css";
-// Create a physics world
-const world = new CANNON.World();
-world.gravity.set(0, -20, 0);
-world.defaultContactMaterial.restitution = 0.7;
+import Model from "./Model";
 
-// Move ground plane much lower
-const groundShape = new CANNON.Plane();
-const groundBody = new CANNON.Body({ mass: 0 });
-groundBody.addShape(groundShape);
-groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-groundBody.position.set(0, -50, 0);
-world.addBody(groundBody);
+// Tennis ball with physics
+function TennisBall() {
+  const [ref, api] = useSphere(() => ({
+    mass: 1,
+    position: [0, 5, -15], // Position further back and not as high
+    args: [1.2], // Larger collision radius
+    material: { restitution: 0.8 },
+    userData: { type: "ball" },
+    linearDamping: 0.1,
+    angularDamping: 0.1,
+  }));
 
-const FallingLetter = React.memo(function FallingLetter({
-  letter,
-  position,
-  size,
-  color = "white",
-  startFalling,
-}) {
-  const meshRef = useRef();
-  const [body, setBody] = useState(null);
-  const [isPhysicsEnabled, setIsPhysicsEnabled] = useState(false);
-
+  // Launch ball directly at letters with more force
   useEffect(() => {
-    if (startFalling && !isPhysicsEnabled) {
-      const shape = new CANNON.Box(new CANNON.Vec3(size / 2, size / 2, 0.1));
-      const body = new CANNON.Body({
-        mass: 1,
-        position: new CANNON.Vec3(...position),
-        shape,
-      });
+    // Strong forward motion toward the letters
+    api.velocity.set(0, 0, 20); // Much stronger Z velocity to ensure hit
 
-      body.angularVelocity.set(
-        Math.random() * 4 - 2,
-        Math.random() * 4 - 2,
-        Math.random() * 4 - 2
+    // Log position to debug
+    const unsubPosition = api.position.subscribe((v) => {
+      console.log(
+        `Ball: ${v[0].toFixed(1)}, ${v[1].toFixed(1)}, ${v[2].toFixed(1)}`
       );
+    });
 
-      body.velocity.set(
-        Math.random() * 2 - 1,
-        Math.random() * -2,
-        Math.random() * 2 - 1
+    // Log velocity to debug
+    const unsubVelocity = api.velocity.subscribe((v) => {
+      console.log(
+        `Velocity: ${v[0].toFixed(1)}, ${v[1].toFixed(1)}, ${v[2].toFixed(1)}`
       );
+    });
 
-      setBody(body);
-      world.addBody(body);
-      setIsPhysicsEnabled(true);
-
-      return () => {
-        world.removeBody(body);
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [position, size, startFalling]);
-
-  useFrame(() => {
-    if (meshRef.current && body) {
-      meshRef.current.position.copy(body.position);
-      meshRef.current.quaternion.copy(body.quaternion);
-
-      if (body.position.y < -60) {
-        body.position.set(Math.random() * 20 - 10, 40, Math.random() * 20 - 10);
-        body.velocity.set(Math.random() * 4 - 2, 0, Math.random() * 4 - 2);
-        body.angularVelocity.set(
-          Math.random() * 4 - 2,
-          Math.random() * 4 - 2,
-          Math.random() * 4 - 2
-        );
-      }
-    }
-  });
+    return () => {
+      unsubPosition();
+      unsubVelocity();
+    };
+  }, [api]);
 
   return (
-    <Text
-      ref={meshRef}
-      position={
-        isPhysicsEnabled ? meshRef.current?.position.toArray() : position
+    <mesh ref={ref} castShadow>
+      <Model scale={[1.2, 1.2, 1.2]} />
+    </mesh>
+  );
+}
+
+// Ground plane
+function Ground() {
+  const [ref] = useBox(() => ({
+    type: "Static",
+    position: [0, -2, 0],
+    args: [50, 1, 50],
+    material: { restitution: 0.5 },
+  }));
+
+  return (
+    <mesh ref={ref} receiveShadow position={[0, -2, 0]}>
+      <boxGeometry args={[50, 1, 50]} />
+      <meshStandardMaterial color="#303030" />
+    </mesh>
+  );
+}
+
+// A single fragment of an exploded letter
+function LetterFragment({ position, rotation, size, color, velocity }) {
+  const [ref] = useBox(() => ({
+    mass: 0.1,
+    position,
+    rotation,
+    args: size,
+    velocity,
+    angularVelocity: [
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+      (Math.random() - 0.5) * 10,
+    ],
+  }));
+
+  return (
+    <mesh ref={ref} castShadow>
+      <boxGeometry args={size} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
+}
+
+// Letter with physics and explosion trigger
+function Letter({ letter, position }) {
+  const [exploded, setExploded] = useState(false);
+  const [letterVisible, setLetterVisible] = useState(true);
+  const [fragments, setFragments] = useState([]);
+
+  // Use fixed collision boxes instead of text geometry
+  const [ref, api] = useBox(() => ({
+    mass: 0, // Static until hit
+    position,
+    args: [2, 2, 2], // MUCH larger collision box
+    material: { restitution: 0.3 },
+    userData: { type: "letter", letter },
+    onCollide: (e) => {
+      // Log all collisions to debug
+      console.log("Collision detected with", e.body.userData);
+
+      if (e.body.userData?.type === "ball" && !exploded) {
+        console.log(`LETTER ${letter} HIT by ball! Creating fragments...`);
+
+        // Create default impact velocity if not available
+        const ballVelocity = e.body.velocity || [0, 0, 10];
+
+        // Make the letter dynamic to react to the hit
+        api.mass.set(1);
+
+        // Create physical fragments
+        createLetterFragments(position, ballVelocity);
+
+        // Hide original letter after a slight delay
+        setTimeout(() => {
+          setLetterVisible(false);
+          setExploded(true);
+        }, 50);
       }
-      fontSize={size}
-      color={color}
-      anchorX="center"
-      anchorY="middle"
-      font="https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qC0s.woff"
-      characters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?"
-      castShadow
-      receiveShadow
-    >
-      {letter}
-    </Text>
-  );
-});
+    },
+  }));
 
-const PhysicsUpdate = () => {
-  useFrame(() => {
-    world.step(1 / 60);
-  });
-  return null;
-};
+  // Create physical fragments based on impact
+  const createLetterFragments = (pos, impactVelocity = [0, 0, 10]) => {
+    const fragmentCount = 15;
+    const newFragments = [];
 
-const Scene = ({ onComplete }) => {
-  const isMobile = window.innerWidth < 768;
-  const letterSpacing = isMobile ? 6 : 17.5;
-  const rowSpacing = isMobile ? 12 : 35;
-  const fontSize = isMobile ? 12 : 35;
-  const [visibleLetters, setVisibleLetters] = useState(0);
-  const [startFalling, setStartFalling] = useState(false);
+    for (let i = 0; i < fragmentCount; i++) {
+      // Smaller fragments for better physics
+      const size = [
+        0.2 + Math.random() * 0.4,
+        0.2 + Math.random() * 0.4,
+        0.2 + Math.random() * 0.4,
+      ];
 
-  // First, memoize the raw text array - split into individual words for mobile
-  const rawTextRows = useMemo(
-    () =>
-      isMobile
-        ? ["Creating", "Unique", "Web", "Experiences"]
-        : ["Creating Unique", "Web Experiences"],
-    [isMobile]
-  );
+      // Distribution pattern for fragments
+      const fragPos = [
+        pos[0] + (Math.random() - 0.5) * 1.5,
+        pos[1] + (Math.random() - 0.5) * 1.5,
+        pos[2] + (Math.random() - 0.5) * 1.5,
+      ];
 
-  // Then, memoize the processed text rows with style information
-  const textRows = useMemo(
-    () =>
-      rawTextRows.map((text) =>
-        text.split("").map((letter) => ({
-          char: letter,
-          isItalic:
-            letter.toLowerCase() === "u" ||
-            letter.toLowerCase() === "n" ||
-            letter.toLowerCase() === "i" ||
-            letter.toLowerCase() === "q" ||
-            letter.toLowerCase() === "u" ||
-            letter.toLowerCase() === "e",
-        }))
-      ),
-    [rawTextRows]
-  );
+      const rotation = [
+        Math.random() * Math.PI * 2,
+        Math.random() * Math.PI * 2,
+        Math.random() * Math.PI * 2,
+      ];
 
-  // Memoize letters array using the memoized textRows
-  const letters = useMemo(
-    () =>
-      textRows.flatMap((row, rowIndex) =>
-        row.map((letterObj, letterIndex) => ({
-          letter: letterObj.char,
-          isItalic: letterObj.isItalic,
-          row: rowIndex,
-          columnIndex: letterIndex,
-        }))
-      ),
-    [textRows]
-  );
+      // Use impact direction but add randomness
+      const velocity = [
+        (impactVelocity[0] || 0) * 0.3 + (Math.random() - 0.5) * 15,
+        (impactVelocity[1] || 0) * 0.3 + Math.random() * 15,
+        (impactVelocity[2] || 0) * 0.3 + (Math.random() - 0.5) * 15,
+      ];
 
-  useEffect(() => {
-    if (visibleLetters < letters.length) {
-      const timeout = setTimeout(() => {
-        setVisibleLetters((prev) => prev + 1);
-      }, 140);
-      return () => clearTimeout(timeout);
-    } else {
-      const fallTimeout = setTimeout(() => {
-        setStartFalling(true);
-      }, 1000);
-
-      const completeTimeout = setTimeout(() => {
-        onComplete?.();
-      }, 5000);
-
-      return () => {
-        clearTimeout(fallTimeout);
-        clearTimeout(completeTimeout);
-      };
+      newFragments.push({
+        id: `${letter}-frag-${i}`,
+        position: fragPos,
+        rotation,
+        size,
+        color: letter === "T" ? "#ff4400" : "#ffffff", // Color variety
+        velocity,
+      });
     }
-  }, [visibleLetters, letters.length, onComplete]);
 
-  const startX = isMobile ? -40 : -125;
-  const startY = isMobile ? 50 : 55; // Adjusted for more words on mobile
+    setFragments(newFragments);
+  };
 
   return (
     <>
-      <PhysicsUpdate />
-      <ambientLight intensity={0.5} />
-      <directionalLight
-        position={[10, 20, 10]}
-        intensity={1.5}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-near={0.5}
-        shadow-camera-far={50}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={20}
-        shadow-camera-bottom={-20}
-      />
+      {letterVisible && (
+        <>
+          {/* Visual text (doesn't participate in physics) */}
+          <Text fontSize={3} position={position}>
+            {letter}
+          </Text>
 
-      {letters.map((letterObj, i) => {
-        if (i >= visibleLetters) return null;
+          {/* Invisible physics box - for debugging, make it visible */}
+          <mesh ref={ref} position={position} visible={false}>
+            <boxGeometry args={[2, 2, 2]} />
+            <meshStandardMaterial color="red" transparent opacity={0.2} />
+          </mesh>
+        </>
+      )}
 
-        let x, y;
-
-        if (isMobile) {
-          // Calculate the total width of each word to center it
-          const currentWord = textRows[letterObj.row];
-          const wordWidth = currentWord.length * letterSpacing;
-          const wordCenterOffset = wordWidth / 2;
-
-          // Center each word horizontally and stack vertically
-          x = -wordCenterOffset + letterObj.columnIndex * letterSpacing;
-          y = startY - letterObj.row * 25;
-        } else {
-          // Original horizontal arrangement for desktop
-          x = startX + letterObj.columnIndex * letterSpacing;
-          y = startY - letterObj.row * rowSpacing;
-        }
-
-        return (
-          <FallingLetter
-            key={i}
-            letter={letterObj.letter}
-            position={[x, y, 0]}
-            size={fontSize}
-            color="#6cf318"
-            startFalling={startFalling}
-            italic={letterObj.isItalic}
-          />
-        );
-      })}
+      {/* Fragments */}
+      {fragments.map((fragment) => (
+        <LetterFragment
+          key={fragment.id}
+          position={fragment.position}
+          rotation={fragment.rotation}
+          size={fragment.size}
+          color={fragment.color}
+          velocity={fragment.velocity}
+        />
+      ))}
     </>
   );
-};
+}
 
-const FallingTextScene = ({ onComplete }) => {
+function Scene() {
+  // Create "TENNIS" text
+  const letters = "TENNIS";
+  const letterPositions = letters.split("").map((letter, i) => {
+    return {
+      letter,
+      position: [(i - 2.5) * 3, 0, 0],
+    };
+  });
+
   return (
-    <div className={styles.canvasContainer}>
-      <Canvas
-        camera={{ position: [0, 0, 100], fov: 75 }}
-        className={styles.canvas}
-      >
-        <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          maxPolarAngle={Math.PI / 2}
-        />
-        <Scene onComplete={onComplete} />
+    <>
+      <ambientLight intensity={0.5} />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+      />
+
+      {/* Increase the intensity for better visibility */}
+      <pointLight position={[0, 10, 0]} intensity={1} />
+
+      <TennisBall />
+      <Ground />
+
+      {letterPositions.map((item, i) => (
+        <Letter key={i} letter={item.letter} position={item.position} />
+      ))}
+    </>
+  );
+}
+
+export default function FallingText() {
+  return (
+    <div
+      className={styles.canvasContainer}
+      style={{ width: "100%", height: "100vh" }}
+    >
+      <Canvas shadows camera={{ position: [0, 0, 20], fov: 60 }}>
+        <Physics
+          gravity={[0, -20, 0]}
+          defaultContactMaterial={{ restitution: 0.7 }}
+          iterations={20}
+        >
+          {/* Use Debug to visualize physics bodies */}
+          <Debug scale={1.1} color="red">
+            <Scene />
+          </Debug>
+        </Physics>
+
+        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+        <Environment preset="sunset" />
       </Canvas>
     </div>
   );
-};
-
-const FallingText = ({ onComplete }) => {
-  return <FallingTextScene onComplete={onComplete} />;
-};
-
-export default FallingText;
+}
