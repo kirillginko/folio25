@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Text, OrbitControls, Environment } from "@react-three/drei";
+import { Text3D, OrbitControls, Environment } from "@react-three/drei";
 import { Physics, useBox, useSphere } from "@react-three/cannon";
 import styles from "../styles/fallingtext.module.css";
 import Model from "./Model";
@@ -119,9 +119,9 @@ function Letter({ letter, position }) {
 
   // Use fixed collision boxes instead of text geometry
   const [ref, api] = useBox(() => ({
-    mass: 0, // Static until hit
+    mass: 0,
     position,
-    args: [2, 2, 2], // MUCH larger collision box
+    args: [2, 2, 2],
     material: { restitution: 0.3 },
     userData: { type: "letter", letter },
     onCollide: (e) => {
@@ -199,12 +199,30 @@ function Letter({ letter, position }) {
     <>
       {letterVisible && (
         <>
-          {/* Visual text (doesn't participate in physics) */}
-          <Text fontSize={3} position={position}>
+          <Text3D
+            font="/fonts/Grotesk_Bold.json"
+            position={position}
+            size={3}
+            height={2}
+            bevelEnabled
+            bevelSize={0.3}
+            bevelThickness={0.3}
+            bevelSegments={10}
+            curveSegments={32}
+          >
             {letter}
-          </Text>
+            <meshPhysicalMaterial
+              color="#32CD32"
+              metalness={0.9}
+              roughness={0.1}
+              envMapIntensity={2}
+              side={2}
+              clearcoat={1}
+              clearcoatRoughness={0.1}
+              thickness={2}
+            />
+          </Text3D>
 
-          {/* Invisible physics box - for debugging, make it visible */}
           <mesh ref={ref} position={position} visible={false}>
             <boxGeometry args={[2, 2, 2]} />
             <meshStandardMaterial color="red" transparent opacity={0.2} />
@@ -212,7 +230,6 @@ function Letter({ letter, position }) {
         </>
       )}
 
-      {/* Fragments */}
       {fragments.map((fragment) => (
         <LetterFragment
           key={fragment.id}
@@ -228,7 +245,7 @@ function Letter({ letter, position }) {
 }
 
 function Scene({ onComplete }) {
-  const letters = "Kirill.Agency";
+  const letters = "Kirill.Kirill";
   const letterPositions = letters.split("").map((letter, i) => {
     return {
       letter,
