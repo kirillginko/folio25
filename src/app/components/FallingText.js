@@ -68,7 +68,7 @@ function TennisBall() {
   );
 }
 
-// Updated Ground function with grass texture
+// Updated Ground function with grass texture needs update
 function Ground() {
   const [ref] = useBox(() => ({
     type: "Static",
