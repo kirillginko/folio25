@@ -1,10 +1,16 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Text3D, OrbitControls, Environment } from "@react-three/drei";
+import {
+  Text3D,
+  OrbitControls,
+  Environment,
+  useTexture,
+} from "@react-three/drei";
 import { Physics, useBox, useSphere } from "@react-three/cannon";
 import styles from "../styles/fallingtext.module.css";
 import Model from "./Model";
+import * as THREE from "three";
 
 // Tennis ball with physics
 function TennisBall() {
@@ -62,7 +68,7 @@ function TennisBall() {
   );
 }
 
-// Ground plane
+// Updated Ground function with grass texture needs update
 function Ground() {
   const [ref] = useBox(() => ({
     type: "Static",
@@ -71,14 +77,28 @@ function Ground() {
     material: { restitution: 0.5 },
   }));
 
+  // Load grass textures needs update
+  const grassTextures = useTexture({
+    map: "/textures/grass/grass_diffuse.jpg",
+    normalMap: "/textures/grass/grass_normal.jpg",
+    roughnessMap: "/textures/grass/grass_roughness.jpg",
+    aoMap: "/textures/grass/grass_ao.jpg",
+  });
+
+  // Apply texture repetition for realistic scale
+  Object.values(grassTextures).forEach((texture) => {
+    texture.repeat.set(20, 20);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  });
+
   return (
     <mesh ref={ref} receiveShadow position={[0, -2, 0]}>
       <boxGeometry args={[100, 1, 100]} />
       <meshStandardMaterial
+        {...grassTextures}
         color="#ffffff"
-        transparent={true}
-        opacity={0}
-        roughness={0}
+        transparent={false}
+        roughness={1}
         metalness={0}
       />
     </mesh>
@@ -496,9 +516,11 @@ export default function FallingText({ onComplete }) {
           <Scene onComplete={onComplete} />
         </Physics>
         <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
+          enablePan={false}
+          enableZoom={false}
+          enableRotate={false}
+          autoRotate
+          autoRotateSpeed={0.3}
           target={[0, 0, 0]}
         />
         <Environment preset="sunset" />
