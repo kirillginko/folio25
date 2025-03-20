@@ -77,7 +77,7 @@ function Ground() {
     material: { restitution: 0.5 },
   }));
 
-  // Load grass textures
+  // Load grass textures needs update
   const grassTextures = useTexture({
     map: "/textures/grass/grass_diffuse.jpg",
     normalMap: "/textures/grass/grass_normal.jpg",
