@@ -55,7 +55,16 @@ const BrushCanvas = () => {
 
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
 
-  const { showBrushCanvas } = useGlobalState();
+  const {
+    setShowAbout,
+    setShowMusicPlayer,
+    setShowEmail,
+    setShowThemeButton,
+    setShowWorkButton,
+    showBrushCanvas,
+    setShowBackdrop,
+    setActiveComponent,
+  } = useGlobalState();
 
   // Add isMobile state at the top with other states
   const [isMobile, setIsMobile] = useState(false);
@@ -584,10 +593,20 @@ const BrushCanvas = () => {
     };
   }, [isMinimized, isMobile]);
 
+  // Modify the toggleMinimized function to hide/show other components
   const toggleMinimized = () => {
     if (!isMinimized) {
       saveCanvasState();
+
+      // When minimizing, hide the backdrop
+      setShowBackdrop(false);
+      setActiveComponent(null);
+    } else if (isMobile) {
+      // When expanding on mobile, show the backdrop
+      setShowBackdrop(true);
+      setActiveComponent("brushcanvas");
     }
+
     setIsMinimized((prev) => !prev);
   };
 
@@ -638,6 +657,7 @@ const BrushCanvas = () => {
               left: "5%",
               width: "90vw",
               maxWidth: "100%",
+              zIndex: 10000 /* Higher than backdrop */,
             }),
         }}
       >
@@ -650,7 +670,10 @@ const BrushCanvas = () => {
             {notificationState.message}
           </div>
         )}
-        <div className={styles.greenCircle} onClick={toggleMinimized}>
+        <div
+          className={`${styles.greenCircle} brushcanvas-toggle-button`}
+          onClick={toggleMinimized}
+        >
           {isMinimized ? (
             <BsArrowsAngleExpand className={styles.toggleIcon} />
           ) : (

@@ -372,6 +372,14 @@
     width: 100%;
     max-width: 100px;
   }
+
+  .backdrop.active {
+    display: block;
+  }
+
+  .draggableWrapper {
+    z-index: 11; /* Make sure the canvas is above the backdrop */
+  }
 }
 
 .labelRow {
@@ -516,4 +524,36 @@
 .error {
   background-color: #f44336;
   color: white;
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 50;
+  opacity: 0;
+  animation: fadeInBackdrop 0.3s ease forwards;
+  pointer-events: auto;
+  display: none;
+}
+
+.backdrop.active {
+  display: block;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* When expanded, the component should be above the backdrop */
+.draggableWrapperExpanded {
+  z-index: 51;
 }

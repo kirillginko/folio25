@@ -18,7 +18,17 @@ const About = () => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const draggableInstance = useRef(null);
-  const { showAbout } = useGlobalState();
+  const {
+    showAbout,
+    setShowBackdrop,
+    setActiveComponent,
+    setShowBrushCanvas,
+    setShowMusicPlayer,
+    setShowEmail,
+    setShowThemeButton,
+    setShowWorkButton,
+  } = useGlobalState();
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   const createDraggable = () => {
     if (containerRef.current) {
@@ -45,9 +55,11 @@ const About = () => {
   };
 
   useEffect(() => {
-    // Add mobile check
+    // Add mobile check - ensure this is exactly the same as in BrushCanvas
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const mobileDetected = window.innerWidth <= 768;
+      console.log("About mobile check:", mobileDetected);
+      setIsMobile(mobileDetected);
     };
 
     checkMobile();
@@ -71,83 +83,97 @@ const About = () => {
   }, [isMinimized, isMobile]);
 
   const toggleMinimized = () => {
+    if (!isMinimized) {
+      // When minimizing, hide the backdrop
+      setShowBackdrop(false);
+      setActiveComponent(null);
+    } else if (isMobile) {
+      // When expanding on mobile, show the backdrop
+      setShowBackdrop(true);
+      setActiveComponent("about");
+    }
+
     setIsMinimized((prev) => !prev);
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`${styles.draggableWrapper} ${
-        isMobile && !isMinimized ? styles.mobileFixed : ""
-      }`}
-      style={{
-        display: showAbout ? "block" : "none",
-        ...(!(isMobile && !isMinimized) && {
-          position: "fixed",
-          top: "50%",
-          right: "50%",
-          transform: "translate(50%, -50%)",
-        }),
-      }}
-    >
-      <div className={styles.greenCircle} onClick={toggleMinimized}>
-        {isMinimized ? (
-          <BsArrowsAngleExpand className={styles.toggleIcon} />
-        ) : (
-          <BsArrowsAngleContract className={styles.toggleIcon} />
-        )}
-      </div>
-
+    <div style={{ display: showAbout ? "block" : "none" }}>
       <div
-        className={`${styles.designContainer} ${
-          isMinimized ? styles.minimizedContainer : styles.normalContainer
-        }`}
+        ref={containerRef}
+        className={`${styles.draggableWrapper}`}
+        style={{
+          ...(!(isMobile && !isMinimized) && {
+            position: "fixed",
+            top: "50%",
+            right: "50%",
+            transform: "translate(50%, -50%)",
+          }),
+          zIndex: isMobile && !isMinimized ? 10000 : "auto", // Higher than backdrop when expanded on mobile
+        }}
       >
-        {/* Minimized State */}
-        {isMinimized ? (
-          <div className={styles.minimizedContent}>
-            <ImInfo className={styles.minimizedText} />
-          </div>
-        ) : (
-          <>
-            {/* Header Section */}
-            <header className={styles.header}>
-              <div className={styles.headerContent}>
-                <p>*** Kirill@Kirill.Agency ***</p>
-              </div>
-            </header>
-            <div className={styles.imageWrapper}>
-              <Image
-                src="https://res.cloudinary.com/dtps5ugbf/image/upload/c_crop,ar_1:1/v1736362617/ascii-art_n8ttiz.png"
-                alt="ASCII Art"
-                width={600}
-                height={600}
-                priority
-                className={styles.heroImage}
-              />
+        <div
+          className={`${styles.greenCircle} about-toggle-button`}
+          onClick={toggleMinimized}
+        >
+          {isMinimized ? (
+            <BsArrowsAngleExpand className={styles.toggleIcon} />
+          ) : (
+            <BsArrowsAngleContract className={styles.toggleIcon} />
+          )}
+        </div>
+
+        <div
+          className={`${styles.designContainer} ${
+            isMinimized ? styles.minimizedContainer : styles.normalContainer
+          }`}
+        >
+          {/* Minimized State */}
+          {isMinimized ? (
+            <div className={styles.minimizedContent}>
+              <ImInfo className={styles.minimizedText} />
             </div>
-            {/* Bio Section */}
-            <section className={styles.bioSection}>
-              <h2 className={styles.bioTitle}>About Me</h2>
-              <p className={styles.bioText}>
-                I am a <strong>full-stack creative web developer</strong> with a
-                passion for crafting{" "}
-                <strong>interactive, user-centric digital experiences</strong>.
-                My expertise spans from front-end development to back-end
-                systems, combining technical skill with artistic vision to build
-                webpages that are both functional and visually engaging. I
-                specialize in using cutting-edge tools like{" "}
-                <strong>React</strong>, <strong>GSAP</strong>, and{" "}
-                <strong>Next.js</strong> to bring ideas to life.
-              </p>
-              <p className={styles.bioText}>
-                I am a <strong>full-stack creative web developer</strong> with a
-                passion for crafting{" "}
-                <strong>interactive, user-centric digital experiences</strong>.
-              </p>
-            </section>
-          </>
-        )}
+          ) : (
+            <>
+              {/* Header Section */}
+              <header className={styles.header}>
+                <div className={styles.headerContent}>
+                  <p>*** Kirill@Kirill.Agency ***</p>
+                </div>
+              </header>
+              <div className={styles.imageWrapper}>
+                <Image
+                  src="https://res.cloudinary.com/dtps5ugbf/image/upload/c_crop,ar_1:1/v1736362617/ascii-art_n8ttiz.png"
+                  alt="ASCII Art"
+                  width={600}
+                  height={600}
+                  priority
+                  className={styles.heroImage}
+                />
+              </div>
+              {/* Bio Section */}
+              <section className={styles.bioSection}>
+                <h2 className={styles.bioTitle}>About Me</h2>
+                <p className={styles.bioText}>
+                  I am a <strong>full-stack creative web developer</strong> with
+                  a passion for crafting{" "}
+                  <strong>interactive, user-centric digital experiences</strong>
+                  . My expertise spans from front-end development to back-end
+                  systems, combining technical skill with artistic vision to
+                  build webpages that are both functional and visually engaging.
+                  I specialize in using cutting-edge tools like{" "}
+                  <strong>React</strong>, <strong>GSAP</strong>, and{" "}
+                  <strong>Next.js</strong> to bring ideas to life.
+                </p>
+                <p className={styles.bioText}>
+                  I am a <strong>full-stack creative web developer</strong> with
+                  a passion for crafting{" "}
+                  <strong>interactive, user-centric digital experiences</strong>
+                  .
+                </p>
+              </section>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { Providers } from "./providers";
 import localFont from "next/font/local";
 import "./globals.css";
 import { GlobalStateProvider } from "./context/GlobalStateContext";
+import GlobalBackdrop from "./components/GlobalBackdrop";
 
 const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",
@@ -81,21 +82,22 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <GlobalStateProvider>
-      <html lang="en" suppressHydrationWarning>
-        <head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-          />
-        </head>
-        <body
-          className={`${instructionFont.variable} ${AustinCyRoman.variable}`}
-          suppressHydrationWarning
-        >
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
+      </head>
+      <body
+        className={`${instructionFont.variable} ${AustinCyRoman.variable}`}
+        suppressHydrationWarning
+      >
+        <GlobalStateProvider>
+          <GlobalBackdrop />
           <Providers>{children}</Providers>
-        </body>
-      </html>
-    </GlobalStateProvider>
+        </GlobalStateProvider>
+      </body>
+    </html>
   );
 }

@@ -14,8 +14,13 @@ const ImageGallery = () => {
   const [isVisible, setIsVisible] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { setShowAbout, setShowBrushCanvas, setShowMusicPlayer, setShowEmail } =
-    useGlobalState();
+  const {
+    setShowAbout,
+    setShowBrushCanvas,
+    setShowMusicPlayer,
+    setShowEmail,
+    showWorkButton,
+  } = useGlobalState();
 
   const getRandomPosition = () => {
     const padding = 100;
@@ -282,7 +287,7 @@ const ImageGallery = () => {
 
   return (
     <>
-      {selectedImage === null && (
+      {selectedImage === null && showWorkButton && (
         <>
           <button onClick={toggleMenu} className={styles.workButton}>
             {isVisible ? "Close" : "Work"}

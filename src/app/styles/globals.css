@@ -1,0 +1,20 @@
+.global-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 9999; /* Very high z-index */
+  animation: fadeInBackdrop 0.3s ease forwards;
+  pointer-events: auto;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

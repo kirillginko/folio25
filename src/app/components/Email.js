@@ -18,7 +18,8 @@ const Email = () => {
     message: "",
     type: "success", // or 'error'
   });
-  const { showEmail } = useGlobalState();
+  const { showEmail, setShowBackdrop, setActiveComponent } = useGlobalState();
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     // Animation for expanding/minimizing
@@ -54,6 +55,16 @@ const Email = () => {
   }, [isMinimized]);
 
   const toggleMinimized = () => {
+    if (!isMinimized) {
+      // When minimizing, hide the backdrop
+      setShowBackdrop(false);
+      setActiveComponent(null);
+    } else if (isMobile) {
+      // When expanding on mobile, show the backdrop
+      setShowBackdrop(true);
+      setActiveComponent("email"); // Set this to your email component identifier
+    }
+
     setIsMinimized((prev) => !prev);
   };
 
@@ -120,9 +131,31 @@ const Email = () => {
     }
   };
 
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobileDetected = window.innerWidth <= 768;
+      setIsMobile(mobileDetected);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <div style={{ display: showEmail ? "block" : "none" }}>
-      <div ref={containerRef} className={styles.draggableWrapper}>
+      <div
+        ref={containerRef}
+        className={`${styles.draggableWrapper}`}
+        style={{
+          ...(!(isMobile && !isMinimized) && {
+            position: "fixed",
+            // Your positioning properties
+          }),
+          zIndex: isMobile && !isMinimized ? 10000 : "auto", // Higher than backdrop when expanded on mobile
+        }}
+      >
         {notificationState.show && (
           <div
             className={`${styles.notification} ${

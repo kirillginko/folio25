@@ -248,6 +248,7 @@
   .draggableWrapper {
     bottom: 10px;
     left: 10px;
+    z-index: 0;
   }
 
   .messageInput {

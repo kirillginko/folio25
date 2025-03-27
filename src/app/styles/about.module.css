@@ -179,7 +179,12 @@
   top: 50%;
   right: 50%;
   transform: translate(50%, -50%);
-  z-index: 10;
+  z-index: 10; /* Normal z-index when minimized */
+}
+
+/* Add this class for when expanded */
+.draggableWrapperExpanded {
+  z-index: 51; /* Higher than backdrop */
 }
 
 .imageWrapper {
@@ -197,6 +202,45 @@
   width: 100% !important;
   height: auto !important;
 }
+
+/* Add backdrop styles */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 50; /* Increase this value to be higher than other components */
+  opacity: 0;
+  animation: fadeInBackdrop 0.3s ease forwards;
+  pointer-events: auto;
+  display: none;
+}
+
+.backdrop.active {
+  display: block;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile fixed style */
+.mobileFixed {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 12;
+  width: 90vw;
+}
+
 @media screen and (max-width: 768px) {
   .normalContainer {
     width: 90vw;
