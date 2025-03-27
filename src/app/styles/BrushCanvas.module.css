@@ -27,7 +27,7 @@
 .canvasWrapper {
   position: relative;
   width: 100%;
-  height: calc(100%); /* Subtract controls height */
+  height: calc(100% - 80px); /* Subtract controls height */
   overflow: hidden;
   background-color: white; /* Add explicit background color */
 }
@@ -69,14 +69,12 @@
 }
 
 .controls {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative; /* Change from absolute to relative */
   width: 100%;
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgb(255, 255, 255);
   border-radius: 16px 16px 0 0;
   z-index: 2;
   min-height: 80px;
@@ -317,7 +315,7 @@
   }
 
   .designContainer .controls {
-    position: relative;
+    position: relative; /* Ensure it's still relative on mobile */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, auto);
