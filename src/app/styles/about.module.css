@@ -10,10 +10,14 @@
   color: var(--flower-color);
   padding: 1rem;
   user-select: none;
-  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease,
+    all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   scrollbar-width: thin; /* For Firefox */
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* For Firefox */
+  overflow: hidden;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
 }
 
 /* Webkit scrollbar styling (Chrome, Safari, newer Edge) */
@@ -176,10 +180,12 @@
 /* Add draggable wrapper */
 .draggableWrapper {
   position: fixed;
-  top: 50%;
-  right: 50%;
-  transform: translate(50%, -50%);
-  z-index: 10; /* Normal z-index when minimized */
+  top: 100px;
+  left: 20px;
+  z-index: 10;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  will-change: transform;
 }
 
 /* Add this class for when expanded */
@@ -244,6 +250,13 @@
 @media screen and (max-width: 768px) {
   .normalContainer {
     width: 90vw;
-    height: 75vh;
+    max-width: 90vw;
+    height: auto;
+    max-height: 75vh;
+    overflow-y: auto;
+  }
+
+  .draggableWrapper {
+    z-index: 11; /* Make sure the component is above the backdrop */
   }
 }

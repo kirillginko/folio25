@@ -34,7 +34,7 @@ const About = () => {
     if (containerRef.current) {
       draggableInstance.current = Draggable.create(containerRef.current, {
         type: "x,y",
-        bounds: "body",
+        bounds: window,
         inertia: true,
         cursor: "grab",
         activeCursor: "grabbing",
@@ -69,6 +69,17 @@ const About = () => {
     if (isMinimized || !isMobile) {
       gsap.registerPlugin(Draggable);
       createDraggable();
+
+      // Set initial position if not already set
+      if (
+        !gsap.getProperty(containerRef.current, "x") &&
+        !gsap.getProperty(containerRef.current, "y")
+      ) {
+        gsap.set(containerRef.current, {
+          x: 100,
+          y: 100,
+        });
+      }
     } else if (draggableInstance.current) {
       draggableInstance.current.kill();
     }
@@ -79,6 +90,84 @@ const About = () => {
         draggableInstance.current.kill();
       }
       window.removeEventListener("resize", checkMobile);
+    };
+  }, [isMinimized, isMobile]);
+
+  useEffect(() => {
+    const adjustPositionAndSize = () => {
+      if (containerRef.current) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Common animation config
+        const animConfig = {
+          duration: 0.15,
+          ease: "power2.out",
+        };
+
+        if (isMobile && !isMinimized) {
+          gsap.to(containerRef.current, {
+            x: 0,
+            y: 0,
+            ...animConfig,
+          });
+
+          gsap.to(containerRef.current.children[1], {
+            width: `${viewportWidth * 0.9}px`,
+            height: `${viewportHeight * 0.8}px`,
+            borderRadius: "16px",
+            ...animConfig,
+          });
+        } else {
+          const element = containerRef.current.getBoundingClientRect();
+          let newX =
+            gsap.getProperty(containerRef.current, "x") ||
+            (viewportWidth - element.width) / 2;
+          let newY =
+            gsap.getProperty(containerRef.current, "y") ||
+            (viewportHeight - element.height) / 2;
+
+          newX = Math.max(
+            20,
+            Math.min(newX, viewportWidth - element.width - 20)
+          );
+          newY = Math.max(
+            20,
+            Math.min(newY, viewportHeight - element.height - 20)
+          );
+
+          gsap.to(containerRef.current, {
+            x: newX,
+            y: newY,
+            ...animConfig,
+          });
+
+          gsap.to(containerRef.current.children[1], {
+            width: isMinimized ? "80px" : "320px",
+            height: isMinimized ? "80px" : "400px",
+            borderRadius: isMinimized ? "20%" : "16px",
+            ...animConfig,
+          });
+        }
+      }
+    };
+
+    // Initial adjustment
+    setTimeout(adjustPositionAndSize, 100);
+
+    // Add resize listener with consistent debounce
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(adjustPositionAndSize, 100);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimeout);
     };
   }, [isMinimized, isMobile]);
 
@@ -100,15 +189,17 @@ const About = () => {
     <div style={{ display: showAbout ? "block" : "none" }}>
       <div
         ref={containerRef}
-        className={`${styles.draggableWrapper}`}
+        className={styles.draggableWrapper}
         style={{
-          ...(!(isMobile && !isMinimized) && {
-            position: "fixed",
-            top: "50%",
-            right: "50%",
-            transform: "translate(50%, -50%)",
-          }),
-          zIndex: isMobile && !isMinimized ? 10000 : "auto", // Higher than backdrop when expanded on mobile
+          ...(isMobile &&
+            !isMinimized && {
+              position: "fixed",
+              top: "10%",
+              left: "5%",
+              width: "90vw",
+              maxWidth: "100%",
+              zIndex: 10000 /* Higher than backdrop */,
+            }),
         }}
       >
         <div
