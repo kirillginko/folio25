@@ -1,36 +1,21 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import styles from "../styles/about.module.css";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import Image from "next/image";
-import {
-  BsArrowsAngleExpand,
-  BsArrowsAngleContract,
-  BsInfoCircleFill,
-} from "react-icons/bs";
+import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
 import { ImInfo } from "react-icons/im";
 import { useGlobalState } from "../context/GlobalStateContext";
-import { HiOutlineUserCircle } from "react-icons/hi";
 
 const About = () => {
   const containerRef = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const draggableInstance = useRef(null);
-  const {
-    showAbout,
-    setShowBackdrop,
-    setActiveComponent,
-    setShowBrushCanvas,
-    setShowMusicPlayer,
-    setShowEmail,
-    setShowThemeButton,
-    setShowWorkButton,
-  } = useGlobalState();
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const { showAbout, setShowBackdrop, setActiveComponent } = useGlobalState();
 
-  const createDraggable = () => {
+  const createDraggable = useCallback(() => {
     if (containerRef.current) {
       draggableInstance.current = Draggable.create(containerRef.current, {
         type: "x,y",
@@ -52,7 +37,7 @@ const About = () => {
         },
       })[0];
     }
-  };
+  }, [isMinimized]);
 
   useEffect(() => {
     // Add mobile check - ensure this is exactly the same as in BrushCanvas
@@ -91,7 +76,7 @@ const About = () => {
       }
       window.removeEventListener("resize", checkMobile);
     };
-  }, [isMinimized, isMobile]);
+  }, [isMinimized, isMobile, createDraggable]);
 
   useEffect(() => {
     const adjustPositionAndSize = () => {
