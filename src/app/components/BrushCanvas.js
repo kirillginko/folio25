@@ -55,16 +55,8 @@ const BrushCanvas = () => {
 
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
 
-  const {
-    setShowAbout,
-    setShowMusicPlayer,
-    setShowEmail,
-    setShowThemeButton,
-    setShowWorkButton,
-    showBrushCanvas,
-    setShowBackdrop,
-    setActiveComponent,
-  } = useGlobalState();
+  const { showBrushCanvas, setShowBackdrop, setActiveComponent } =
+    useGlobalState();
 
   // Add isMobile state at the top with other states
   const [isMobile, setIsMobile] = useState(false);
@@ -78,8 +70,8 @@ const BrushCanvas = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      canvasWidth = viewportWidth * 1.1; // viewport width
-      canvasHeight = viewportHeight * 0.7; // viewport height
+      canvasWidth = viewportWidth * 0.9; // 90vw to match container
+      canvasHeight = viewportHeight * 0.8 - 80; // 80vh minus controls height
     }
 
     const canvas = p5
@@ -621,28 +613,27 @@ const BrushCanvas = () => {
   // Add a resize handler to update canvas when window is resized
   useEffect(() => {
     const handleResize = () => {
-      if (p5Instance && isMobile) {
+      if (p5Instance && isMobile && !isMinimized) {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        const newWidth = viewportWidth * 0.85;
-        const newHeight = viewportHeight * 0.6;
+        const newWidth = viewportWidth * 0.9;
+        const newHeight = viewportHeight * 0.8 - 80; // Account for controls height
 
         p5Instance.resizeCanvas(newWidth, newHeight);
-        p5Instance.background(255);
-
-        // Redraw saved canvas data if it exists
         if (canvasData) {
           p5Instance.loadImage(canvasData, (img) => {
             p5Instance.image(img, 0, 0);
           });
+        } else {
+          p5Instance.background(255);
         }
       }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [p5Instance, isMobile, canvasData]);
+  }, [p5Instance, isMobile, isMinimized, canvasData]);
 
   return (
     <div style={{ display: showBrushCanvas ? "block" : "none" }}>

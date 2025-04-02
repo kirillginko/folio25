@@ -16,8 +16,7 @@
   padding: 0;
   touch-action: none;
   user-select: none;
-  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease,
-    all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.15s ease, height 0.15s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   max-width: calc(100vw - 40px);
@@ -54,7 +53,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+  transition: width 0.15s ease, height 0.15s ease;
 }
 
 .minimizedContent {
@@ -275,19 +274,25 @@
   top: 100px;
   left: 20px;
   z-index: 10;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  will-change: transform;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .designContainer {
-    width: calc(100vw - 40px) !important;
-    max-width: 400px !important;
-    height: auto !important;
+    width: 90vw !important;
+    max-width: 90vw !important;
+    height: calc(100vh - 20vh) !important;
+    max-height: calc(100vh - 20vh) !important;
     padding: 0;
+    overflow: hidden;
+    transition: width 0.15s ease, height 0.15s ease;
   }
 
   .minimizedContainer {
-    width: 80px !important; /* Match desktop size */
-    height: 80px !important; /* Match desktop size */
+    width: 80px !important;
+    height: 80px !important;
     border: 1px solid black;
     border-radius: 20% !important;
     background-color: #e6e6e6;
@@ -296,26 +301,49 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: width 0.15s ease, height 0.15s ease;
   }
 
-  .minimizedText {
-    font-size: 44px; /* Match desktop size */
-    color: #000;
+  /* Mobile fixed positioning when expanded */
+  .draggableWrapper:has(.normalContainer) {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    height: calc(100vh - 20vh) !important;
+    margin: 0 !important;
+    z-index: 10000 !important;
+  }
+
+  /* Keep minimized state draggable and properly sized */
+  .draggableWrapper:has(.minimizedContainer) {
+    position: fixed;
+    width: 80px !important;
+    height: 80px !important;
+    z-index: 10;
   }
 
   .canvasWrapper {
     width: 100% !important;
-    height: auto !important;
+    height: calc(100% - 80px) !important;
   }
 
   .canvasWrapper canvas {
     width: 100% !important;
-    height: auto !important;
-    max-height: 550px !important;
+    height: 100% !important;
   }
 
-  .designContainer .controls {
-    position: relative; /* Ensure it's still relative on mobile */
+  /* Ensure green circle stays in position for both states */
+  .greenCircle {
+    position: absolute;
+    top: -25px !important;
+    right: 0px !important;
+    z-index: 11;
+  }
+
+  .controls {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, auto);
@@ -324,9 +352,10 @@
     justify-content: center;
     align-items: start;
     min-height: unset;
+    background-color: #e6e6e6;
   }
 
-  .designContainer .controls .control {
+  .control {
     width: 100%;
     min-width: unset;
     display: flex;
@@ -336,12 +365,8 @@
     gap: 4px;
   }
 
-  .designContainer .controls .buttonGroup {
-    padding: 0;
-  }
-
   .colorPicker {
-    grid-column: span 3; /* Make color picker span full width */
+    grid-column: span 3;
     flex-wrap: wrap;
     justify-content: center;
     gap: 4px;
@@ -366,19 +391,13 @@
     white-space: nowrap;
     width: auto;
   }
+}
 
-  /* Adjust input ranges for mobile */
-  .control input[type="range"] {
-    width: 100%;
-    max-width: 100px;
-  }
-
-  .backdrop.active {
-    display: block;
-  }
-
-  .draggableWrapper {
-    z-index: 11; /* Make sure the canvas is above the backdrop */
+/* Ensure the design container fills the wrapper on mobile only when expanded */
+@media screen and (max-width: 768px) {
+  .draggableWrapper:has(.normalContainer) .designContainer {
+    width: 100% !important;
+    height: 100% !important;
   }
 }
 
