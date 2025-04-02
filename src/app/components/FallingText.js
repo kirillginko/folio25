@@ -15,8 +15,8 @@ import * as THREE from "three";
 // Add responsive camera hook
 function useResponsiveCamera() {
   const [cameraSettings, setCameraSettings] = useState({
-    position: [-7.83, 6.79, 17.1],
-    fov: 55,
+    position: [-12, 6, 17.1], // More to the left and lower
+    fov: 65,
   });
 
   useEffect(() => {
@@ -24,18 +24,18 @@ function useResponsiveCamera() {
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
         setCameraSettings({
-          position: [-5, 8, 32], // Moved camera back slightly to show full word
-          fov: 70, // Slightly wider FOV to ensure full word visibility
+          position: [-10, 7, 32], // Adjusted mobile position to match new perspective
+          fov: 75,
         });
       } else {
         setCameraSettings({
-          position: [-7.83, 6.79, 17.1], // Original desktop position
-          fov: 55, // Original desktop FOV
+          position: [-12, 6, 17.1], // More to the left and lower
+          fov: 65,
         });
       }
     }
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -43,15 +43,15 @@ function useResponsiveCamera() {
   return cameraSettings;
 }
 
-// Tennis ball with physics
+// Tennis ball with physics - powerful direct trajectory to hit letters
 function TennisBall() {
   const [ref, api] = useSphere(() => ({
     mass: 1,
-    position: [0, 5, 35], // Moved even further back to stay out of view
+    position: [0, 8, 50], // Start even further back
     args: [1.5],
     material: { restitution: 0.8 },
     userData: { type: "ball" },
-    linearDamping: 0.1,
+    linearDamping: 0.05, // Reduced damping for less slowdown
     angularDamping: 0.1,
     collisionFilterGroup: 1,
     collisionFilterMask: 1,
@@ -63,15 +63,26 @@ function TennisBall() {
         ref.current.userData = { type: "ball" };
       }
 
-      const randomX = (Math.random() - 0.5) * 8;
+      // Position with slight randomness
+      const randomX = (Math.random() - 0.5) * 3; // Further reduced randomness
+      const launchY = 8; // Same moderate height
 
-      api.position.set(randomX, 5, 35); // Updated starting position
+      // Position ball even further back for more momentum
+      api.position.set(randomX, launchY, 50);
 
       setTimeout(() => {
+        // Much stronger horizontal velocity for guaranteed hit
         api.velocity.set(
-          (Math.random() - 0.5) * 5,
-          (Math.random() - 0.5) * 5,
-          -50 // Increased velocity for faster impact from further back
+          randomX * -0.5, // Same correction toward center
+          -4, // Less downward velocity
+          -70 // Dramatically increased forward velocity
+        );
+
+        // Add angular velocity for spin effect
+        api.angularVelocity.set(
+          Math.random() * 10 - 5,
+          Math.random() * 10 - 5,
+          Math.random() * 10 - 5
         );
       }, 50);
     }, 2000);
@@ -98,10 +109,13 @@ function Ground() {
     type: "Static",
     position: [0, -2, 0],
     args: [100, 1, 100],
-    material: { restitution: 0.5 },
+    material: {
+      restitution: 0.2, // Reduced bounciness
+      friction: 0.8, // Increased friction
+    },
   }));
 
-  // Load grass textures needs update
+  // Load grass textures
   const grassTextures = useTexture({
     map: "/textures/grass/grass_diffuse.jpg",
     normalMap: "/textures/grass/grass_normal.jpg",
@@ -138,54 +152,69 @@ const LetterFragment = React.memo(function LetterFragment({
   velocity,
 }) {
   const [ref] = useBox(() => ({
-    mass: 0.1,
-    position,
+    mass: 0.2, // Increased mass for better physical response
+    position: [
+      position[0],
+      position[1] + 0.5, // Raise position slightly to avoid ground intersection
+      position[2],
+    ],
     rotation,
     args: size,
     velocity,
     angularVelocity: [
-      (Math.random() - 0.5) * 5, // Reduced angular velocity
-      (Math.random() - 0.5) * 5,
-      (Math.random() - 0.5) * 5,
+      (Math.random() - 0.5) * 3, // Reduced angular velocity
+      (Math.random() - 0.5) * 3,
+      (Math.random() - 0.5) * 3,
     ],
-    linearDamping: 0.2, // Add damping to improve physics stability
-    angularDamping: 0.2, // Add angular damping
+    linearDamping: 0.3, // Increased damping to reduce bouncing
+    angularDamping: 0.3, // Increased angular damping
+    material: {
+      friction: 0.3, // Add friction to prevent sliding
+      restitution: 0.2, // Lower restitution to reduce bounciness
+    },
+    sleepSpeedLimit: 0.3, // Allow physics objects to sleep when nearly stationary
+    sleepTimeLimit: 0.8, // Time before sleep is applied (in seconds)
+    allowSleep: true, // Enable sleep for better performance
   }));
 
   return (
-    <mesh ref={ref} castShadow>
+    <mesh ref={ref} castShadow receiveShadow>
       <boxGeometry args={size} />
-      <meshStandardMaterial color={color} />
+      <meshPhysicalMaterial
+        color={color}
+        metalness={0.9}
+        roughness={0.1}
+        envMapIntensity={2}
+        side={2}
+        clearcoat={1}
+        clearcoatRoughness={0.1}
+        thickness={2}
+      />
     </mesh>
   );
 });
 
-// Add a new component to handle the entire word collision
-function WordCollider({ letters, onCollide }) {
-  // Create a single collision box for the entire word
+// Individual letter collision box
+function LetterCollider({ position, index, onCollide }) {
+  const letterWidth = 2.5; // Slightly narrower than visual size for precision
+
   const [ref] = useBox(() => ({
     mass: 0,
-    // Position at the center of all letters
-    position: [0, 0, 0],
-    // Make the box wider and deeper for better collision detection
-    args: [letters.length * 3.5, 4, 5], // Increased size in all dimensions
+    position,
+    args: [letterWidth, 3, 3], // Letter collision size
     material: { restitution: 0.3 },
-    userData: { type: "word" },
+    userData: { type: "letter", index },
     onCollide: (e) => {
-      // Check for collision with ball
       if (e.body.userData?.type === "ball") {
-        // Get ball position at impact
-        const ballPosition = e.body.position;
-        // Calculate which letters should explode based on proximity
-        onCollide(e.body.velocity || [0, 0, -25], ballPosition);
+        onCollide(index, e.body.velocity || [0, 0, -25]);
       }
     },
   }));
 
   return (
     <mesh ref={ref} visible={false}>
-      <boxGeometry args={[letters.length * 3.5, 4, 5]} />
-      <meshStandardMaterial color="blue" transparent opacity={0.1} />
+      <boxGeometry args={[letterWidth, 3, 3]} />
+      <meshStandardMaterial color="red" transparent opacity={0.1} />
     </mesh>
   );
 }
@@ -288,15 +317,17 @@ const Letter = React.memo(function Letter({
     }
 
     const newFragments = fragmentsRef.current.map((fragData) => {
-      const maxDistance = 2.0; // Slightly reduced max distance for larger pieces
+      const maxDistance = 1.5; // Reduced max distance for more contained explosion
       const distance = fragData.distanceWeight * maxDistance;
 
       // Calculate position relative to impact point using pre-calculated angles
+      // Add slight upward bias to prevent ground intersection
       const fragPos = [
         impactPoint[0] +
           distance * Math.sin(fragData.phi) * Math.cos(fragData.theta),
         impactPoint[1] +
-          distance * Math.sin(fragData.phi) * Math.sin(fragData.theta),
+          distance * Math.sin(fragData.phi) * Math.sin(fragData.theta) +
+          0.3, // Add upward bias
         impactPoint[2] + distance * Math.cos(fragData.phi),
       ];
 
@@ -304,13 +335,14 @@ const Letter = React.memo(function Letter({
       const sizeScale = 0.8 + 0.4 * (1 - fragData.distanceWeight); // Increased base scale
       const size = fragData.size.map((s) => s * sizeScale);
 
-      // Slightly reduced velocity for better physics stability
-      const velocityScale = 15 * (1 - fragData.distanceWeight); // Reduced from 20
+      // Reduced velocity for better physics stability
+      const velocityScale = 10 * (1 - fragData.distanceWeight); // Reduced from 15
       const velocity = [
         normalizedDirection[0] * velocityScale * 0.6 +
           (fragPos[0] - impactPoint[0]) * velocityScale * 0.7,
         normalizedDirection[1] * velocityScale * 0.6 +
-          (fragPos[1] - impactPoint[1]) * velocityScale * 0.7,
+          (fragPos[1] - impactPoint[1]) * velocityScale * 0.7 +
+          2, // Add upward velocity component
         normalizedDirection[2] * velocityScale * 0.6 +
           (fragPos[2] - impactPoint[2]) * velocityScale * 0.7,
       ];
@@ -388,99 +420,69 @@ const Letter = React.memo(function Letter({
   );
 });
 
+// Update Scene component's collision handling
 function Scene({ onComplete }) {
   const letters = "Kirill.Kirill";
   const letterArray = letters.split("");
 
+  // Calculate letter positions with explicit center alignment
+  const totalWidth = letterArray.length * 3;
+  const startX = -totalWidth / 2 + 1.5; // Center the word and offset by half letter width
+
   const letterPositions = letterArray.map((letter, i) => {
     return {
       letter,
-      position: [(i - 3.9) * 3, 0, 0],
+      position: [startX + i * 3, 0, 0],
     };
   });
 
-  // State to trigger word explosion - use useRef to avoid re-renders
   const wordExplodedRef = useRef(false);
   const [wordExploded, setWordExploded] = useState(false);
   const [ballImpactVelocity, setBallImpactVelocity] = useState([0, 0, -25]);
-  // Track which letters should explode (by index)
   const [lettersToExplode, setLettersToExplode] = useState([]);
 
-  // Calculate impact radius - controls how many letters will break
-  // Increase this to make more letters break at once
-  const impactRadius = 12; // Increased from 6 to ensure more letters break
-
-  // Handle word collision
-  const handleWordCollision = (velocity, ballPosition) => {
-    // Skip state update if already exploded using ref for faster check
+  // Handle letter collision - direct and precise
+  const handleLetterCollision = (letterIndex, velocity) => {
+    // Prevent multiple explosions
     if (wordExplodedRef.current) return;
 
-    console.log("Word collision handler triggered!");
+    console.log(
+      `Letter collision: ${letterIndex} (${letterArray[letterIndex]})`
+    );
 
-    // Mark as exploded immediately with ref
+    // Mark as exploded
     wordExplodedRef.current = true;
 
-    // Calculate which letters should explode based on proximity to ball impact
-    const letterImpactIndices = [];
+    // Create array of letters to explode (hit letter and maybe adjacent)
+    const impactIndices = [letterIndex];
 
-    // If we have ball position, use it to determine which letters to explode
-    if (ballPosition) {
-      console.log("Using ball position to determine impact:", ballPosition);
+    // Maybe add adjacent letters based on velocity magnitude
+    const velocityMagnitude = Math.sqrt(
+      velocity[0] * velocity[0] +
+        velocity[1] * velocity[1] +
+        velocity[2] * velocity[2]
+    );
 
-      letterPositions.forEach((item, index) => {
-        // Calculate distance from this letter to the ball impact point
-        const dx = item.position[0] - ballPosition[0];
-        const dy = item.position[1] - ballPosition[1];
-        const dz = item.position[2] - ballPosition[2];
-        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-        console.log(
-          `Letter ${index} (${item.letter}) distance: ${distance.toFixed(2)}`
-        );
-
-        // If this letter is within the impact radius, mark it for explosion
-        if (distance < impactRadius) {
-          letterImpactIndices.push(index);
-          console.log(`Letter ${index} (${item.letter}) will explode`);
-        }
-      });
-    } else {
-      // Fallback: If no ball position, explode all letters
-      console.log("No ball position, using fallback");
-      for (let i = 0; i < letterPositions.length; i++) {
-        letterImpactIndices.push(i);
-      }
+    // For strong impacts, maybe break adjacent letters
+    if (velocityMagnitude > 20) {
+      if (letterIndex > 0) impactIndices.push(letterIndex - 1);
+      if (letterIndex < letterArray.length - 1)
+        impactIndices.push(letterIndex + 1);
     }
 
-    // Ensure we have at least some letters to explode
-    if (letterImpactIndices.length === 0) {
-      console.log("No letters selected for explosion, using fallback");
-      // If no letters were selected, explode the central 4 letters
-      const middleIndex = Math.floor(letterPositions.length / 2);
-      for (let i = middleIndex - 2; i <= middleIndex + 2; i++) {
-        if (i >= 0 && i < letterPositions.length) {
-          letterImpactIndices.push(i);
-        }
-      }
-    }
+    console.log("Breaking letters:", impactIndices);
 
-    console.log("Final explosion indices:", letterImpactIndices);
-
-    // Batch state updates in a single render cycle
+    // Update state
     setBallImpactVelocity(velocity);
-    setLettersToExplode(letterImpactIndices);
+    setLettersToExplode(impactIndices);
     setWordExploded(true);
   };
 
   // Add effect to trigger onComplete after ball launch and collision
   useEffect(() => {
-    // Wait for:
-    // - Initial delay (2000ms)
-    // - Ball travel time (~1000ms)
-    // - Collision and fragment animation (2000ms)
     const timer = setTimeout(() => {
       onComplete?.();
-    }, 5000); // Increased to 5 seconds total
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [onComplete]);
@@ -492,24 +494,45 @@ function Scene({ onComplete }) {
         position={[10, 10, 5]}
         intensity={1.5}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[4096, 4096]}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
+        shadow-camera-near={0.1}
+        shadow-camera-far={50}
+        shadow-bias={-0.001}
+        shadow-normalBias={0.02}
       />
 
-      <pointLight position={[0, 10, 0]} intensity={1.5} />
+      <pointLight
+        position={[0, 10, 0]}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.001}
+      />
+
       <Ground />
       <TennisBall />
 
-      {/* Single collision box for the word */}
-      <WordCollider letters={letters} onCollide={handleWordCollision} />
+      {/* Individual letter collision boxes */}
+      {letterPositions.map((item, i) => (
+        <LetterCollider
+          key={`collider-${i}`}
+          position={item.position}
+          index={i}
+          onCollide={handleLetterCollision}
+        />
+      ))}
 
-      {/* Render all letters */}
+      {/* Render letters */}
       {letterPositions.map((item, i) => (
         <Letter
           key={i}
           letter={item.letter}
           position={item.position}
           index={i}
-          // Only explode this letter if it's in the impact zone
           shouldExplode={wordExploded && lettersToExplode.includes(i)}
           ballVelocity={ballImpactVelocity}
         />
@@ -524,10 +547,10 @@ export default function FallingText({ onComplete }) {
   return (
     <div className={styles.canvasContainer}>
       <Canvas
-        shadows
+        shadows="soft"
         camera={{
           position: cameraSettings.position,
-          rotation: [-0.38, -0.4, -0.15],
+          rotation: [-0.35, -0.5, -0.2], // Adjusted rotation for new camera position
           fov: cameraSettings.fov,
         }}
       >
