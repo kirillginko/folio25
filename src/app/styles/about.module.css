@@ -205,8 +205,8 @@
   z-index: 10;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
-  will-change: transform, width, height;
-  transition: width 0.15s ease, height 0.15s ease;
+  will-change: transform;
+  touch-action: none;
 }
 
 /* Add this class for when expanded */
@@ -288,7 +288,6 @@
     height: 80vh !important;
     margin: 0 !important;
     z-index: 10000 !important;
-    transition: width 0.15s ease, height 0.15s ease;
   }
 
   /* Keep minimized state draggable and properly sized */
@@ -296,9 +295,7 @@
     position: fixed;
     width: 80px !important;
     height: 80px !important;
-    transform: none;
     z-index: 10;
-    transition: width 0.15s ease, height 0.15s ease;
   }
 
   .minimizedContainer {
@@ -329,13 +326,11 @@
 /* Remove transform transition to prevent stutter */
 .draggableWrapper {
   position: fixed;
-  top: 100px;
-  left: 20px;
   z-index: 10;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
-  will-change: transform, width, height;
-  transition: width 0.15s ease, height 0.15s ease;
+  will-change: transform;
+  touch-action: none;
 }
 
 /* Ensure the design container fills the wrapper on mobile only when expanded */

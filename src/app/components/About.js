@@ -15,20 +15,6 @@ const About = () => {
   const draggableInstance = useRef(null);
   const { showAbout, setShowBackdrop, setActiveComponent } = useGlobalState();
 
-  const createDraggable = () => {
-    if (containerRef.current) {
-      draggableInstance.current = Draggable.create(containerRef.current, {
-        type: "x,y",
-        bounds: window,
-        inertia: true,
-        cursor: "grab",
-        activeCursor: "grabbing",
-        edgeResistance: 0.95,
-        dragResistance: 0.2,
-      })[0];
-    }
-  };
-
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -40,17 +26,6 @@ const About = () => {
     if (isMinimized || !isMobile) {
       gsap.registerPlugin(Draggable);
       createDraggable();
-
-      // Set initial position if not already set
-      if (
-        !gsap.getProperty(containerRef.current, "x") &&
-        !gsap.getProperty(containerRef.current, "y")
-      ) {
-        gsap.set(containerRef.current, {
-          x: 100,
-          y: 100,
-        });
-      }
     } else if (draggableInstance.current) {
       draggableInstance.current.kill();
     }
@@ -63,43 +38,82 @@ const About = () => {
     };
   }, [isMinimized, isMobile]);
 
-  // Add viewport boundary handling
   useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
+    const adjustPositionAndSize = () => {
+      if (containerRef.current && (isMinimized || !isMobile)) {
+        const element = containerRef.current.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        const element = containerRef.current.getBoundingClientRect();
-        const currentX = gsap.getProperty(containerRef.current, "x");
-        const currentY = gsap.getProperty(containerRef.current, "y");
 
-        // Calculate boundaries
+        // Common animation config
+        const animConfig = {
+          duration: 0.15,
+          ease: "power2.out",
+        };
+
+        const currentX = gsap.getProperty(containerRef.current, "x") || 0;
+        const currentY = gsap.getProperty(containerRef.current, "y") || 0;
+
         const maxX = viewportWidth - element.width - 20;
         const maxY = viewportHeight - element.height - 20;
 
-        // Adjust position if out of bounds
+        // Only adjust if out of bounds
         if (
           currentX < 20 ||
           currentX > maxX ||
           currentY < 20 ||
           currentY > maxY
         ) {
-          const newX = Math.max(20, Math.min(currentX, maxX));
-          const newY = Math.max(20, Math.min(currentY, maxY));
-
           gsap.to(containerRef.current, {
-            x: newX,
-            y: newY,
-            duration: 0.3,
-            ease: "power2.out",
+            x: Math.min(Math.max(currentX, 20), maxX),
+            y: Math.min(Math.max(currentY, 20), maxY),
+            ...animConfig,
           });
         }
       }
     };
 
+    // Initial adjustment
+    setTimeout(adjustPositionAndSize, 100);
+
+    // Add resize listener with consistent debounce
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(adjustPositionAndSize, 100);
+    };
+
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [isMinimized, isMobile]);
+
+  const createDraggable = () => {
+    if (containerRef.current) {
+      draggableInstance.current = Draggable.create(containerRef.current, {
+        type: "x,y",
+        bounds: window,
+        inertia: true,
+        cursor: "grab",
+        activeCursor: "grabbing",
+        edgeResistance: isMinimized ? 0.95 : 0.85,
+        dragResistance: isMinimized ? 0.2 : 0.15,
+        zIndexBoost: true,
+        onDragStart: function () {
+          gsap.to(this.target, {
+            scale: isMinimized ? 1.05 : 1.02,
+            duration: 0.2,
+          });
+        },
+        onDragEnd: function () {
+          gsap.to(this.target, { scale: 1, duration: 0.2 });
+        },
+      })[0];
+    }
+  };
 
   const toggleMinimized = () => {
     if (!isMinimized) {
