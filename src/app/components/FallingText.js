@@ -12,41 +12,66 @@ import styles from "../styles/fallingtext.module.css";
 import Model from "./Model";
 import * as THREE from "three";
 
+// Add responsive camera hook
+function useResponsiveCamera() {
+  const [cameraSettings, setCameraSettings] = useState({
+    position: [-7.83, 6.79, 17.1],
+    fov: 55,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        setCameraSettings({
+          position: [-5, 8, 32], // Moved camera back slightly to show full word
+          fov: 70, // Slightly wider FOV to ensure full word visibility
+        });
+      } else {
+        setCameraSettings({
+          position: [-7.83, 6.79, 17.1], // Original desktop position
+          fov: 55, // Original desktop FOV
+        });
+      }
+    }
+
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return cameraSettings;
+}
+
 // Tennis ball with physics
 function TennisBall() {
   const [ref, api] = useSphere(() => ({
     mass: 1,
-    position: [0, 5, 20], // Closer to camera
-    args: [1.5], // Increased ball size for better collision detection
+    position: [0, 5, 35], // Moved even further back to stay out of view
+    args: [1.5],
     material: { restitution: 0.8 },
-    userData: { type: "ball" }, // Make sure this is set correctly
+    userData: { type: "ball" },
     linearDamping: 0.1,
     angularDamping: 0.1,
-    collisionFilterGroup: 1, // Assign to group 1
-    collisionFilterMask: 1, // Collide with group 1
+    collisionFilterGroup: 1,
+    collisionFilterMask: 1,
   }));
 
   useEffect(() => {
-    // Launch after a delay
     const launchTimer = setTimeout(() => {
-      // Ensure userData is set on the ref
       if (ref.current) {
         ref.current.userData = { type: "ball" };
       }
 
-      // Randomize x position slightly for varied impact location
       const randomX = (Math.random() - 0.5) * 8;
 
-      // Set position first, then velocity for more consistent physics
-      api.position.set(randomX, 5, 20);
+      api.position.set(randomX, 5, 35); // Updated starting position
 
-      // Give the physics engine a moment to update position
       setTimeout(() => {
-        // Increased velocity and added randomness for unpredictable impacts
         api.velocity.set(
-          (Math.random() - 0.5) * 5, // Add slight x velocity for angled impacts
-          (Math.random() - 0.5) * 5, // Add slight y velocity
-          -40 // Increased z velocity for more forceful impact
+          (Math.random() - 0.5) * 5,
+          (Math.random() - 0.5) * 5,
+          -50 // Increased velocity for faster impact from further back
         );
       }, 50);
     }, 2000);
@@ -60,7 +85,6 @@ function TennisBall() {
     <group>
       <mesh ref={ref} castShadow visible={true}>
         <Model scale={[1.2, 1.2, 1.2]} />
-        {/* Debug sphere with 0 opacity */}
         <sphereGeometry args={[1.5]} />
         <meshStandardMaterial color="yellow" transparent opacity={0} />
       </mesh>
@@ -495,17 +519,16 @@ function Scene({ onComplete }) {
 }
 
 export default function FallingText({ onComplete }) {
+  const cameraSettings = useResponsiveCamera();
+
   return (
-    <div
-      className={styles.canvasContainer}
-      style={{ width: "100%", height: "100vh" }}
-    >
+    <div className={styles.canvasContainer}>
       <Canvas
         shadows
         camera={{
-          position: [-7.83, 6.79, 17.1],
+          position: cameraSettings.position,
           rotation: [-0.38, -0.4, -0.15],
-          fov: 55,
+          fov: cameraSettings.fov,
         }}
       >
         <Physics
