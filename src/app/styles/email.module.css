@@ -8,6 +8,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform-origin: bottom center;
   overflow: hidden;
+  pointer-events: all;
 }
 
 .normalContainer {
@@ -160,7 +161,8 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  z-index: 9999;
+  z-index: 2000;
+  pointer-events: all;
 }
 
 /* Keep the green circle positioning */
@@ -173,11 +175,12 @@
   top: -25px;
   right: 5px;
   cursor: pointer;
-  z-index: 10000;
+  z-index: 2001;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: all;
 }
 
 .greenCircle:hover {
@@ -209,7 +212,7 @@
   border-radius: 8px;
   color: white;
   font-size: 14px;
-  z-index: 1000;
+  z-index: 2002;
   animation: slideDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -248,7 +251,7 @@
   .draggableWrapper {
     bottom: 10px;
     left: 10px;
-    z-index: 0;
+    z-index: 2000;
   }
 
   .messageInput {
@@ -258,11 +261,11 @@
   .headerInput,
   .messageInput {
     font-size: 13px;
-    -webkit-text-size-adjust: 100%;
+    /* -webkit-text-size-adjust: 100%; */
   }
 
   .headerInput:focus,
   .messageInput:focus {
-    font-size: 16px !important;
+    font-size: 13px;
   }
 }

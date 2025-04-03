@@ -5,6 +5,7 @@ import { GlobalStateProvider } from "./context/GlobalStateContext";
 import GlobalBackdrop from "./components/GlobalBackdrop";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+import Image from "next/image";
 
 const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",

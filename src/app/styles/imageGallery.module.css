@@ -184,6 +184,17 @@
   opacity: 0;
   animation: fadeInBackdrop 0.3s ease forwards;
   cursor: pointer;
+  pointer-events: none;
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: auto;
 }
 
 @keyframes fadeInBackdrop {

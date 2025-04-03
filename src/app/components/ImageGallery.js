@@ -105,11 +105,9 @@ const ImageGallery = () => {
   };
 
   const handleDetailClick = (index, e) => {
-    // Ensure we have a proper event object even if called programmatically
     e = e || { stopPropagation: () => {} };
     e.stopPropagation();
 
-    // Prevent any default touch behavior
     if (e.preventDefault) {
       e.preventDefault();
     }
@@ -139,7 +137,6 @@ const ImageGallery = () => {
         },
       });
     } else {
-      // If there's already a selected image, minimize it first
       if (selectedImage !== null) {
         gsap.to(imageRefs.current[selectedImage], {
           x: getRandomPosition().x,
@@ -159,7 +156,6 @@ const ImageGallery = () => {
       setShowAbout(false);
       setShowBrushCanvas(false);
       setShowMusicPlayer(false);
-      setShowEmail(false);
       zIndexCounter.current += 1;
 
       gsap.to(imageRefs.current[index], {
@@ -308,6 +304,7 @@ const ImageGallery = () => {
         className={`${styles.imageContainer} ${
           isVisible ? styles.visible : ""
         }`}
+        style={{ pointerEvents: selectedImage !== null ? "auto" : "none" }}
       >
         {selectedImage !== null && (
           <>
