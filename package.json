@@ -16,6 +16,7 @@
     "@react-three/fiber": "9.0.0-alpha.8",
     "@vercel/analytics": "^1.5.0",
     "cannon-es": "^0.20.0",
+    "critters": "^0.0.25",
     "curtainsjs": "^8.1.6",
     "gsap": "^3.12.5",
     "next": "15.1.6",
