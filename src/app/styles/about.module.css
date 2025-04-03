@@ -92,7 +92,7 @@
   background-color: #f8e932;
   border-radius: 50%;
   top: -25px;
-  right: 5px;
+  right: 0px;
   cursor: pointer;
   z-index: 11;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -312,7 +312,7 @@
   .greenCircle {
     position: absolute;
     top: -25px !important;
-    right: 5px !important;
+    right: 0px !important;
     z-index: 11;
   }
 
