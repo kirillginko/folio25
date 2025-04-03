@@ -1,17 +1,24 @@
-# *
+# Global rules
 User-agent: *
 Allow: /
 Allow: /fonts/
 Allow: /favicon.ico
 Allow: /flower.svg
+Disallow: /api/
+Disallow: /_next/
 
-# Specific rules for Bingbot
-User-agent: bingbot
+# Google-specific rules
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Bing-specific rules
+User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
 
 # Host
-Host: https://kirill.agency
+Host: https://www.kirill.agency
 
 # Sitemaps
 Sitemap: https://www.kirill.agency/sitemap.xml
