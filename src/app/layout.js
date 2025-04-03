@@ -4,6 +4,7 @@ import "./globals.css";
 import { GlobalStateProvider } from "./context/GlobalStateContext";
 import GlobalBackdrop from "./components/GlobalBackdrop";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 
 const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",
@@ -144,6 +145,7 @@ export default function RootLayout({ children }) {
         <GlobalStateProvider>
           <GlobalBackdrop />
           <Providers>{children}</Providers>
+          <Analytics mode="production" />
         </GlobalStateProvider>
       </body>
     </html>
