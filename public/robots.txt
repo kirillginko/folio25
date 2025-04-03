@@ -4,11 +4,19 @@ Allow: /
 Allow: /fonts/
 Allow: /favicon.ico
 Allow: /flower.svg
-Disallow: /private
-Disallow: /admin
+
+# Specific rules for Bingbot
+User-agent: bingbot
+Allow: /
+Crawl-delay: 1
 
 # Host
 Host: https://kirill.agency
 
 # Sitemaps
-Sitemap: https://kirill.agency/sitemap.xml
+Sitemap: https://www.kirill.agency/sitemap.xml
+
+# Block access to specific files
+Disallow: /private/
+Disallow: /*.json$
+Disallow: /*?*

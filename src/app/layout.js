@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { GlobalStateProvider } from "./context/GlobalStateContext";
 import GlobalBackdrop from "./components/GlobalBackdrop";
+import Script from "next/script";
 
 const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",
@@ -17,9 +18,9 @@ const instructionFont = localFont({
 });
 
 export const metadata = {
-  title: "Kirill Ginko | Creative Developer & Web Designer in New York",
+  title: "Kirill Ginko | Creative Developer & Digital Designer in NYC",
   description:
-    "Award-winning creative developer specializing in interactive web experiences, custom web development, and UI design in New York City. Expert in React, Next.js, and modern web technologies.",
+    "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL
     ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
     : new URL("https://www.kirill.agency"),
@@ -27,31 +28,42 @@ export const metadata = {
     canonical: "/",
   },
   keywords: [
-    "creative developer NYC",
-    "web developer New York",
-    "frontend developer NYC",
-    "interactive web design",
-    "UI/UX designer New York",
-    "React developer NYC",
-    "Next.js developer",
-    "custom web development",
-    "interactive websites",
+    "creative developer",
+    "digital designer",
+    "NYC developer",
+    "React developer",
+    "Next.js expert",
+    "UI designer New York",
+    "interactive experiences",
+    "web animation",
     "Kirill Ginko",
     "digital experiences",
-    "web animation specialist",
+    "creative technologist",
+    "modern web development",
+    "UI/UX design",
+    "frontend development",
+    "New York City developer",
   ],
   creator: "Kirill Ginko",
+  authors: [{ name: "Kirill Ginko", url: "https://www.kirill.agency" }],
+  publisher: "Kirill Ginko",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: "Kirill Ginko | Creative Developer",
-    description: "Kirill Ginko is a creative developer based in New York.",
+    title: "Kirill Ginko | Creative Developer & Digital Designer in NYC",
+    description:
+      "Creative developer crafting engaging digital experiences with modern web technologies. Based in New York City.",
     url: "https://www.kirill.agency",
-    siteName: "Kirill Ginko Portfolio",
+    siteName: "Kirill Ginko",
     images: [
       {
-        url: "/flower.svg", // Add your OG image
+        url: "/flower.svg",
         width: 1200,
         height: 630,
-        alt: "Kirill Ginko - Creative Developer Portfolio",
+        alt: "Kirill Ginko - Creative Developer",
       },
     ],
     locale: "en_US",
@@ -59,13 +71,16 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kirill Ginko | Creative Developer",
-    description: "Kirill Ginko is a creative developer based in New York.",
-    images: ["/flower.svg"], // Same as OG image
+    title: "Kirill Ginko | Creative Developer & Digital Designer",
+    description:
+      "Creative developer crafting engaging digital experiences in NYC.",
+    images: ["/flower.svg"],
+    creator: "@kirillginko",
   },
   robots: {
     index: true,
     follow: true,
+    nocache: true,
     googleBot: {
       index: true,
       follow: true,
@@ -77,6 +92,7 @@ export const metadata = {
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
     bing: process.env.BING_SITE_VERIFICATION,
+    yandex: process.env.YANDEX_VERIFICATION,
   },
 };
 
@@ -88,6 +104,38 @@ export default function RootLayout({ children }) {
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
+        <Script id="schema-markup" type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Kirill Ginko",
+              "url": "https://www.kirill.agency",
+              "description": "Creative developer and digital designer crafting engaging web experiences",
+              "creator": {
+                "@type": "Person",
+                "name": "Kirill Ginko",
+                "jobTitle": "Creative Developer",
+                "url": "https://www.kirill.agency",
+                "knowsAbout": ["Web Development", "UI Design", "React", "Next.js", "Digital Experiences"],
+                "location": {
+                  "@type": "Place",
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "New York",
+                    "addressRegion": "NY",
+                    "addressCountry": "US"
+                  }
+                }
+              },
+              "specialty": "Creative Development and Digital Design",
+              "potentialAction": {
+                "@type": "ViewAction",
+                "target": "https://www.kirill.agency"
+              }
+            }
+          `}
+        </Script>
       </head>
       <body
         className={`${instructionFont.variable} ${AustinCyRoman.variable}`}
