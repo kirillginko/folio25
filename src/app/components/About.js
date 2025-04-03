@@ -39,25 +39,17 @@ const About = () => {
   }, [isMinimized, isMobile]);
 
   useEffect(() => {
-    const adjustPositionAndSize = () => {
+    const handleResize = () => {
       if (containerRef.current && (isMinimized || !isMobile)) {
         const element = containerRef.current.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        // Common animation config
-        const animConfig = {
-          duration: 0.15,
-          ease: "power2.out",
-        };
-
+        const maxX = viewportWidth - element.width - 20;
+        const maxY = viewportHeight - element.height - 20;
         const currentX = gsap.getProperty(containerRef.current, "x") || 0;
         const currentY = gsap.getProperty(containerRef.current, "y") || 0;
 
-        const maxX = viewportWidth - element.width - 20;
-        const maxY = viewportHeight - element.height - 20;
-
-        // Only adjust if out of bounds
         if (
           currentX < 20 ||
           currentX > maxX ||
@@ -67,28 +59,15 @@ const About = () => {
           gsap.to(containerRef.current, {
             x: Math.min(Math.max(currentX, 20), maxX),
             y: Math.min(Math.max(currentY, 20), maxY),
-            ...animConfig,
+            duration: 0.15,
+            ease: "power2.out",
           });
         }
       }
     };
 
-    // Initial adjustment
-    setTimeout(adjustPositionAndSize, 100);
-
-    // Add resize listener with consistent debounce
-    let resizeTimeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(adjustPositionAndSize, 100);
-    };
-
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(resizeTimeout);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, [isMinimized, isMobile]);
 
   const createDraggable = () => {
@@ -99,8 +78,8 @@ const About = () => {
         inertia: true,
         cursor: "grab",
         activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.95 : 0.85,
-        dragResistance: isMinimized ? 0.2 : 0.15,
+        edgeResistance: 0.65,
+        dragResistance: 0.05,
         zIndexBoost: true,
         onDragStart: function () {
           gsap.to(this.target, {
@@ -110,6 +89,22 @@ const About = () => {
         },
         onDragEnd: function () {
           gsap.to(this.target, { scale: 1, duration: 0.2 });
+
+          // Check bounds after drag
+          const element = this.target.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const maxX = viewportWidth - element.width - 20;
+          const maxY = viewportHeight - element.height - 20;
+
+          if (this.x < 20 || this.x > maxX || this.y < 20 || this.y > maxY) {
+            gsap.to(this.target, {
+              x: Math.min(Math.max(this.x, 20), maxX),
+              y: Math.min(Math.max(this.y, 20), maxY),
+              duration: 0.15,
+              ease: "power2.out",
+            });
+          }
         },
       })[0];
     }
