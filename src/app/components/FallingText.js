@@ -231,27 +231,20 @@ const Letter = React.memo(function Letter({
   const [letterVisible, setLetterVisible] = useState(true);
   const [fragments, setFragments] = useState([]);
   const fragmentsRef = useRef(null);
-
-  // Pre-generate fragment data on mount to avoid calculation during collision
-  useEffect(() => {
-    // Pre-calculate potential fragments - REDUCED COUNT to 7
-    fragmentsRef.current = generateFragmentData(7, letter);
-  }, [letter]);
-
-  // Regular physics for the letter with direct collision detection added
   const [ref, api] = useBox(() => ({
     mass: 0,
     position,
-    args: [2.5, 2.5, 2.5], // Increased size for better collision detection
+    args: [2.5, 2.5, 2.5],
     material: { restitution: 0.3 },
     userData: { type: "letter", letter, index },
-    // Add direct letter-level collision detection as a backup
     onCollide: (e) => {
       if (!exploded && e.body.userData?.type === "ball") {
         // Trigger explosion directly from letter collision
         setExploded(true);
         createLetterFragments(position, e.body.velocity || ballVelocity);
         setLetterVisible(false);
+        // Remove the physics body completely
+        api.position.set(0, -1000, 0); // Move far away
         api.mass.set(0);
       }
     },
@@ -317,34 +310,36 @@ const Letter = React.memo(function Letter({
     }
 
     const newFragments = fragmentsRef.current.map((fragData) => {
-      const maxDistance = 1.5; // Reduced max distance for more contained explosion
+      const maxDistance = 3.0; // Increased from 1.5 for wider spread
       const distance = fragData.distanceWeight * maxDistance;
 
       // Calculate position relative to impact point using pre-calculated angles
-      // Add slight upward bias to prevent ground intersection
+      // Add more upward bias for dramatic effect
       const fragPos = [
         impactPoint[0] +
           distance * Math.sin(fragData.phi) * Math.cos(fragData.theta),
         impactPoint[1] +
           distance * Math.sin(fragData.phi) * Math.sin(fragData.theta) +
-          0.3, // Add upward bias
+          0.8, // Increased upward bias from 0.3 to 0.8
         impactPoint[2] + distance * Math.cos(fragData.phi),
       ];
 
       // Size inversely proportional to distance (smaller fragments near impact)
-      const sizeScale = 0.8 + 0.4 * (1 - fragData.distanceWeight); // Increased base scale
+      const sizeScale = 0.8 + 0.4 * (1 - fragData.distanceWeight);
       const size = fragData.size.map((s) => s * sizeScale);
 
-      // Reduced velocity for better physics stability
-      const velocityScale = 10 * (1 - fragData.distanceWeight); // Reduced from 15
+      // Dramatically increased velocity and upward force
+      const velocityScale = 25 * (1 - fragData.distanceWeight * 0.5); // Increased from 10 and adjusted scaling
+      const upwardBoost = 8; // Significant upward force
+
       const velocity = [
-        normalizedDirection[0] * velocityScale * 0.6 +
-          (fragPos[0] - impactPoint[0]) * velocityScale * 0.7,
-        normalizedDirection[1] * velocityScale * 0.6 +
-          (fragPos[1] - impactPoint[1]) * velocityScale * 0.7 +
-          2, // Add upward velocity component
-        normalizedDirection[2] * velocityScale * 0.6 +
-          (fragPos[2] - impactPoint[2]) * velocityScale * 0.7,
+        normalizedDirection[0] * velocityScale * 0.8 +
+          (fragPos[0] - impactPoint[0]) * velocityScale * 0.9,
+        normalizedDirection[1] * velocityScale * 0.8 +
+          (fragPos[1] - impactPoint[1]) * velocityScale * 0.9 +
+          upwardBoost, // Add strong upward velocity
+        normalizedDirection[2] * velocityScale * 0.8 +
+          (fragPos[2] - impactPoint[2]) * velocityScale * 0.9,
       ];
 
       return {
@@ -358,15 +353,19 @@ const Letter = React.memo(function Letter({
     setFragments(newFragments);
   };
 
+  // Pre-generate fragment data on mount to avoid calculation during collision
+  useEffect(() => {
+    fragmentsRef.current = generateFragmentData(7, letter);
+  }, [letter]);
+
   // Handle explosion triggered from parent with optimized timing
   useEffect(() => {
     if (shouldExplode && !exploded) {
-      // Create fragments immediately, no waiting for RAF
       createLetterFragments(position, ballVelocity);
-      // Hide letter immediately to avoid visual stutter
       setLetterVisible(false);
       setExploded(true);
-      // Set mass to 0 to prevent additional physics calculations
+      // Remove the physics body completely
+      api.position.set(0, -1000, 0); // Move far away
       api.mass.set(0);
     }
   }, [shouldExplode, ballVelocity, exploded, index, letter, position, api]);
@@ -399,10 +398,13 @@ const Letter = React.memo(function Letter({
             />
           </Text3D>
 
-          <mesh ref={ref} position={position} visible={false}>
-            <boxGeometry args={[2.5, 2.5, 2.5]} />
-            <meshStandardMaterial color="red" transparent opacity={0.2} />
-          </mesh>
+          {/* Only render collision box if not exploded */}
+          {!exploded && (
+            <mesh ref={ref} position={position} visible={false}>
+              <boxGeometry args={[2.5, 2.5, 2.5]} />
+              <meshStandardMaterial color="red" transparent opacity={0.2} />
+            </mesh>
+          )}
         </>
       )}
 
@@ -516,15 +518,18 @@ function Scene({ onComplete }) {
       <Ground />
       <TennisBall />
 
-      {/* Individual letter collision boxes */}
-      {letterPositions.map((item, i) => (
-        <LetterCollider
-          key={`collider-${i}`}
-          position={item.position}
-          index={i}
-          onCollide={handleLetterCollision}
-        />
-      ))}
+      {/* Individual letter collision boxes - only render if not exploded */}
+      {letterPositions.map(
+        (item, i) =>
+          !lettersToExplode.includes(i) && (
+            <LetterCollider
+              key={`collider-${i}`}
+              position={item.position}
+              index={i}
+              onCollide={handleLetterCollision}
+            />
+          )
+      )}
 
       {/* Render letters */}
       {letterPositions.map((item, i) => (
