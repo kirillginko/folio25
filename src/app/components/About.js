@@ -130,7 +130,7 @@ const About = () => {
       }}
     >
       <div
-        className={`${styles.greenCircle} about-toggle-button`}
+        className={`${styles.expandButton} about-toggle-button`}
         onClick={toggleMinimized}
       >
         {isMinimized ? (

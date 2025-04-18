@@ -662,7 +662,7 @@ const BrushCanvas = () => {
           </div>
         )}
         <div
-          className={`${styles.greenCircle} brushcanvas-toggle-button`}
+          className={`${styles.expandButton} brushcanvas-toggle-button`}
           onClick={toggleMinimized}
         >
           {isMinimized ? (

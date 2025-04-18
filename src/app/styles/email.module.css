@@ -166,7 +166,7 @@
 }
 
 /* Keep the green circle positioning */
-.greenCircle {
+.expandButton {
   position: absolute;
   width: 20px;
   height: 20px;
@@ -183,7 +183,7 @@
   pointer-events: all;
 }
 
-.greenCircle:hover {
+.expandButton:hover {
   background-color: #ffb120;
 }
 .toggleIcon {

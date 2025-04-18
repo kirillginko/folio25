@@ -85,7 +85,7 @@
 }
 
 /* Green circle */
-.greenCircle {
+.expandButton {
   position: absolute;
   width: 20px;
   height: 20px;
@@ -100,7 +100,7 @@
   align-items: center;
   justify-content: center;
 }
-.greenCircle:hover {
+.expandButton:hover {
   background-color: #ffb120;
 }
 
@@ -309,7 +309,7 @@
   }
 
   /* Ensure green circle stays in position for both states */
-  .greenCircle {
+  .expandButton {
     position: absolute;
     top: -25px !important;
     right: 0px !important;

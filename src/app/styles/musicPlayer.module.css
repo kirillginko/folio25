@@ -134,7 +134,7 @@
 }
 
 /* Green Circle (Minimize Button) */
-.greenCircle {
+.expandButton {
   position: absolute;
   width: 20px;
   height: 20px;
@@ -149,7 +149,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.greenCircle:hover {
+.expandButton:hover {
   background-color: #ffb120;
 }
 

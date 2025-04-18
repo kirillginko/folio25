@@ -165,7 +165,7 @@ const Email = () => {
             {notificationState.message}
           </div>
         )}
-        <div className={styles.greenCircle} onClick={toggleMinimized}>
+        <div className={styles.expandButton} onClick={toggleMinimized}>
           {isMinimized ? (
             <BsArrowsAngleExpand className={styles.toggleIcon} />
           ) : (

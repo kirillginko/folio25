@@ -407,7 +407,7 @@ const MusicPlayer = () => {
             preload="auto"
             crossOrigin="anonymous"
           />
-          <div className={styles.greenCircle} onClick={toggleMinimized}>
+          <div className={styles.expandButton} onClick={toggleMinimized}>
             {isMusicPlayerMinimized ? (
               <BsArrowsAngleExpand className={styles.toggleIcon} />
             ) : (
