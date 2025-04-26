@@ -11,6 +11,8 @@ const AnalogClock = () => {
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
+  const positionSaved = useRef(false);
   const {
     showAnalogClock,
     setShowBackdrop,
@@ -22,11 +24,6 @@ const AnalogClock = () => {
   const hourHandRef = useRef(null);
   const minuteHandRef = useRef(null);
   const secondHandRef = useRef(null);
-
-  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
-
-  // Add ref to track if position was saved
-  const positionSaved = useRef(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -50,7 +47,7 @@ const AnalogClock = () => {
   // Update effect to handle position saving when activeComponent changes
   useEffect(() => {
     if (
-      activeComponent === "image" &&
+      activeComponent === "clock" &&
       containerRef.current &&
       !positionSaved.current
     ) {
@@ -75,80 +72,6 @@ const AnalogClock = () => {
       createDraggable();
     }
   }, [activeComponent, lastPosition]);
-
-  const createDraggable = () => {
-    if ((isMinimized || !isMobile) && containerRef.current) {
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
-      }
-
-      draggableInstance.current = Draggable.create(containerRef.current, {
-        type: "x,y",
-        bounds: window,
-        inertia: true,
-        cursor: "grab",
-        activeCursor: "grabbing",
-        edgeResistance: isMinimized ? 0.95 : 0.85,
-        dragResistance: isMinimized ? 0.2 : 0.15,
-        zIndexBoost: true,
-        onPress: function (e) {
-          if (e.target.closest(`.${styles.expandButton}`)) {
-            this.endDrag(e);
-          }
-        },
-        onDragStart: function () {
-          gsap.to(this.target, {
-            scale: isMinimized ? 1.05 : 1.02,
-            duration: 0.2,
-          });
-        },
-        onDragEnd: function () {
-          gsap.to(this.target, { scale: 1, duration: 0.2 });
-
-          const element = this.target.getBoundingClientRect();
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
-          const maxX = viewportWidth - element.width - 20;
-          const maxY = viewportHeight - element.height - 20;
-
-          const newX = Math.min(Math.max(this.x, 20), maxX);
-          const newY = Math.min(Math.max(this.y, 20), maxY);
-
-          // Store the position after drag
-          setLastPosition({ x: newX, y: newY });
-
-          if (this.x < 20 || this.x > maxX || this.y < 20 || this.y > maxY) {
-            gsap.to(this.target, {
-              x: newX,
-              y: newY,
-              duration: 0.15,
-              ease: "power2.out",
-            });
-          }
-        },
-      })[0];
-
-      // Set initial position if draggable is created
-      if (lastPosition.x !== 0 || lastPosition.y !== 0) {
-        gsap.set(containerRef.current, {
-          x: lastPosition.x,
-          y: lastPosition.y,
-        });
-      }
-    } else if (draggableInstance.current) {
-      draggableInstance.current.kill();
-    }
-  };
-
-  useEffect(() => {
-    if (!draggableInstance.current) return;
-
-    if (isMobile && !isMinimized) {
-      draggableInstance.current.disable();
-    } else {
-      draggableInstance.current.enable();
-    }
-  }, [isMinimized, isMobile]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -180,6 +103,49 @@ const AnalogClock = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const createDraggable = () => {
+    if ((isMinimized || !isMobile) && containerRef.current) {
+      if (draggableInstance.current) {
+        draggableInstance.current.kill();
+      }
+
+      draggableInstance.current = Draggable.create(containerRef.current, {
+        type: "x,y",
+        bounds: window,
+        inertia: true,
+        cursor: "grab",
+        activeCursor: "grabbing",
+        edgeResistance: 0.65,
+        dragResistance: 0.05,
+        zIndexBoost: true,
+        onDragStart: function () {
+          gsap.to(this.target, {
+            scale: isMinimized ? 1.05 : 1.02,
+            duration: 0.2,
+          });
+        },
+        onDragEnd: function () {
+          gsap.to(this.target, { scale: 1, duration: 0.2 });
+
+          const element = this.target.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const maxX = viewportWidth - element.width - 20;
+          const maxY = viewportHeight - element.height - 20;
+
+          if (this.x < 20 || this.x > maxX || this.y < 20 || this.y > maxY) {
+            gsap.to(this.target, {
+              x: Math.min(Math.max(this.x, 20), maxX),
+              y: Math.min(Math.max(this.y, 20), maxY),
+              duration: 0.15,
+              ease: "power2.out",
+            });
+          }
+        },
+      })[0];
+    }
+  };
 
   useEffect(() => {
     const updateClock = () => {
@@ -219,26 +185,22 @@ const AnalogClock = () => {
     setIsMinimized((prev) => !prev);
   };
 
-  // Hide clock when image is expanded
-  if (!showAnalogClock || activeComponent === "image") return null;
+  if (!showAnalogClock) return null;
 
   return (
     <div
       ref={containerRef}
-      className={styles.draggableWrapper}
+      className={`${styles.draggableWrapper} ${
+        !isMinimized && isMobile ? styles.draggableWrapperExpanded : ""
+      }`}
       style={{
-        ...(isMobile &&
-          !isMinimized && {
-            position: "fixed",
-            top: "10%",
-            left: "5%",
-            width: "90vw",
-            maxWidth: "100%",
-            zIndex: 10000,
-          }),
+        display: showAnalogClock ? "block" : "none",
       }}
     >
-      <div className={styles.expandButton} onClick={toggleMinimized}>
+      <div
+        className={`${styles.expandButton} clock-toggle-button`}
+        onClick={toggleMinimized}
+      >
         {isMinimized ? (
           <BsArrowsAngleExpand className={styles.toggleIcon} />
         ) : (
@@ -259,8 +221,12 @@ const AnalogClock = () => {
           {/* Hour markers and numbers */}
           {Array.from({ length: 12 }).map((_, i) => {
             const angle = i * 30;
-            const markerRadius = isMinimized ? 28 : 120; // Radius for markers
-            const numberRadius = markerRadius - (isMinimized ? 8 : 25); // Position numbers slightly inside markers
+            const markerRadius = isMinimized
+              ? 28
+              : window.innerWidth <= 768
+              ? 160
+              : 120;
+            const numberRadius = markerRadius - (isMinimized ? 8 : 25);
             return (
               <div key={`hour-${i}`}>
                 <div
@@ -286,7 +252,11 @@ const AnalogClock = () => {
           {/* Minute markers */}
           {Array.from({ length: 60 }).map((_, i) => {
             const angle = i * 6;
-            const markerRadius = isMinimized ? 28 : 120;
+            const markerRadius = isMinimized
+              ? 28
+              : window.innerWidth <= 768
+              ? 160
+              : 120;
             return (
               i % 5 !== 0 && (
                 <div

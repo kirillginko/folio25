@@ -169,20 +169,18 @@ const About = () => {
             <section className={styles.bioSection}>
               <h2 className={styles.bioTitle}>About Me</h2>
               <p className={styles.bioText}>
-                I am a <strong>full-stack creative web developer</strong> with a
-                passion for crafting{" "}
-                <strong>interactive, user-centric digital experiences</strong>.
-                My expertise spans from front-end development to back-end
-                systems, combining technical skill with artistic vision to build
-                webpages that are both functional and visually engaging. I
-                specialize in using cutting-edge tools like{" "}
-                <strong>React</strong>, <strong>GSAP</strong>, and{" "}
-                <strong>Next.js</strong> to bring ideas to life.
+                Kirill Ginko is a creative developer and visual storyteller—
+                shaping digital experiences, visuals, and brand identities. His
+                work moves between interactive design, visual identity,
+                illustration, and video, with a focus on building cohesive
+                branding across mediums.
               </p>
               <p className={styles.bioText}>
-                I am a <strong>full-stack creative web developer</strong> with a
-                passion for crafting{" "}
-                <strong>interactive, user-centric digital experiences</strong>.
+                Rooted in a deep understanding of branding and marketing,
+                helping companies, and individuals craft experiences that tell a
+                story. His approach to digital is immersive, blending design,
+                motion graphics, and interactivity to create environments that
+                invite users to engage, explore, and remember.
               </p>
             </section>
           </>

@@ -3,12 +3,20 @@
   z-index: 10;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
-  border: 1px solid #000;
-  border-radius: 16px;
+  will-change: transform;
+  touch-action: none;
 }
 
 .draggableWrapperExpanded {
   z-index: 51;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 90vw !important;
+  height: 90vw !important;
+  margin: 0 !important;
+  z-index: 10000 !important;
 }
 
 .clockContainer {
@@ -18,28 +26,28 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #e6e6e6;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
   padding: 10px;
-  touch-action: none;
   user-select: none;
   transition: width 0.15s ease, height 0.15s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
 }
 
 .minimizedContainer {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  padding: 15px;
+  width: 80px !important;
+  height: 80px !important;
+  border: 1px solid black;
+  border-radius: 20% !important;
+  background-color: #e6e6e6;
+  padding: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: width 0.15s ease, height 0.15s ease;
 }
 
 .minimizedContainer .clockFace {
@@ -78,9 +86,10 @@
 .normalContainer {
   width: 300px;
   height: 300px;
+  border: 1px solid black;
   border-radius: 16px;
-  padding: 40px;
-  transition: width 0.15s ease, height 0.15s ease;
+  padding: 20px;
+  background-color: #e6e6e6;
 }
 
 .clockFace {
@@ -168,10 +177,10 @@
   right: 0px;
   cursor: pointer;
   z-index: 11;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .expandButton:hover {
@@ -181,9 +190,6 @@
 .toggleIcon {
   width: 12px;
   height: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: #000;
 }
 
@@ -239,7 +245,7 @@
   height: 6px;
 }
 
-.m nimizedContain r .minuteNotch {
+.minimizedContainer .minuteNotch {
   width: 0.5px;
   height: 3px;
 }
@@ -299,33 +305,57 @@
   padding: 15px;
 }
 
-@media (max-width: 768px) {
-  .draggableWrapper:has(.normalContainer) {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+@media screen and (max-width: 768px) {
+  .normalContainer {
     width: 90vw !important;
     height: 90vw !important;
-    margin: 0 !important;
-    z-index: 10000 !important;
-  }
-
-  .normalContainer {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 90vw !important;
+    max-height: 90vw !important;
+    padding: 2px !important;
   }
 
   .normalContainer .clockFace {
-    width: 100%;
-    height: 100%;
-    padding: 10px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    padding: 0;
   }
 
+  .normalContainer .hourHand {
+    width: 6px;
+    height: 25%;
+  }
+
+  .normalContainer .minuteHand {
+    width: 4px;
+    height: 35%;
+  }
+
+  .normalContainer .secondHand {
+    width: 2px;
+    height: 40%;
+  }
+
+  .normalContainer .center {
+    width: 16px;
+    height: 16px;
+  }
+
+  .normalContainer .hourMarker {
+    width: 3px;
+    height: 16px;
+  }
+
+  .normalContainer .minuteMarker {
+    width: 2px;
+    height: 8px;
+  }
+
+  .normalContainer .hourNumber {
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  /* Keep minimized state draggable and properly sized */
   .draggableWrapper:has(.minimizedContainer) {
     position: fixed;
     width: 80px !important;
@@ -336,14 +366,33 @@
   .minimizedContainer {
     width: 80px !important;
     height: 80px !important;
-    border-radius: 16px !important;
-    padding: 5px;
+    border-radius: 20% !important;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
   }
 
+  /* Ensure yellow circle stays in position for both states */
   .expandButton {
+    position: absolute;
     top: -25px !important;
     right: 0px !important;
     z-index: 11;
+  }
+
+  /* Ensure smooth transition for the clock container */
+  .clockContainer {
+    transition: all 0.15s ease !important;
+  }
+}
+
+/* Ensure the clock container fills the wrapper on mobile only when expanded */
+@media screen and (max-width: 768px) {
+  .draggableWrapper:has(.normalContainer) .clockContainer {
+    width: 100% !important;
+    height: 100% !important;
   }
 }
 
