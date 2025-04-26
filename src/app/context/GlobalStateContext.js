@@ -10,6 +10,7 @@ export function GlobalStateProvider({ children }) {
   const [showEmail, setShowEmail] = useState(true);
   const [showThemeButton, setShowThemeButton] = useState(true);
   const [showWorkButton, setShowWorkButton] = useState(true);
+  const [showAnalogClock, setShowAnalogClock] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [isMusicPlayerMinimized, setIsMusicPlayerMinimized] = useState(false);
@@ -31,6 +32,8 @@ export function GlobalStateProvider({ children }) {
         setShowThemeButton,
         showWorkButton,
         setShowWorkButton,
+        showAnalogClock,
+        setShowAnalogClock,
         isTransitioning,
         setIsTransitioning,
         isRotating,
