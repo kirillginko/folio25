@@ -6,13 +6,20 @@ const STATIC_ASSETS =
 
 export function middleware(request) {
   const response = NextResponse.next();
+  const isDevelopment = process.env.NODE_ENV === "development";
 
-  // Cache static assets
+  // Handle static assets
   if (STATIC_ASSETS.test(request.nextUrl.pathname)) {
-    response.headers.set(
-      "Cache-Control",
-      "public, max-age=31536000, immutable"
-    );
+    if (isDevelopment && request.nextUrl.pathname.endsWith(".css")) {
+      // Prevent caching of CSS in development
+      response.headers.set("Cache-Control", "no-store, must-revalidate");
+    } else {
+      // Cache other static assets and CSS in production
+      response.headers.set(
+        "Cache-Control",
+        "public, max-age=31536000, immutable"
+      );
+    }
     return response;
   }
 
@@ -20,7 +27,9 @@ export function middleware(request) {
   if (request.nextUrl.pathname === "/") {
     response.headers.set(
       "Cache-Control",
-      "public, s-maxage=60, stale-while-revalidate=59"
+      isDevelopment
+        ? "no-store"
+        : "public, s-maxage=60, stale-while-revalidate=59"
     );
   }
 
