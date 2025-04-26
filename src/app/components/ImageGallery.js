@@ -20,6 +20,7 @@ const ImageGallery = () => {
     setShowMusicPlayer,
     setShowEmail,
     showWorkButton,
+    setActiveComponent,
   } = useGlobalState();
 
   const getRandomPosition = () => {
@@ -134,6 +135,7 @@ const ImageGallery = () => {
           setShowBrushCanvas(true);
           setShowMusicPlayer(true);
           setShowEmail(true);
+          setActiveComponent(null);
         },
       });
     } else {
@@ -156,6 +158,7 @@ const ImageGallery = () => {
       setShowAbout(false);
       setShowBrushCanvas(false);
       setShowMusicPlayer(false);
+      setActiveComponent("image");
       zIndexCounter.current += 1;
 
       gsap.to(imageRefs.current[index], {

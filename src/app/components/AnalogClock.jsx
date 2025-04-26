@@ -11,13 +11,22 @@ const AnalogClock = () => {
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const { showAnalogClock, setShowBackdrop, setActiveComponent } =
-    useGlobalState();
+  const {
+    showAnalogClock,
+    setShowBackdrop,
+    setActiveComponent,
+    activeComponent,
+  } = useGlobalState();
 
   // Clock hands refs
   const hourHandRef = useRef(null);
   const minuteHandRef = useRef(null);
   const secondHandRef = useRef(null);
+
+  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
+
+  // Add ref to track if position was saved
+  const positionSaved = useRef(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -36,10 +45,39 @@ const AnalogClock = () => {
       }
       window.removeEventListener("resize", checkMobile);
     };
-  }, []);
+  }, [isMinimized, isMobile]);
+
+  // Update effect to handle position saving when activeComponent changes
+  useEffect(() => {
+    if (
+      activeComponent === "image" &&
+      containerRef.current &&
+      !positionSaved.current
+    ) {
+      const currentX = gsap.getProperty(containerRef.current, "x");
+      const currentY = gsap.getProperty(containerRef.current, "y");
+      if (currentX !== undefined && currentY !== undefined) {
+        setLastPosition({ x: currentX, y: currentY });
+        positionSaved.current = true;
+      }
+    } else if (activeComponent === null) {
+      positionSaved.current = false;
+    }
+  }, [activeComponent]);
+
+  // Effect to restore position
+  useEffect(() => {
+    if (activeComponent === null && containerRef.current) {
+      gsap.set(containerRef.current, {
+        x: lastPosition.x,
+        y: lastPosition.y,
+      });
+      createDraggable();
+    }
+  }, [activeComponent, lastPosition]);
 
   const createDraggable = () => {
-    if (containerRef.current) {
+    if ((isMinimized || !isMobile) && containerRef.current) {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
@@ -50,8 +88,8 @@ const AnalogClock = () => {
         inertia: true,
         cursor: "grab",
         activeCursor: "grabbing",
-        edgeResistance: 0.65,
-        dragResistance: 0.05,
+        edgeResistance: isMinimized ? 0.95 : 0.85,
+        dragResistance: isMinimized ? 0.2 : 0.15,
         zIndexBoost: true,
         onPress: function (e) {
           if (e.target.closest(`.${styles.expandButton}`)) {
@@ -73,16 +111,32 @@ const AnalogClock = () => {
           const maxX = viewportWidth - element.width - 20;
           const maxY = viewportHeight - element.height - 20;
 
+          const newX = Math.min(Math.max(this.x, 20), maxX);
+          const newY = Math.min(Math.max(this.y, 20), maxY);
+
+          // Store the position after drag
+          setLastPosition({ x: newX, y: newY });
+
           if (this.x < 20 || this.x > maxX || this.y < 20 || this.y > maxY) {
             gsap.to(this.target, {
-              x: Math.min(Math.max(this.x, 20), maxX),
-              y: Math.min(Math.max(this.y, 20), maxY),
+              x: newX,
+              y: newY,
               duration: 0.15,
               ease: "power2.out",
             });
           }
         },
       })[0];
+
+      // Set initial position if draggable is created
+      if (lastPosition.x !== 0 || lastPosition.y !== 0) {
+        gsap.set(containerRef.current, {
+          x: lastPosition.x,
+          y: lastPosition.y,
+        });
+      }
+    } else if (draggableInstance.current) {
+      draggableInstance.current.kill();
     }
   };
 
@@ -165,7 +219,8 @@ const AnalogClock = () => {
     setIsMinimized((prev) => !prev);
   };
 
-  if (!showAnalogClock) return null;
+  // Hide clock when image is expanded
+  if (!showAnalogClock || activeComponent === "image") return null;
 
   return (
     <div
