@@ -3,7 +3,15 @@ import { useGlobalState } from "../context/GlobalStateContext";
 import { useEffect } from "react";
 
 export default function GlobalBackdrop() {
-  const { showBackdrop, activeComponent } = useGlobalState();
+  const {
+    showBackdrop,
+    activeComponent,
+    setActiveComponent,
+    setShowAbout,
+    setShowBrushCanvas,
+    setShowMusicPlayer,
+    setShowEmail,
+  } = useGlobalState();
 
   // Handle click events only on client-side to avoid hydration issues
   useEffect(() => {
@@ -12,6 +20,15 @@ export default function GlobalBackdrop() {
         document.querySelector(".about-toggle-button")?.click();
       } else if (activeComponent === "brushcanvas") {
         document.querySelector(".brushcanvas-toggle-button")?.click();
+      } else if (activeComponent === "clock") {
+        document.querySelector(".clock-toggle-button")?.click();
+      } else if (activeComponent === "image") {
+        // Reset the UI state when clicking on backdrop with an expanded image
+        setActiveComponent(null);
+        setShowAbout(true);
+        setShowBrushCanvas(true);
+        setShowMusicPlayer(true);
+        setShowEmail(true);
       }
     };
 
@@ -25,7 +42,14 @@ export default function GlobalBackdrop() {
         backdropElement.removeEventListener("click", handleBackdropClick);
       }
     };
-  }, [activeComponent]);
+  }, [
+    activeComponent,
+    setActiveComponent,
+    setShowAbout,
+    setShowBrushCanvas,
+    setShowMusicPlayer,
+    setShowEmail,
+  ]);
 
   if (!showBackdrop) return null;
 

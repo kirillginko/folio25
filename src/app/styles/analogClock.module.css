@@ -1,22 +1,33 @@
 .draggableWrapper {
   position: fixed;
-  z-index: 10;
-  max-width: calc(100vw - 40px);
-  max-height: calc(100vh - 40px);
-  will-change: transform;
-  touch-action: none;
+  width: auto;
+  z-index: 2000;
+  transition: opacity 0.2s ease;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .draggableWrapperExpanded {
   z-index: 51;
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  width: 90vw !important;
-  height: 90vw !important;
-  margin: 0 !important;
-  z-index: 10000 !important;
+}
+
+.draggableWrapperBehind {
+  z-index: 50;
+}
+
+.draggableWrapperMobile {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  height: 90vw;
+  margin: 0;
+  z-index: 10000 !important; /* Must be higher than backdrop */
 }
 
 .clockContainer {
@@ -28,20 +39,20 @@
   justify-content: center;
   background: var(--background-color);
   border: 1px solid var(--border-color);
-  padding: 10px;
+  padding: 2px;
   user-select: none;
-  transition: width 0.15s ease, height 0.15s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
+  transition: all 0.15s ease;
 }
 
 .minimizedContainer {
-  width: 80px !important;
-  height: 80px !important;
+  width: 80px;
+  height: 80px;
   border: 1px solid black;
-  border-radius: 20% !important;
+  border-radius: 20%;
   background-color: #e6e6e6;
   padding: 0;
   overflow: hidden;
@@ -88,7 +99,7 @@
   height: 300px;
   border: 1px solid black;
   border-radius: 16px;
-  padding: 20px;
+  padding: 2px;
   background-color: #e6e6e6;
 }
 
@@ -307,11 +318,11 @@
 
 @media screen and (max-width: 768px) {
   .normalContainer {
-    width: 90vw !important;
-    height: 90vw !important;
-    max-width: 90vw !important;
-    max-height: 90vw !important;
-    padding: 2px !important;
+    width: 90vw;
+    height: 90vw;
+    max-width: 90vw;
+    max-height: 90vw;
+    padding: 2px;
   }
 
   .normalContainer .clockFace {
@@ -358,41 +369,53 @@
   /* Keep minimized state draggable and properly sized */
   .draggableWrapper:has(.minimizedContainer) {
     position: fixed;
-    width: 80px !important;
-    height: 80px !important;
+    width: 80px;
+    height: 80px;
     z-index: 10;
   }
 
   .minimizedContainer {
-    width: 80px !important;
-    height: 80px !important;
-    border-radius: 20% !important;
+    width: 80px;
+    height: 80px;
+    border-radius: 20%;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
   }
 
   /* Ensure yellow circle stays in position for both states */
   .expandButton {
     position: absolute;
-    top: -25px !important;
-    right: 0px !important;
-    z-index: 11;
+    top: -25px;
+    right: 0;
+    z-index: 51001;
   }
 
-  /* Ensure smooth transition for the clock container */
-  .clockContainer {
-    transition: all 0.15s ease !important;
+  /* Ensure the clock container fills the wrapper on mobile when expanded */
+  .draggableWrapperMobile .clockContainer {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .draggableWrapperMobile {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw !important;
+    height: 90vw !important;
+  }
+
+  .draggableWrapperMobile .expandButton {
+    z-index: 10001 !important; /* Above the clock container */
   }
 }
 
-/* Ensure the clock container fills the wrapper on mobile only when expanded */
-@media screen and (max-width: 768px) {
-  .draggableWrapper:has(.normalContainer) .clockContainer {
-    width: 100% !important;
-    height: 100% !important;
+/* For even smaller screens */
+@media screen and (max-width: 480px) {
+  .draggableWrapper {
+    max-height: 80vh;
   }
 }
 
