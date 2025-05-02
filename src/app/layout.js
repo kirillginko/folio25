@@ -22,7 +22,7 @@ const instructionFont = localFont({
 export const metadata = {
   title: "Kirill Ginko | Creative Developer & Digital Designer in NYC",
   description:
-    "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
+    "Kirill Ginko is a creative developer and digital designer based in New York City, specializing in crafting engaging and high-performance web experiences. With expertise in modern ux/ui design, branding and digital marketing, I focus on developing interactive and user-centered applications. My passion lies in transforming ideas into functional and visually appealing digital solutions for businesses and individuals.",
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL
     ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
     : new URL("https://www.kirill.agency"),
@@ -108,113 +108,116 @@ export default function RootLayout({ children }) {
         />
         <Script id="schema-markup" type="application/ld+json">
           {`
-            [{
-              "@context": "https://schema.org",
-              "@type": ["WebSite", "ProfilePage"],
-              "name": "Kirill Ginko - Official Portfolio",
-              "url": "https://www.kirill.agency",
-              "mainEntity": {
-                "@type": "Person",
-                "name": "Kirill Ginko",
-                "jobTitle": "Creative Developer",
-                "url": "https://www.kirill.agency",
-                "sameAs": [
-                  "https://www.linkedin.com/in/kirillginko/",
-                  "https://www.instagram.com/kirillginko/",
-                  "https://github.com/kirillginko"
-                ],
-                "knowsAbout": [
-                  "Web Development",
-                  "UI Design",
-                  "React",
-                  "Next.js",
-                  "Digital Experiences",
-                  "Frontend Development",
-                  "Interactive Design",
-                  "Digital Marketing"
-                ],
-                "worksFor": {
-                  "@type": "Organization",
-                  "name": "Kirill Ginko Creative Development",
-                  "url": "https://www.kirill.agency"
-                },
-                "location": {
-                  "@type": "Place",
-                  "address": {
-                    "@type": "PostalAddress",
-                    "addressLocality": "New York",
-                    "addressRegion": "NY",
-                    "addressCountry": "US"
-                  }
-                }
-              },
-              "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
-              "primaryImageOfPage": {
-                "@type": "ImageObject",
-                "url": "https://www.kirill.agency/flower.svg",
-                "name": "Kirill Ginko - Creative Developer"
-              }
-            },
-            {
-              "@context": "https://schema.org",
-              "@type": "ProfessionalService",
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["WebSite", "ProfilePage"],
+          "name": "Kirill Ginko - Official Portfolio",
+          "url": "https://www.kirill.agency",
+          "mainEntity": {
+            "@type": "Person",
+            "name": "Kirill Ginko",
+            "jobTitle": "Creative Developer",
+            "url": "https://www.kirill.agency",
+            "sameAs": [
+              "https://www.linkedin.com/in/kirillginko/",
+              "https://www.instagram.com/kirillginko/",
+              "https://github.com/kirillginko"
+            ],
+            "knowsAbout": [
+              "Web Development",
+              "UI Design",
+              "React",
+              "Next.js",
+              "Digital Experiences",
+              "Frontend Development",
+              "Interactive Design",
+              "Digital Marketing"
+            ],
+            "worksFor": {
+              "@type": "Organization",
               "name": "Kirill Ginko Creative Development",
-              "image": "https://www.kirill.agency/flower.svg",
-              "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
-              "@id": "https://www.kirill.agency",
-              "url": "https://www.kirill.agency",
+              "url": "https://www.kirill.agency"
+            },
+            "location": {
+              "@type": "Place",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "New York",
                 "addressRegion": "NY",
                 "addressCountry": "US"
-              },
-              "geo": {
-                "@type": "GeoCoordinates",
-                "latitude": "40.7128",
-                "longitude": "-74.0060"
-              },
-              "areaServed": {
-                "@type": "City",
-                "name": "New York City"
-              },
-              "priceRange": "$$",
-              "sameAs": [
-                "https://github.com/kirillginko",
-                "https://www.linkedin.com/in/kirillginko/"
-              ],
-              "hasOfferCatalog": {
-                "@type": "OfferCatalog",
-                "name": "Creative Development Services",
-                "itemListElement": [
-                  {
-                    "@type": "Offer",
-                    "itemOffered": {
-                      "@type": "Service",
-                      "name": "Web Development",
-                      "description": "Custom web development using React and Next.js"
-                    }
-                  },
-                  {
-                    "@type": "Offer",
-                    "itemOffered": {
-                      "@type": "Service",
-                      "name": "UI Design",
-                      "description": "Modern UI design and interactive experiences"
-                    }
-                  },
-                  {
-                    "@type": "Offer",
-                    "itemOffered": {
-                      "@type": "Service",
-                      "name": "Digital Marketing",
-                      "description": "Digital marketing and brand development"
-                    }
-                  }
-                ]
               }
-            }]
-          `}
+            }
+          },
+          "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
+          "primaryImageOfPage": {
+            "@type": "ImageObject",
+            "url": "https://www.kirill.agency/flower.svg",
+            "name": "Kirill Ginko - Creative Developer"
+          }
+        },
+        {
+          "@type": "ProfessionalService",
+          "name": "Kirill Ginko Creative Development",
+          "image": "https://www.kirill.agency/flower.svg",
+          "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
+          "@id": "https://www.kirill.agency",
+          "url": "https://www.kirill.agency",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "New York",
+            "addressRegion": "NY",
+            "addressCountry": "US"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "40.7128",
+            "longitude": "-74.0060"
+          },
+          "areaServed": {
+            "@type": "City",
+            "name": "New York City"
+          },
+          "priceRange": "$$",
+          "sameAs": [
+            "https://github.com/kirillginko",
+            "https://www.linkedin.com/in/kirillginko/"
+          ],
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Creative Development Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Web Development",
+                  "description": "Custom web development using React and Next.js"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "UI Design",
+                  "description": "Modern UI design and interactive experiences"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Digital Marketing",
+                  "description": "Digital marketing and brand development"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  `}
         </Script>
       </head>
       <body

@@ -203,6 +203,8 @@
   will-change: transform;
   touch-action: none;
   transition: opacity 0.2s ease;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
 }
 
 .hidden {
@@ -328,7 +330,7 @@
 /* Remove transform transition to prevent stutter */
 .draggableWrapper {
   position: fixed;
-  z-index: 10;
+  z-index: 2000;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
   will-change: transform;

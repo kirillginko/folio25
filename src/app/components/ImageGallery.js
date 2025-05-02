@@ -131,11 +131,19 @@ const ImageGallery = () => {
         },
         onComplete: () => {
           setSelectedImage(null);
-          setShowAbout(true);
-          setShowBrushCanvas(true);
-          setShowMusicPlayer(true);
-          setShowEmail(true);
-          setActiveComponent(null);
+
+          // Restore other components with a delay to ensure animations complete
+          setTimeout(() => {
+            setShowAbout(true);
+            setShowBrushCanvas(true);
+            setShowMusicPlayer(true);
+            setShowEmail(true);
+
+            // Delay the activeComponent reset to ensure position restoration works
+            setTimeout(() => {
+              setActiveComponent(null);
+            }, 50);
+          }, 50);
         },
       });
     } else {
