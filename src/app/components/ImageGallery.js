@@ -132,17 +132,16 @@ const ImageGallery = () => {
         onComplete: () => {
           setSelectedImage(null);
 
-          // Restore other components with a delay to ensure animations complete
-          setTimeout(() => {
-            setShowAbout(true);
-            setShowBrushCanvas(true);
-            setShowMusicPlayer(true);
-            setShowEmail(true);
+          // First restore visibility
+          setShowAbout(true);
+          setShowBrushCanvas(true);
+          setShowMusicPlayer(true);
+          setShowEmail(true);
 
-            // Delay the activeComponent reset to ensure position restoration works
-            setTimeout(() => {
-              setActiveComponent(null);
-            }, 50);
+          // Then reset active component with a delay to allow position restoration
+          setTimeout(() => {
+            // This will trigger position restoration in the components
+            setActiveComponent(null);
           }, 50);
         },
       });

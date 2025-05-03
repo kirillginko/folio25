@@ -5,7 +5,6 @@ import { GlobalStateProvider } from "./context/GlobalStateContext";
 import GlobalBackdrop from "./components/GlobalBackdrop";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
-import Image from "next/image";
 
 const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",
@@ -57,7 +56,7 @@ export const metadata = {
   openGraph: {
     title: "Kirill Ginko | Creative Developer & Digital Designer in NYC",
     description:
-      "Creative developer crafting engaging digital experiences with modern web technologies. Based in New York City.",
+      "Kirill Ginko is a creative developer and digital designer based in New York City, specializing in crafting engaging and high-performance web experiences. With expertise in modern ux/ui design, branding and digital marketing, I focus on developing interactive and user-centered applications. My passion lies in transforming ideas into functional and visually appealing digital solutions for businesses and individuals.",
     url: "https://www.kirill.agency",
     siteName: "Kirill Ginko",
     images: [
@@ -75,7 +74,8 @@ export const metadata = {
     card: "summary_large_image",
     title: "Kirill Ginko | Creative Developer & Digital Designer",
     description:
-      "Creative developer crafting engaging digital experiences in NYC.",
+      "Kirill Ginko is a creative developer and digital designer based in New York City, specializing in crafting engaging and high-performance web experiences. With expertise in modern ux/ui design, branding and digital marketing, I focus on developing interactive and user-centered applications. My passion lies in transforming ideas into functional and visually appealing digital solutions for businesses and individuals.",
+    url: "https://www.kirill.agency",
     images: ["/flower.svg"],
     creator: "@kirillginko",
   },
@@ -137,7 +137,7 @@ export default function RootLayout({ children }) {
             ],
             "worksFor": {
               "@type": "Organization",
-              "name": "Kirill Ginko Creative Development",
+              "name": "Kirill.Agency",
               "url": "https://www.kirill.agency"
             },
             "location": {
@@ -150,8 +150,8 @@ export default function RootLayout({ children }) {
               }
             }
           },
-          "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
-          "primaryImageOfPage": {
+            "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
+            "primaryImageOfPage": {
             "@type": "ImageObject",
             "url": "https://www.kirill.agency/flower.svg",
             "name": "Kirill Ginko - Creative Developer"
@@ -161,7 +161,7 @@ export default function RootLayout({ children }) {
           "@type": "ProfessionalService",
           "name": "Kirill Ginko Creative Development",
           "image": "https://www.kirill.agency/flower.svg",
-          "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
+          "description": "Kirill Ginko is a creative developer and digital designer based in New York City, specializing in crafting engaging and high-performance web experiences. With expertise in modern ux/ui design, branding and digital marketing, I focus on developing interactive and user-centered applications. My passion lies in transforming ideas into functional and visually appealing digital solutions for businesses and individuals.",
           "@id": "https://www.kirill.agency",
           "url": "https://www.kirill.agency",
           "address": {

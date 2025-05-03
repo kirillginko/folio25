@@ -14,81 +14,180 @@ const About = () => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
-  const positionSaved = useRef(false);
   const isInitialPositionSet = useRef(false);
+  const stablePositionRef = useRef({ x: 0, y: 0 });
+  const positionBeforeImageRef = useRef({ x: 0, y: 0 });
   const { showAbout, setShowBackdrop, setActiveComponent, activeComponent } =
     useGlobalState();
 
-  // Add a stable position ref to persist across renders
-  const stablePositionRef = useRef({ x: 0, y: 0 });
-  const positionBeforeImageRef = useRef({ x: 0, y: 0 });
+  // Add a position adjustment effect that runs on component state changes
+  useEffect(() => {
+    const adjustPositionAndSize = () => {
+      if (containerRef.current) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-  const createDraggable = () => {
-    if (!containerRef.current) return;
+        if (isMobile && !isMinimized) {
+          // For mobile expanded view
+          gsap.set(containerRef.current, {
+            x: 0,
+            y: 0,
+          });
+        } else {
+          // For desktop or minimized view, maintain position
+          const element = containerRef.current.getBoundingClientRect();
 
-    if (draggableInstance.current) {
-      draggableInstance.current.kill();
-    }
+          // IMPORTANT: For image closing, always use stored position
+          let newX, newY;
 
-    // Ensure any inline transforms are preserved before creating draggable
-    const currentX = gsap.getProperty(containerRef.current, "x") || 0;
-    const currentY = gsap.getProperty(containerRef.current, "y") || 0;
+          // If we're closing an image (activeComponent changed from "image" to null)
+          // Always use the position that was saved before the image was opened
+          if (
+            activeComponent === null &&
+            positionBeforeImageRef.current.x !== 0
+          ) {
+            newX = positionBeforeImageRef.current.x;
+            newY = positionBeforeImageRef.current.y;
 
-    // Determine which position to use
-    let positionToUse = { x: currentX, y: currentY };
+            // Apply position immediately with no animation
+            gsap.set(containerRef.current, {
+              x: newX,
+              y: newY,
+            });
 
-    // If current position is at origin (0,0) but we have a saved position
-    if (currentX === 0 && currentY === 0) {
-      // Try position saved right before image was shown
-      if (positionBeforeImageRef.current.x !== 0) {
-        positionToUse = positionBeforeImageRef.current;
-      }
-      // Fall back to the last tracked stable position
-      else if (stablePositionRef.current.x !== 0) {
-        positionToUse = stablePositionRef.current;
-      }
-      // Finally, try the state-based last position
-      else if (lastPosition.x !== 0) {
-        positionToUse = lastPosition;
-      }
+            // Also update other position refs for consistency
+            stablePositionRef.current = { x: newX, y: newY };
+            setLastPosition({ x: newX, y: newY });
+            return;
+          }
 
-      // Apply the position before creating draggable
-      gsap.set(containerRef.current, positionToUse);
-    }
+          // For other cases, use current position or fall back to stored positions
+          newX = gsap.getProperty(containerRef.current, "x");
+          newY = gsap.getProperty(containerRef.current, "y");
 
-    // Create the draggable with the position already set
-    draggableInstance.current = Draggable.create(containerRef.current, {
-      type: "x,y",
-      bounds: "body",
-      inertia: true,
-      cursor: "grab",
-      activeCursor: "grabbing",
-      edgeResistance: 0.65,
-      dragResistance: 0.05,
-      onDragStart: function () {
-        gsap.to(this.target, {
-          scale: isMinimized ? 1.05 : 1.02,
-          duration: 0.2,
-        });
-      },
-      onDragEnd: function () {
-        gsap.to(this.target, {
-          scale: 1,
-          duration: 0.2,
-        });
+          // If position is invalid, use saved positions
+          if (!newX || !newY || (Math.abs(newX) < 5 && Math.abs(newY) < 5)) {
+            if (stablePositionRef.current.x !== 0) {
+              newX = stablePositionRef.current.x;
+              newY = stablePositionRef.current.y;
+            } else if (lastPosition.x !== 0) {
+              newX = lastPosition.x;
+              newY = lastPosition.y;
+            } else {
+              // Default fallback position
+              newX = viewportWidth - element.width - 130;
+              newY = 200;
+            }
+          }
 
-        // Save position after drag ends
-        const newX = gsap.getProperty(containerRef.current, "x");
-        const newY = gsap.getProperty(containerRef.current, "y");
+          // Ensure position is within bounds
+          newX = Math.max(
+            20,
+            Math.min(newX, viewportWidth - element.width - 20)
+          );
+          newY = Math.max(
+            20,
+            Math.min(newY, viewportHeight - element.height - 20)
+          );
 
-        if (newX !== undefined && newY !== undefined) {
-          stablePositionRef.current = { x: newX, y: newY };
-          setLastPosition({ x: newX, y: newY });
-          positionBeforeImageRef.current = { x: newX, y: newY };
+          // Apply position with no animation to prevent movement
+          gsap.set(containerRef.current, {
+            x: newX,
+            y: newY,
+          });
+
+          // Store the position only if we're not closing an image
+          if (activeComponent !== "image") {
+            stablePositionRef.current = { x: newX, y: newY };
+            setLastPosition({ x: newX, y: newY });
+          }
         }
-      },
-    })[0];
-  };
+      }
+    };
+
+    // Run with a delay to ensure component is mounted
+    const timer = setTimeout(adjustPositionAndSize, 10);
+
+    return () => clearTimeout(timer);
+  }, [isMinimized, isMobile, activeComponent, showAbout]);
+
+  // Enhance the draggable creation to ensure it's recreated properly after image interaction
+  useEffect(() => {
+    gsap.registerPlugin(Draggable);
+
+    const createDraggable = () => {
+      // Only create draggable if component should be draggable
+      if (isMinimized || !isMobile) {
+        // Kill any existing draggable
+        if (draggableInstance.current) {
+          draggableInstance.current.kill();
+        }
+
+        // Create new draggable
+        draggableInstance.current = Draggable.create(containerRef.current, {
+          type: "x,y",
+          bounds: "body",
+          inertia: true,
+          cursor: "grab",
+          activeCursor: "grabbing",
+          edgeResistance: 0.65,
+          dragResistance: 0.05,
+          zIndexBoost: true,
+          onDragStart: function () {
+            gsap.to(this.target, {
+              scale: isMinimized ? 1.05 : 1.02,
+              duration: 0.2,
+            });
+          },
+          onDragEnd: function () {
+            gsap.to(this.target, {
+              scale: 1,
+              duration: 0.2,
+            });
+
+            // Save position after drag
+            if (containerRef.current) {
+              const newX = gsap.getProperty(containerRef.current, "x");
+              const newY = gsap.getProperty(containerRef.current, "y");
+
+              stablePositionRef.current = { x: newX, y: newY };
+              positionBeforeImageRef.current = { x: newX, y: newY };
+              setLastPosition({ x: newX, y: newY });
+            }
+          },
+        })[0];
+      } else if (draggableInstance.current) {
+        // Kill draggable if component shouldn't be draggable (mobile expanded)
+        draggableInstance.current.kill();
+      }
+    };
+
+    // Create draggable on mount and when state changes
+    createDraggable();
+
+    // Create additional listeners specifically for image gallery interactions
+    const imageClosedListener = () => {
+      if (activeComponent === null && showAbout) {
+        // Wait for GSAP to apply the position before recreating draggable
+        setTimeout(() => {
+          if (draggableInstance.current) {
+            draggableInstance.current.kill();
+          }
+          createDraggable();
+        }, 50);
+      }
+    };
+
+    // Call the listener when activeComponent changes
+    imageClosedListener();
+
+    // Clean up on unmount
+    return () => {
+      if (draggableInstance.current) {
+        draggableInstance.current.kill();
+      }
+    };
+  }, [isMinimized, isMobile, activeComponent, showAbout]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -98,16 +197,10 @@ const About = () => {
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
-    gsap.registerPlugin(Draggable);
-    createDraggable();
-
     return () => {
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
-      }
       window.removeEventListener("resize", checkMobile);
     };
-  }, [isMinimized, isMobile]);
+  }, []);
 
   // Position and resize handling
   useEffect(() => {
@@ -227,169 +320,6 @@ const About = () => {
     }
   }, [activeComponent]);
 
-  // Add a function to force position restoration
-  const forceRestorePosition = () => {
-    if (!containerRef.current || !showAbout) return;
-
-    // Choose the best position to restore
-    let positionToUse = { x: 0, y: 0 };
-
-    if (positionBeforeImageRef.current.x !== 0) {
-      positionToUse = positionBeforeImageRef.current;
-    } else if (stablePositionRef.current.x !== 0) {
-      positionToUse = stablePositionRef.current;
-    } else if (lastPosition.x !== 0) {
-      positionToUse = lastPosition;
-    }
-
-    // Only apply if we have a valid position
-    if (positionToUse.x !== 0 || positionToUse.y !== 0) {
-      console.log("About: Restoring position to", positionToUse);
-
-      // First try with GSAP
-      gsap.set(containerRef.current, positionToUse);
-
-      // As a fallback, also try direct style manipulation
-      containerRef.current.style.transform = `translate3d(${positionToUse.x}px, ${positionToUse.y}px, 0px)`;
-
-      // Recreate draggable instance
-      if (draggableInstance.current) {
-        draggableInstance.current.kill();
-      }
-
-      // Create new draggable with a slight delay
-      setTimeout(() => {
-        // Double-check position before creating draggable
-        const currentX = gsap.getProperty(containerRef.current, "x") || 0;
-        const currentY = gsap.getProperty(containerRef.current, "y") || 0;
-
-        if (Math.abs(currentX) < 5 && Math.abs(currentY) < 5) {
-          // Position was lost, apply again
-          gsap.set(containerRef.current, positionToUse);
-          containerRef.current.style.transform = `translate3d(${positionToUse.x}px, ${positionToUse.y}px, 0px)`;
-        }
-
-        createDraggable();
-      }, 50);
-    }
-  };
-
-  // Add useEffect to specifically watch for image gallery changes
-  useEffect(() => {
-    // If image gallery is closed (activeComponent goes from "image" to null)
-    // and we have a saved position, restore it
-    if (activeComponent === null && showAbout) {
-      // Use a healthy delay to ensure any other animations complete first
-      setTimeout(forceRestorePosition, 100);
-    }
-  }, [activeComponent, showAbout]);
-
-  // Handle size changes when minimizing/maximizing without changing position
-  useEffect(() => {
-    if (!isInitialPositionSet.current) return;
-
-    if (containerRef.current) {
-      if (isMobile && !isMinimized) {
-        containerRef.current.classList.add(styles.mobileFixed);
-        // Kill draggable when expanded on mobile
-        if (draggableInstance.current) {
-          draggableInstance.current.kill();
-        }
-      } else {
-        containerRef.current.classList.remove(styles.mobileFixed);
-        // Recreate draggable when minimized
-        createDraggable();
-      }
-    }
-  }, [isMinimized, isMobile]);
-
-  // Update effect to handle position saving when activeComponent changes
-  useEffect(() => {
-    // Always try to get the current position
-    if (containerRef.current && showAbout) {
-      const currentX = gsap.getProperty(containerRef.current, "x");
-      const currentY = gsap.getProperty(containerRef.current, "y");
-
-      // Only save position if it's valid and different from the initial values
-      if (
-        currentX !== undefined &&
-        currentY !== undefined &&
-        (currentX !== 0 || currentY !== 0) &&
-        !(Math.abs(currentX) < 5 && Math.abs(currentY) < 5) // Ignore very small values
-      ) {
-        // When activeComponent becomes "image", we're showing the image gallery
-        // Save the current position to restore later
-        if (activeComponent === "image") {
-          positionBeforeImageRef.current = { x: currentX, y: currentY };
-          stablePositionRef.current = { x: currentX, y: currentY };
-          setLastPosition({ x: currentX, y: currentY });
-          positionSaved.current = true;
-        }
-
-        // When activeComponent becomes null, we're closing all components
-        // This is a good time to save the current position
-        if (activeComponent === null) {
-          // Only update if we have a valid position
-          stablePositionRef.current = { x: currentX, y: currentY };
-          setLastPosition({ x: currentX, y: currentY });
-          positionSaved.current = false;
-        }
-      }
-    }
-  }, [activeComponent, showAbout]);
-
-  // Effect to restore position
-  useEffect(() => {
-    // When images are closed (activeComponent becomes null) and we have a valid saved position
-    if (
-      activeComponent === null &&
-      containerRef.current &&
-      lastPosition.x !== 0 &&
-      lastPosition.y !== 0 &&
-      showAbout // Only restore if the component is visible
-    ) {
-      // Small delay to ensure position is restored after any animation
-      setTimeout(() => {
-        if (containerRef.current) {
-          gsap.set(containerRef.current, {
-            x: lastPosition.x,
-            y: lastPosition.y,
-          });
-
-          // Recreate draggable after position restoration
-          createDraggable();
-        }
-      }, 10);
-    }
-  }, [activeComponent, lastPosition, showAbout]);
-
-  // Position reset safety check
-  useEffect(() => {
-    // This is a safety check to reset the position if the component ends up at 0,0
-    const safetyCheckTimer = setTimeout(() => {
-      if (containerRef.current) {
-        const currentX = gsap.getProperty(containerRef.current, "x");
-        const currentY = gsap.getProperty(containerRef.current, "y");
-
-        // If the position is at the origin (potentially a reset issue)
-        // and we have a valid last position
-        if (
-          currentX === 0 &&
-          currentY === 0 &&
-          lastPosition.x !== 0 &&
-          lastPosition.y !== 0
-        ) {
-          gsap.set(containerRef.current, {
-            x: lastPosition.x,
-            y: lastPosition.y,
-          });
-        }
-      }
-    }, 500); // Check after a short delay to allow for normal positioning
-
-    return () => clearTimeout(safetyCheckTimer);
-  }, [lastPosition, activeComponent]);
-
   // Update effect to handle z-index changes when activeComponent changes
   useEffect(() => {
     if (containerRef.current) {
@@ -403,59 +333,43 @@ const About = () => {
     }
   }, [activeComponent]);
 
-  // Handle visibility changes
+  // Add a dedicated effect to save position before image is shown
   useEffect(() => {
-    // When the About component becomes visible again after being hidden
-    if (showAbout && isInitialPositionSet.current && containerRef.current) {
-      // Small delay to ensure the component is fully mounted
-      setTimeout(() => {
-        const currentX = gsap.getProperty(containerRef.current, "x") || 0;
-        const currentY = gsap.getProperty(containerRef.current, "y") || 0;
+    // This effect runs specifically when an image is about to be displayed
+    if (activeComponent === "image" && containerRef.current) {
+      // Get the current position
+      const currentX = gsap.getProperty(containerRef.current, "x");
+      const currentY = gsap.getProperty(containerRef.current, "y");
 
-        // If the component position is at the origin (0,0), restore it
-        if (
-          (currentX === 0 && currentY === 0) ||
-          (Math.abs(currentX) < 5 && Math.abs(currentY) < 5)
-        ) {
-          // Find the best position to restore from our various position refs
-          let positionToRestore = { x: 0, y: 0 };
+      // Only save if we have valid coordinates
+      if (
+        currentX !== undefined &&
+        currentY !== undefined &&
+        (currentX !== 0 || currentY !== 0) &&
+        !(Math.abs(currentX) < 5 && Math.abs(currentY) < 5)
+      ) {
+        console.log("Saving position before image:", {
+          x: currentX,
+          y: currentY,
+        });
 
-          if (positionBeforeImageRef.current.x !== 0) {
-            positionToRestore = positionBeforeImageRef.current;
-          } else if (stablePositionRef.current.x !== 0) {
-            positionToRestore = stablePositionRef.current;
-          } else if (lastPosition.x !== 0) {
-            positionToRestore = lastPosition;
-          }
-
-          // Only restore if we found a valid position
-          if (positionToRestore.x !== 0 || positionToRestore.y !== 0) {
-            gsap.set(containerRef.current, positionToRestore);
-
-            // Make sure the draggable is recreated at this position
-            if (draggableInstance.current) {
-              draggableInstance.current.kill();
-            }
-            createDraggable();
-          }
-        }
-      }, 50);
+        // Save to all position refs for redundancy
+        positionBeforeImageRef.current = { x: currentX, y: currentY };
+        stablePositionRef.current = { x: currentX, y: currentY };
+        setLastPosition({ x: currentX, y: currentY });
+      }
     }
-  }, [showAbout]);
+  }, [activeComponent]);
 
   const toggleMinimized = () => {
     if (!isMinimized) {
       setShowBackdrop(false);
       setActiveComponent(null);
-
-      // When minimizing, ensure we restore proper position if needed
-      if (activeComponent === "image") {
-        setTimeout(forceRestorePosition, 100);
-      }
     } else if (isMobile) {
       setShowBackdrop(true);
       setActiveComponent("about");
     }
+
     setIsMinimized((prev) => !prev);
   };
 

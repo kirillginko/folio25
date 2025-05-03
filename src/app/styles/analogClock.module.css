@@ -59,6 +59,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .minimizedContainer .clockFace {
@@ -67,6 +68,7 @@
   transform: none;
   border-radius: 50%;
   padding: 5px;
+  box-sizing: border-box;
 }
 
 .minimizedContainer .hourHand {
@@ -441,4 +443,33 @@
     transform: none;
     border-radius: 50%;
   }
+}
+
+/* Add these new classes at the end of the file */
+
+.minimizedClockFace {
+  width: 85%;
+  height: 85%;
+  position: relative;
+  border-radius: 50%;
+}
+
+.normalClockFace {
+  width: 92%;
+  height: 92%;
+  position: relative;
+  border-radius: 50%;
+}
+
+/* Remove these unused classes */
+.clockWrapper {
+  display: none;
+}
+
+.minimizedClockWrapper {
+  display: none;
+}
+
+.normalClockWrapper {
+  display: none;
 }

@@ -8,6 +8,7 @@ import { useGlobalState } from "../context/GlobalStateContext";
 
 const AnalogClock = () => {
   const containerRef = useRef(null);
+  const clockContainerRef = useRef(null);
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -149,24 +150,111 @@ const AnalogClock = () => {
     setTimeout(setInitialPosition, 100);
   }, []);
 
-  // Handle size changes when minimizing/maximizing without changing position
+  // Apply smooth animation for expansion/minimization
   useEffect(() => {
-    if (!isInitialPositionSet.current) return;
+    const adjustPositionAndSize = () => {
+      if (!containerRef.current || !clockContainerRef.current) return;
 
-    if (containerRef.current) {
+      const clockElement = clockContainerRef.current;
+
+      // Simpler approach: immediately apply CSS classes first
+      if (isMinimized) {
+        clockContainerRef.current.classList.add(styles.minimizedContainer);
+        clockContainerRef.current.classList.remove(styles.normalContainer);
+      } else {
+        clockContainerRef.current.classList.add(styles.normalContainer);
+        clockContainerRef.current.classList.remove(styles.minimizedContainer);
+      }
+
+      // Handle mobile classes
       if (isMobile && !isMinimized) {
         containerRef.current.classList.add(styles.draggableWrapperMobile);
-        // Kill draggable when expanded on mobile
         if (draggableInstance.current) {
           draggableInstance.current.kill();
         }
       } else {
         containerRef.current.classList.remove(styles.draggableWrapperMobile);
-        // Recreate draggable when minimized
         createDraggable();
       }
-    }
-  }, [isMinimized, isMobile]);
+
+      // Clear any existing animations to prevent conflicts
+      gsap.killTweensOf(clockElement);
+      gsap.killTweensOf(containerRef.current);
+
+      // Target dimensions - use simplest approach
+      if (isMobile && !isMinimized) {
+        // EXPANDING on mobile: single, direct animation
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const targetWidth = Math.min(viewportWidth * 0.9, viewportHeight * 0.9);
+        const targetHeight = targetWidth;
+        const centerX = (viewportWidth - targetWidth) / 2;
+        const centerY = (viewportHeight - targetHeight) / 2;
+
+        // Direct center positioning without animation
+        gsap.set(containerRef.current, {
+          x: centerX,
+          y: centerY,
+        });
+
+        // Animate size only
+        gsap.to(clockElement, {
+          width: targetWidth,
+          height: targetHeight,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      } else if (isMinimized) {
+        // MINIMIZING: simpler, direct approach
+        const targetPosition =
+          lastPosition.x !== 0
+            ? { x: lastPosition.x, y: lastPosition.y }
+            : { x: window.innerWidth - 100, y: 200 };
+
+        // First set minimized size instantly
+        gsap.set(clockElement, {
+          width: 80,
+          height: 80,
+        });
+
+        // Then animate position if needed (mobile-only)
+        if (isMobile) {
+          gsap.to(containerRef.current, {
+            x: targetPosition.x,
+            y: targetPosition.y,
+            duration: 0.25,
+            ease: "power2.inOut",
+          });
+        }
+      } else {
+        // Desktop expansion: simple animation
+        gsap.to(clockElement, {
+          width: 300,
+          height: 300,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+
+      // Control hour numbers visibility
+      const hourNumbers = document.querySelectorAll(`.${styles.hourNumber}`);
+      if (isMinimized) {
+        // Instantly hide numbers when minimizing
+        gsap.set(hourNumbers, { opacity: 0 });
+      } else {
+        // Fade in numbers when expanding
+        gsap.to(hourNumbers, {
+          opacity: 1,
+          duration: 0.2,
+          ease: "power2.inOut",
+        });
+      }
+    };
+
+    // Use direct execution with small delay for safety
+    const timer = setTimeout(adjustPositionAndSize, 5);
+    return () => clearTimeout(timer);
+  }, [isMinimized, isMobile, lastPosition]);
 
   // Update effect to handle position saving when activeComponent changes
   useEffect(() => {
@@ -289,6 +377,7 @@ const AnalogClock = () => {
       setShowBackdrop(true);
       setActiveComponent("clock");
     }
+
     setIsMinimized((prev) => !prev);
   };
 
@@ -313,11 +402,16 @@ const AnalogClock = () => {
           )}
         </div>
         <div
+          ref={clockContainerRef}
           className={`${styles.clockContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer
           }`}
         >
-          <div className={styles.clockFace}>
+          <div
+            className={`${styles.clockFace} ${
+              isMinimized ? styles.minimizedClockFace : styles.normalClockFace
+            }`}
+          >
             <div className={styles.center}></div>
             <div ref={hourHandRef} className={styles.hourHand}></div>
             <div ref={minuteHandRef} className={styles.minuteHand}></div>
