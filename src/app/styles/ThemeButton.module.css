@@ -9,7 +9,8 @@
   border-radius: 30px;
   cursor: pointer;
   font-size: 0.6em;
-  z-index: 51;
+  /* Keep below gallery backdrop (1500) but above Work button (500) and images */
+  z-index: 550;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: opacity 1s ease; /* Match the other buttons' transition */
   transform-style: preserve-3d;

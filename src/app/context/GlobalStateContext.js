@@ -9,6 +9,7 @@ export function GlobalStateProvider({ children }) {
   const [showMusicPlayer, setShowMusicPlayer] = useState(true);
   const [showEmail, setShowEmail] = useState(true);
   const [showThemeButton, setShowThemeButton] = useState(true);
+  const [showThemeSelector, setShowThemeSelector] = useState(true);
   const [showWorkButton, setShowWorkButton] = useState(true);
   const [showAnalogClock, setShowAnalogClock] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -44,6 +45,8 @@ export function GlobalStateProvider({ children }) {
         setShowBackdrop,
         activeComponent,
         setActiveComponent,
+        showThemeSelector,
+        setShowThemeSelector,
       }}
     >
       {children}

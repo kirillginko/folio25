@@ -73,12 +73,12 @@
   display: flex;
   justify-content: space-between;
   padding: 20px;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(245, 245, 245);
   border-radius: 16px 16px 0 0;
   z-index: 2;
   min-height: 80px;
   align-items: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid rgb(183, 183, 183);
 }
 
 .controls:active {
@@ -351,11 +351,12 @@
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, auto);
     gap: 8px;
-    padding: 8px 10px !important;
+    padding: 8px 10px;
+    padding-bottom: 15px;
     justify-content: center;
     align-items: start;
     min-height: unset;
-    background-color: #e6e6e6;
+    background-color: rgb(245, 245, 245);
   }
 
   .control {

@@ -14,17 +14,19 @@ const ImageGallery = () => {
   const [isVisible, setIsVisible] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const originalPositions = useRef(new Map()); // Store original positions of components
+  const lastKnownPositions = useRef(new Map()); // Store last known positions before flying off-screen
   const {
     setShowAbout,
     setShowBrushCanvas,
     setShowMusicPlayer,
     setShowEmail,
+    setShowAnalogClock,
     showWorkButton,
     setActiveComponent,
   } = useGlobalState();
 
   const getRandomPosition = () => {
-    const padding = 100;
     const imageSize = 220;
 
     return {
@@ -35,7 +37,7 @@ const ImageGallery = () => {
 
   const getOffScreenPosition = () => {
     const side = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
-    const padding = 300; // Distance off screen
+    const padding = 300; // Distance off screen for gallery images
 
     switch (side) {
       case 0: // top
@@ -61,6 +63,245 @@ const ImageGallery = () => {
     }
   };
 
+  // Separate function for components with larger padding to ensure they're completely off-screen
+  const getComponentOffScreenPosition = () => {
+    const side = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
+    const padding = Math.max(window.innerWidth, window.innerHeight) + 500; // Use viewport size + extra padding
+
+    switch (side) {
+      case 0: // top
+        return {
+          x: Math.random() * window.innerWidth,
+          y: -padding,
+        };
+      case 1: // right
+        return {
+          x: window.innerWidth + padding,
+          y: Math.random() * window.innerHeight,
+        };
+      case 2: // bottom
+        return {
+          x: Math.random() * window.innerWidth,
+          y: window.innerHeight + padding,
+        };
+      case 3: // left
+        return {
+          x: -padding,
+          y: Math.random() * window.innerHeight,
+        };
+    }
+  };
+
+  // Function to animate specific components off-screen when work button is clicked
+  const flyComponentsOffScreen = () => {
+    console.log("flyComponentsOffScreen called");
+
+    // Force minimize any expanded components first by resetting activeComponent
+    setActiveComponent(null);
+
+    // Small delay to allow components to minimize before animating off-screen
+    setTimeout(() => {
+      // Get all draggable wrapper elements (About, BrushCanvas, AnalogClock) and MusicPlayer using attribute selector
+      const allDraggables = document.querySelectorAll(
+        '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
+      );
+      console.log("Found draggable elements:", allDraggables.length);
+
+      allDraggables.forEach((element, index) => {
+        console.log(`Element ${index}:`, element);
+
+        // Skip if this is part of the ImageGallery
+        if (element.closest(".interactive-element")) {
+          console.log(`Skipping element ${index} - part of gallery`);
+          return;
+        }
+
+        // Skip Email component (keep this stationary)
+        if (
+          element.className.toLowerCase().includes("email") ||
+          element.id?.toLowerCase().includes("email")
+        ) {
+          console.log(`Skipping element ${index} - Email component`);
+          return;
+        }
+
+        // For MusicPlayer, store position differently since it has its own positioning logic
+        const isMusicPlayer = element.className
+          .toLowerCase()
+          .includes("musicplayer");
+        if (isMusicPlayer) {
+          console.log(`Found MusicPlayer element ${index}`);
+        }
+
+        // Store current position before animating off-screen
+        const elementKey = element.id || `element-${index}`;
+        const currentX = gsap.getProperty(element, "x") || 0;
+        const currentY = gsap.getProperty(element, "y") || 0;
+        const currentRotation = gsap.getProperty(element, "rotation") || 0;
+
+        // Store the last known position
+        lastKnownPositions.current.set(elementKey, {
+          x: currentX,
+          y: currentY,
+          rotation: currentRotation,
+          isMusicPlayer: isMusicPlayer,
+        });
+
+        // Store original position only if it hasn't been stored yet
+        if (!originalPositions.current.has(elementKey)) {
+          let finalX = currentX;
+          let finalY = currentY;
+
+          if (isMusicPlayer) {
+            const rect = element.getBoundingClientRect();
+            const computedStyle = window.getComputedStyle(element);
+
+            if (computedStyle.position === "fixed") {
+              finalX = currentX !== 0 ? currentX : rect.left || finalX;
+              finalY = currentY !== 0 ? currentY : rect.top || finalY;
+            }
+
+            console.log(`MusicPlayer position details:`, {
+              gsapX: currentX,
+              gsapY: currentY,
+              rectLeft: rect.left,
+              rectTop: rect.top,
+              finalX,
+              finalY,
+            });
+          }
+
+          originalPositions.current.set(elementKey, {
+            x: finalX,
+            y: finalY,
+            rotation: currentRotation,
+            isMusicPlayer: isMusicPlayer,
+          });
+          console.log(
+            `Stored original position for ${elementKey}:`,
+            originalPositions.current.get(elementKey)
+          );
+        }
+
+        console.log(`Animating element ${index} off-screen`);
+        const pos = getComponentOffScreenPosition();
+        console.log(`Target position:`, pos);
+
+        gsap.to(element, {
+          x: pos.x,
+          y: pos.y,
+          rotation: Math.random() * 30 - 15,
+          duration: 1.2,
+          ease: "power2.out",
+          onComplete: () =>
+            console.log(`Animation complete for element ${index}`),
+        });
+      });
+    }, 100); // 100ms delay to allow minimization
+  };
+
+  // Function to handle theme button visibility for individual image expansion
+  const handleThemeButtonForImage = (hide) => {
+    const themeButton = document.querySelector('[class*="flowerContainer"]');
+    if (themeButton) {
+      if (hide) {
+        // Hide theme button when expanding individual image
+        gsap.to(themeButton, {
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      } else {
+        // Show theme button when minimizing individual image
+        gsap.to(themeButton, {
+          opacity: 1,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+      }
+    }
+  };
+
+  // Function to restore components to their original positions
+  const restoreComponentsToOriginalPositions = () => {
+    console.log("restoreComponentsToOriginalPositions called");
+
+    // Small delay to ensure any animations have completed
+    setTimeout(() => {
+      // Get all draggable wrapper elements and MusicPlayer
+      const allDraggables = document.querySelectorAll(
+        '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
+      );
+      console.log("Found draggable elements to restore:", allDraggables.length);
+
+      allDraggables.forEach((element, index) => {
+        // Skip if this is part of the ImageGallery
+        if (element.closest(".interactive-element")) {
+          console.log(`Skipping element ${index} - part of gallery`);
+          return;
+        }
+
+        // Skip Email component (keep this stationary)
+        if (
+          element.className.toLowerCase().includes("email") ||
+          element.id?.toLowerCase().includes("email")
+        ) {
+          console.log(
+            `Skipping element ${index} - Email component during restore`
+          );
+          return;
+        }
+
+        const elementKey = element.id || `element-${index}`;
+        const lastKnownPos = lastKnownPositions.current.get(elementKey);
+        const isMusicPlayer = element.className
+          .toLowerCase()
+          .includes("musicplayer");
+
+        if (lastKnownPos) {
+          console.log(
+            `Restoring element ${index} to last known position:`,
+            lastKnownPos
+          );
+
+          // For MusicPlayer, use a longer duration and different approach
+          const duration = isMusicPlayer ? 1.0 : 0.7;
+
+          gsap.to(element, {
+            x: lastKnownPos.x,
+            y: lastKnownPos.y,
+            rotation: lastKnownPos.rotation,
+            duration: duration,
+            ease: "power2.out",
+            onComplete: () => {
+              console.log(`Restoration complete for element ${index}`);
+
+              // For MusicPlayer, ensure position is locked after restoration
+              if (isMusicPlayer) {
+                // Add a class to indicate we're restoring position
+                element.classList.add("position-restoring");
+
+                setTimeout(() => {
+                  gsap.set(element, {
+                    x: lastKnownPos.x,
+                    y: lastKnownPos.y,
+                  });
+
+                  // Remove the flag after a longer delay
+                  setTimeout(() => {
+                    element.classList.remove("position-restoring");
+                  }, 500);
+                }, 50);
+              }
+            },
+          });
+        } else {
+          console.log(`No last known position found for element ${index}`);
+        }
+      });
+    }, 100); // 100ms delay to ensure proper timing
+  };
+
   const shuffleImages = () => {
     if (!isVisible) {
       // If images are hidden, bring them back first
@@ -81,8 +322,10 @@ const ImageGallery = () => {
   };
 
   const toggleImages = () => {
-    setIsVisible(!isVisible);
+    const newVisibility = !isVisible;
+    setIsVisible(newVisibility);
 
+    // Animate gallery images
     imageRefs.current.forEach((ref) => {
       if (!ref) return;
 
@@ -96,6 +339,26 @@ const ImageGallery = () => {
         stagger: 0.05,
       });
     });
+
+    // Handle component animations based on gallery visibility
+    if (newVisibility) {
+      // Gallery is becoming visible, fly other components off-screen
+      flyComponentsOffScreen();
+    } else {
+      // Gallery is closing, restore components and their visibility
+      restoreComponentsToOriginalPositions();
+      setShowAbout(true);
+      setShowBrushCanvas(true);
+      setShowMusicPlayer(true);
+      setShowEmail(true);
+      setShowAnalogClock(true);
+
+      // Force recreation of draggables after a delay to ensure proper state restoration
+      setTimeout(() => {
+        // Dispatch a custom event to tell components to recreate their draggables
+        window.dispatchEvent(new CustomEvent("recreateDraggables"));
+      }, 200);
+    }
   };
 
   const getWindowCenter = () => {
@@ -106,6 +369,7 @@ const ImageGallery = () => {
   };
 
   const handleDetailClick = (index, e) => {
+    // eslint-disable-next-line no-param-reassign
     e = e || { stopPropagation: () => {} };
     e.stopPropagation();
 
@@ -132,17 +396,23 @@ const ImageGallery = () => {
         onComplete: () => {
           setSelectedImage(null);
 
-          // First restore visibility
-          setShowAbout(true);
-          setShowBrushCanvas(true);
-          setShowMusicPlayer(true);
-          setShowEmail(true);
+          // Show theme button when minimizing an image
+          handleThemeButtonForImage(false);
 
-          // Then reset active component with a delay to allow position restoration
-          setTimeout(() => {
-            // This will trigger position restoration in the components
-            setActiveComponent(null);
-          }, 50);
+          // Only restore visibility if the gallery itself is hidden
+          if (!isVisible) {
+            setShowAbout(true);
+            setShowBrushCanvas(true);
+            setShowMusicPlayer(true);
+            setShowEmail(true);
+            setShowAnalogClock(true);
+          }
+
+          // Reset active component immediately
+          setActiveComponent(null);
+
+          // Reset z-index so theme button can stay on top of non-selected images
+          gsap.set(imageRefs.current[index], { zIndex: 1 });
         },
       });
     } else {
@@ -157,6 +427,10 @@ const ImageGallery = () => {
           onStart: () => {
             draggableInstances.current[selectedImage].enable();
           },
+          onComplete: () => {
+            // Reset z-index for previously selected image
+            gsap.set(imageRefs.current[selectedImage], { zIndex: 1 });
+          },
         });
       }
 
@@ -165,7 +439,12 @@ const ImageGallery = () => {
       setShowAbout(false);
       setShowBrushCanvas(false);
       setShowMusicPlayer(false);
+      setShowAnalogClock(false);
       setActiveComponent("image");
+
+      // Hide theme button when expanding an image
+      handleThemeButtonForImage(true);
+
       zIndexCounter.current += 1;
 
       gsap.to(imageRefs.current[index], {
@@ -233,17 +512,15 @@ const ImageGallery = () => {
           allowEventDefault: true,
           allowContextMenu: true,
           onClick: function () {
-            zIndexCounter.current += 1;
             gsap.set(this.target, {
-              zIndex: zIndexCounter.current,
+              zIndex: getNextZIndex(),
             });
           },
           onDragStart: function () {
-            zIndexCounter.current += 1;
             gsap.to(this.target, {
               scale: 1.1,
               duration: 0.2,
-              zIndex: zIndexCounter.current,
+              zIndex: getNextZIndex(),
             });
           },
           onDragEnd: function () {
@@ -291,6 +568,13 @@ const ImageGallery = () => {
     };
   }, []); // Empty dependency array to run only once on mount
 
+  // Helper to keep regular images below Theme button (Theme button z-index = 550)
+  const getNextZIndex = () => {
+    // Cycle between 1 and 500
+    zIndexCounter.current = (zIndexCounter.current % 500) + 1;
+    return zIndexCounter.current;
+  };
+
   return (
     <>
       {selectedImage === null && showWorkButton && (
@@ -320,9 +604,8 @@ const ImageGallery = () => {
           <>
             <div
               className={styles.backdrop}
-              onClick={(e) => {
+              onClick={() => {
                 handleDetailClick(selectedImage, { stopPropagation: () => {} });
-                setShowAbout(false);
               }}
             />
             <button

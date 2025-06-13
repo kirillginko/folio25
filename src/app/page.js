@@ -25,7 +25,7 @@ export default function Home() {
   const fluidBackgroundRef = useRef(null);
 
   const {
-    showAbout,
+    showThemeSelector,
     isTransitioning,
     setIsTransitioning,
     isRotating,
@@ -137,7 +137,7 @@ export default function Home() {
           className={styles.main}
           style={{ opacity: 0 }}
         >
-          {showAbout && (
+          {showThemeSelector && (
             <div
               className={`
                 ${styles.flowerContainer} 

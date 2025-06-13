@@ -115,6 +115,13 @@ const About = () => {
   useEffect(() => {
     gsap.registerPlugin(Draggable);
 
+    const handleRecreateDraggables = () => {
+      // Force recreation of draggable when gallery interaction is complete
+      setTimeout(() => {
+        createDraggable();
+      }, 50);
+    };
+
     const createDraggable = () => {
       // Only create draggable if component should be draggable
       if (isMinimized || !isMobile) {
@@ -181,11 +188,18 @@ const About = () => {
     // Call the listener when activeComponent changes
     imageClosedListener();
 
+    // Add event listener for forced recreation
+    window.addEventListener("recreateDraggables", handleRecreateDraggables);
+
     // Clean up on unmount
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
+      window.removeEventListener(
+        "recreateDraggables",
+        handleRecreateDraggables
+      );
     };
   }, [isMinimized, isMobile, activeComponent, showAbout]);
 

@@ -456,6 +456,13 @@ const BrushCanvas = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
+    const handleRecreateDraggables = () => {
+      // Force recreation of draggable when gallery interaction is complete
+      setTimeout(() => {
+        createDraggable();
+      }, 50);
+    };
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
@@ -498,12 +505,19 @@ const BrushCanvas = () => {
 
     createDraggable();
 
+    // Add event listener for forced recreation
+    window.addEventListener("recreateDraggables", handleRecreateDraggables);
+
     // Clean up
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
       window.removeEventListener("resize", checkMobile);
+      window.removeEventListener(
+        "recreateDraggables",
+        handleRecreateDraggables
+      );
     };
   }, [isMinimized, isMobile]);
 

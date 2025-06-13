@@ -62,8 +62,16 @@ const AnalogClock = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
+    const handleRecreateDraggables = () => {
+      // Force recreation of draggable when gallery interaction is complete
+      setTimeout(() => {
+        createDraggable();
+      }, 50);
+    };
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
+    window.addEventListener("recreateDraggables", handleRecreateDraggables);
 
     gsap.registerPlugin(Draggable);
     createDraggable();
@@ -73,6 +81,10 @@ const AnalogClock = () => {
         draggableInstance.current.kill();
       }
       window.removeEventListener("resize", checkMobile);
+      window.removeEventListener(
+        "recreateDraggables",
+        handleRecreateDraggables
+      );
     };
   }, [isMinimized, isMobile]);
 
