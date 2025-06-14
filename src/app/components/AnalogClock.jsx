@@ -12,8 +12,7 @@ const AnalogClock = () => {
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
-  const positionSaved = useRef(false);
+
   const isInitialPositionSet = useRef(false);
   const {
     showAnalogClock,
@@ -42,6 +41,7 @@ const AnalogClock = () => {
       activeCursor: "grabbing",
       edgeResistance: 0.65,
       dragResistance: 0.05,
+      zIndexBoost: true,
       onDragStart: function () {
         gsap.to(this.target, {
           scale: isMinimized ? 1.05 : 1.02,
@@ -63,7 +63,6 @@ const AnalogClock = () => {
     };
 
     const handleRecreateDraggables = () => {
-      // Force recreation of draggable when gallery interaction is complete
       setTimeout(() => {
         createDraggable();
       }, 50);
@@ -97,17 +96,14 @@ const AnalogClock = () => {
         const windowHeight = window.innerHeight;
         const padding = 20;
 
-        // Get current transform position
         const currentX = gsap.getProperty(containerRef.current, "x");
         const currentY = gsap.getProperty(containerRef.current, "y");
 
-        // Calculate bounds
         const maxX = windowWidth - rect.width - padding;
         const maxY = windowHeight - rect.height - padding;
         const minX = padding;
         const minY = padding;
 
-        // Check if current position is out of bounds
         if (
           currentX < minX ||
           currentX > maxX ||
@@ -128,7 +124,7 @@ const AnalogClock = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Initial positioning - only runs once
+  // Initial positioning
   useEffect(() => {
     if (isInitialPositionSet.current) return;
 
@@ -138,11 +134,9 @@ const AnalogClock = () => {
         const viewportHeight = window.innerHeight;
         const element = containerRef.current.getBoundingClientRect();
 
-        // Position in top-right corner with some padding
         let newX = viewportWidth - element.width - 40;
-        let newY = 200; // 100px from top
+        let newY = 200;
 
-        // Ensure it stays within bounds
         newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
         newY = Math.max(
           20,
@@ -158,202 +152,10 @@ const AnalogClock = () => {
       }
     };
 
-    // Initial position with a slight delay to ensure the component is mounted
     setTimeout(setInitialPosition, 100);
   }, []);
 
-  // Apply smooth animation for expansion/minimization
-  useEffect(() => {
-    const adjustPositionAndSize = () => {
-      if (!containerRef.current || !clockContainerRef.current) return;
-
-      const clockElement = clockContainerRef.current;
-
-      // Simpler approach: immediately apply CSS classes first
-      if (isMinimized) {
-        clockContainerRef.current.classList.add(styles.minimizedContainer);
-        clockContainerRef.current.classList.remove(styles.normalContainer);
-      } else {
-        clockContainerRef.current.classList.add(styles.normalContainer);
-        clockContainerRef.current.classList.remove(styles.minimizedContainer);
-      }
-
-      // Handle mobile classes
-      if (isMobile && !isMinimized) {
-        containerRef.current.classList.add(styles.draggableWrapperMobile);
-        if (draggableInstance.current) {
-          draggableInstance.current.kill();
-        }
-      } else {
-        containerRef.current.classList.remove(styles.draggableWrapperMobile);
-        createDraggable();
-      }
-
-      // Clear any existing animations to prevent conflicts
-      gsap.killTweensOf(clockElement);
-      gsap.killTweensOf(containerRef.current);
-
-      // Target dimensions - use simplest approach
-      if (isMobile && !isMinimized) {
-        // EXPANDING on mobile: single, direct animation
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const targetWidth = Math.min(viewportWidth * 0.9, viewportHeight * 0.9);
-        const targetHeight = targetWidth;
-        const centerX = (viewportWidth - targetWidth) / 2;
-        const centerY = (viewportHeight - targetHeight) / 2;
-
-        // Direct center positioning without animation
-        gsap.set(containerRef.current, {
-          x: centerX,
-          y: centerY,
-        });
-
-        // Animate size only
-        gsap.to(clockElement, {
-          width: targetWidth,
-          height: targetHeight,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      } else if (isMinimized) {
-        // MINIMIZING: simpler, direct approach
-        const targetPosition =
-          lastPosition.x !== 0
-            ? { x: lastPosition.x, y: lastPosition.y }
-            : { x: window.innerWidth - 100, y: 200 };
-
-        // First set minimized size instantly
-        gsap.set(clockElement, {
-          width: 80,
-          height: 80,
-        });
-
-        // Then animate position if needed (mobile-only)
-        if (isMobile) {
-          gsap.to(containerRef.current, {
-            x: targetPosition.x,
-            y: targetPosition.y,
-            duration: 0.25,
-            ease: "power2.inOut",
-          });
-        }
-      } else {
-        // Desktop expansion: simple animation
-        gsap.to(clockElement, {
-          width: 300,
-          height: 300,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      }
-
-      // Control hour numbers visibility
-      const hourNumbers = document.querySelectorAll(`.${styles.hourNumber}`);
-      if (isMinimized) {
-        // Instantly hide numbers when minimizing
-        gsap.set(hourNumbers, { opacity: 0 });
-      } else {
-        // Fade in numbers when expanding
-        gsap.to(hourNumbers, {
-          opacity: 1,
-          duration: 0.2,
-          ease: "power2.inOut",
-        });
-      }
-    };
-
-    // Use direct execution with small delay for safety
-    const timer = setTimeout(adjustPositionAndSize, 5);
-    return () => clearTimeout(timer);
-  }, [isMinimized, isMobile, lastPosition]);
-
-  // Update effect to handle position saving when activeComponent changes
-  useEffect(() => {
-    // Save position when any component becomes active or changes
-    if (containerRef.current) {
-      const currentX = gsap.getProperty(containerRef.current, "x");
-      const currentY = gsap.getProperty(containerRef.current, "y");
-
-      // Only save position if it's valid and different from the initial values
-      if (
-        currentX !== undefined &&
-        currentY !== undefined &&
-        (currentX !== 0 || currentY !== 0)
-      ) {
-        // Save position at two points:
-        // 1. When a component becomes active and position isn't saved yet
-        // 2. When activeComponent is null (everything is minimized) to capture latest position
-        if (
-          (activeComponent !== null && !positionSaved.current) ||
-          activeComponent === null
-        ) {
-          setLastPosition({ x: currentX, y: currentY });
-          positionSaved.current = activeComponent !== null;
-        }
-      }
-    }
-  }, [activeComponent]);
-
-  // Effect to restore position
-  useEffect(() => {
-    // Restore position when components are minimized and we have a valid saved position
-    if (
-      activeComponent === null &&
-      containerRef.current &&
-      lastPosition.x !== 0 &&
-      lastPosition.y !== 0
-    ) {
-      gsap.set(containerRef.current, {
-        x: lastPosition.x,
-        y: lastPosition.y,
-      });
-
-      // Recreate draggable after position restoration
-      createDraggable();
-    }
-  }, [activeComponent, lastPosition]);
-
-  // Position reset safety check
-  useEffect(() => {
-    // This is a safety check to reset the position if the clock ends up at 0,0
-    const safetyCheckTimer = setTimeout(() => {
-      if (containerRef.current) {
-        const currentX = gsap.getProperty(containerRef.current, "x");
-        const currentY = gsap.getProperty(containerRef.current, "y");
-
-        // If the position is at the origin (potentially a reset issue)
-        // and we have a valid last position
-        if (
-          currentX === 0 &&
-          currentY === 0 &&
-          lastPosition.x !== 0 &&
-          lastPosition.y !== 0
-        ) {
-          gsap.set(containerRef.current, {
-            x: lastPosition.x,
-            y: lastPosition.y,
-          });
-        }
-      }
-    }, 500); // Check after a short delay to allow for normal positioning
-
-    return () => clearTimeout(safetyCheckTimer);
-  }, [lastPosition, activeComponent]);
-
-  // Update effect to handle z-index changes when activeComponent changes
-  useEffect(() => {
-    if (containerRef.current) {
-      if (activeComponent === "image") {
-        // When an image is expanded, ensure the clock is behind the backdrop
-        gsap.set(containerRef.current, { zIndex: 50 });
-      } else {
-        // Restore normal z-index when no image is expanded
-        gsap.set(containerRef.current, { zIndex: 2000 });
-      }
-    }
-  }, [activeComponent]);
-
+  // Clock update
   useEffect(() => {
     const updateClock = () => {
       const now = new Date();
@@ -429,7 +231,6 @@ const AnalogClock = () => {
             <div ref={minuteHandRef} className={styles.minuteHand}></div>
             <div ref={secondHandRef} className={styles.secondHand}></div>
 
-            {/* Hour markers and numbers */}
             {Array.from({ length: 12 }).map((_, i) => {
               const angle = i * 30;
               const markerRadius = isMinimized
@@ -460,7 +261,6 @@ const AnalogClock = () => {
               );
             })}
 
-            {/* Minute markers */}
             {Array.from({ length: 60 }).map((_, i) => {
               const angle = i * 6;
               const markerRadius = isMinimized

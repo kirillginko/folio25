@@ -1,7 +1,6 @@
 .draggableWrapper {
   position: fixed;
   width: auto;
-  z-index: 2000;
   transition: opacity 0.2s ease;
 }
 
@@ -12,11 +11,11 @@
 }
 
 .draggableWrapperExpanded {
-  z-index: 51;
+  /* Rely on GSAP zIndexBoost instead */
 }
 
 .draggableWrapperBehind {
-  z-index: 50;
+  /* Rely on GSAP zIndexBoost instead */
 }
 
 .draggableWrapperMobile {
@@ -27,7 +26,7 @@
   width: 90vw;
   height: 90vw;
   margin: 0;
-  z-index: 10000 !important; /* Must be higher than backdrop */
+  z-index: 10000; /* Must be above backdrop (9999) */
 }
 
 .clockContainer {
@@ -120,7 +119,6 @@
   height: 12px;
   background-color: #000;
   border-radius: 50%;
-  z-index: 10;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -132,7 +130,6 @@
   position: absolute;
   transform-origin: bottom center;
   border-radius: 4px;
-  z-index: 5;
 }
 
 .hourHand {
@@ -144,7 +141,6 @@
   bottom: 50%;
   left: calc(50% - 2px);
   border-radius: 4px;
-  z-index: 5;
 }
 
 .minuteHand {
@@ -156,7 +152,6 @@
   bottom: 50%;
   left: calc(50% - 1.5px);
   border-radius: 4px;
-  z-index: 5;
 }
 
 .secondHand {
@@ -168,7 +163,6 @@
   bottom: 50%;
   left: calc(50% - 1px);
   border-radius: 4px;
-  z-index: 5;
 }
 
 .hour {
@@ -189,7 +183,6 @@
   top: -25px;
   right: 0px;
   cursor: pointer;
-  z-index: 11;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
@@ -373,7 +366,6 @@
     position: fixed;
     width: 80px;
     height: 80px;
-    z-index: 10;
   }
 
   .minimizedContainer {
@@ -391,7 +383,6 @@
     position: absolute;
     top: -25px;
     right: 0;
-    z-index: 51001;
   }
 
   /* Ensure the clock container fills the wrapper on mobile when expanded */
@@ -410,7 +401,11 @@
   }
 
   .draggableWrapperMobile .expandButton {
-    z-index: 10001 !important; /* Above the clock container */
+  }
+
+  /* Ensure mobile expanded components are above backdrop */
+  .draggableWrapper.draggableWrapperMobile {
+    z-index: 10000 !important; /* Must be above backdrop (9999) */
   }
 }
 
@@ -427,7 +422,6 @@
     position: fixed;
     width: 80px;
     height: 80px;
-    z-index: 10;
   }
 
   .minimizedContainer {

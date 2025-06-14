@@ -13,7 +13,7 @@
   height: 60px;
   max-width: min(500px, calc(100vw - 40px));
   gap: 10px;
-  z-index: 2000;
+  z-index: inherit; /* Inherit from parent wrapper */
   margin-top: -40px;
 }
 
@@ -228,33 +228,9 @@
   }
 }
 
-.visualizerContainer {
-  position: absolute;
-  bottom: 3px; /* Height of music container */
-  left: 0;
-  width: 600px;
-  height: 150px;
-  border-radius: 8px 8px 30px 30px;
-  overflow: hidden;
-  background: transparent;
-  pointer-events: none;
-  z-index: 1;
-}
-
 /* Adjust for minimized state */
 .minimizedContainer .visualizerContainer {
   display: none;
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .visualizerContainer {
-    width: calc(100vw - 40px);
-    height: 120px;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
 }
 
 .musicPlayerWrapper {
@@ -265,7 +241,8 @@
   user-select: none;
   width: auto;
   transition: width 0.3s ease;
-  z-index: 2000;
+  will-change: transform;
+  pointer-events: auto;
 }
 
 .visualizerWrapper {
@@ -302,7 +279,7 @@
   padding: 0 15px;
   height: 60px;
   gap: 10px;
-  z-index: 2; /* Ensure music container is on top */
+  z-index: inherit; /* Inherit from parent wrapper */
 }
 
 @media (max-width: 640px) {

@@ -92,7 +92,6 @@
   top: -25px;
   right: 0px;
   cursor: pointer;
-  z-index: 11;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
@@ -186,7 +185,6 @@
   position: absolute;
   top: 160px;
   right: 20px;
-  z-index: 10;
 }
 
 /* Add new containerWrapper style */
@@ -198,7 +196,6 @@
 /* Add draggable wrapper */
 .draggableWrapper {
   position: fixed;
-  z-index: 2000;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
   will-change: transform;
@@ -215,7 +212,7 @@
 
 /* Add this class for when expanded */
 .draggableWrapperExpanded {
-  z-index: 51; /* Higher than backdrop */
+  /* Rely on GSAP zIndexBoost instead */
 }
 
 .imageWrapper {
@@ -268,7 +265,6 @@
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  z-index: 12;
   width: 90vw;
 }
 
@@ -291,7 +287,7 @@
     width: 90vw !important;
     height: 80vh !important;
     margin: 0 !important;
-    z-index: 10000 !important;
+    z-index: 10000 !important; /* Must be above backdrop (9999) */
   }
 
   /* Keep minimized state draggable and properly sized */
@@ -299,7 +295,6 @@
     position: fixed;
     width: 80px !important;
     height: 80px !important;
-    z-index: 10;
   }
 
   .minimizedContainer {
@@ -318,7 +313,6 @@
     position: absolute;
     top: -25px !important;
     right: 0px !important;
-    z-index: 11;
   }
 
   /* Ensure smooth transition for the design container */
@@ -330,7 +324,6 @@
 /* Remove transform transition to prevent stutter */
 .draggableWrapper {
   position: fixed;
-  z-index: 2000;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
   will-change: transform;
@@ -342,5 +335,10 @@
   .draggableWrapper:has(.normalContainer) .designContainer {
     width: 100% !important;
     height: 100% !important;
+  }
+
+  /* Ensure mobile expanded components are above backdrop */
+  .draggableWrapper.mobileFixed {
+    z-index: 10000 !important; /* Must be above backdrop (9999) */
   }
 }

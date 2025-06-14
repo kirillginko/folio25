@@ -140,6 +140,7 @@ const About = () => {
           edgeResistance: 0.65,
           dragResistance: 0.05,
           zIndexBoost: true,
+
           onDragStart: function () {
             gsap.to(this.target, {
               scale: isMinimized ? 1.05 : 1.02,
@@ -330,19 +331,6 @@ const About = () => {
 
       if (currentX !== undefined && currentY !== undefined) {
         positionBeforeImageRef.current = { x: currentX, y: currentY };
-      }
-    }
-  }, [activeComponent]);
-
-  // Update effect to handle z-index changes when activeComponent changes
-  useEffect(() => {
-    if (containerRef.current) {
-      if (activeComponent === "image") {
-        // When an image is expanded, ensure the component is behind the backdrop
-        gsap.set(containerRef.current, { zIndex: 50 });
-      } else {
-        // Restore normal z-index when no image is expanded
-        gsap.set(containerRef.current, { zIndex: 2000 });
       }
     }
   }, [activeComponent]);

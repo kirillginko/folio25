@@ -30,6 +30,13 @@ const MusicPlayer = () => {
   useEffect(() => {
     gsap.registerPlugin(Draggable);
 
+    const handleRecreateDraggables = () => {
+      // Force recreation of draggable when gallery interaction is complete
+      setTimeout(() => {
+        createDraggable();
+      }, 50);
+    };
+
     const createDraggable = () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
@@ -58,10 +65,17 @@ const MusicPlayer = () => {
 
     createDraggable();
 
+    // Add event listener for forced recreation
+    window.addEventListener("recreateDraggables", handleRecreateDraggables);
+
     return () => {
       if (draggableInstance.current) {
         draggableInstance.current.kill();
       }
+      window.removeEventListener(
+        "recreateDraggables",
+        handleRecreateDraggables
+      );
     };
   }, [isMusicPlayerMinimized]);
 
@@ -381,12 +395,7 @@ const MusicPlayer = () => {
 
   return (
     <div style={{ display: showMusicPlayer ? "block" : "none" }}>
-      <div
-        ref={containerRef}
-        className={`${styles.musicPlayerWrapper} ${
-          isMusicPlayerMinimized ? styles.minimizedContainer : ""
-        }`}
-      >
+      <div ref={containerRef} className={styles.musicPlayerWrapper}>
         {!isMusicPlayerMinimized && (
           <div className={styles.visualizerWrapper}>
             <div className={styles.visualizerContainer}>
