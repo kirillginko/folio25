@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import {
   Text3D,
@@ -24,13 +24,13 @@ function useResponsiveCamera() {
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
         setCameraSettings({
-          position: [-10, 7, 32], // Adjusted mobile position to match new perspective
-          fov: 75,
+          position: [-20, 7, 45], // Adjusted mobile position to match new perspective
+          fov: 85,
         });
       } else {
         setCameraSettings({
-          position: [-12, 6, 17.1], // More to the left and lower
-          fov: 65,
+          position: [-14, 6, 25.1], // More to the left and lower
+          fov: 70,
         });
       }
     }
@@ -110,8 +110,8 @@ function Ground() {
     position: [0, -2, 0],
     args: [100, 1, 100],
     material: {
-      restitution: 0.2, // Reduced bounciness
-      friction: 0.8, // Increased friction
+      restitution: 0.3, // Slightly more bounce to prevent sticking
+      friction: 0.5, // Reduced friction to prevent fragments getting stuck
     },
   }));
 
@@ -143,65 +143,69 @@ function Ground() {
   );
 }
 
-// A single fragment of an exploded letter
+// Shared geometry and material for performance
+const sharedFragmentGeometry = new THREE.BoxGeometry(1, 1, 1);
+const sharedFragmentMaterial = new THREE.MeshPhysicalMaterial({
+  color: "#32CD32",
+  metalness: 0.9,
+  roughness: 0.1,
+  envMapIntensity: 2,
+  side: 2,
+  clearcoat: 1,
+  clearcoatRoughness: 0.1,
+  thickness: 2,
+});
+
+// Optimized fragment component with shared materials
 const LetterFragment = React.memo(function LetterFragment({
   position,
   rotation,
   size,
-  color,
   velocity,
 }) {
   const [ref] = useBox(() => ({
-    mass: 0.2, // Increased mass for better physical response
-    position: [
-      position[0],
-      position[1] + 0.5, // Raise position slightly to avoid ground intersection
-      position[2],
-    ],
+    mass: 0.15, // Slightly reduced mass for better performance
+    position: [position[0], position[1], position[2]], // Use exact position since we already positioned safely
     rotation,
     args: size,
     velocity,
     angularVelocity: [
-      (Math.random() - 0.5) * 3, // Reduced angular velocity
-      (Math.random() - 0.5) * 3,
-      (Math.random() - 0.5) * 3,
+      (Math.random() - 0.5) * 1.0, // Minimal angular velocity for calm motion
+      (Math.random() - 0.5) * 1.0,
+      (Math.random() - 0.5) * 1.0,
     ],
-    linearDamping: 0.3, // Increased damping to reduce bouncing
-    angularDamping: 0.3, // Increased angular damping
+    linearDamping: 0.3, // Slightly reduced damping for better motion
+    angularDamping: 0.4,
     material: {
-      friction: 0.3, // Add friction to prevent sliding
-      restitution: 0.2, // Lower restitution to reduce bounciness
+      friction: 0.3, // Reduced friction to prevent sticking
+      restitution: 0.25, // Slightly higher restitution for better bounce
     },
-    sleepSpeedLimit: 0.3, // Allow physics objects to sleep when nearly stationary
-    sleepTimeLimit: 0.8, // Time before sleep is applied (in seconds)
-    allowSleep: true, // Enable sleep for better performance
+    sleepSpeedLimit: 0.2, // Lower threshold for sleep
+    sleepTimeLimit: 0.5, // Faster sleep
+    allowSleep: true,
   }));
 
+  // Use shared geometry and material for better performance
   return (
-    <mesh ref={ref} castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshPhysicalMaterial
-        color={color}
-        metalness={0.9}
-        roughness={0.1}
-        envMapIntensity={2}
-        side={2}
-        clearcoat={1}
-        clearcoatRoughness={0.1}
-        thickness={2}
-      />
-    </mesh>
+    <mesh
+      ref={ref}
+      castShadow
+      receiveShadow
+      geometry={sharedFragmentGeometry}
+      material={sharedFragmentMaterial}
+      scale={size}
+    />
   );
 });
 
 // Individual letter collision box
 function LetterCollider({ position, index, onCollide }) {
-  const letterWidth = 2.5; // Slightly narrower than visual size for precision
+  const letterWidth = 3.8; // Slightly narrower than visual size for precision
 
   const [ref] = useBox(() => ({
     mass: 0,
     position,
-    args: [letterWidth, 3, 3], // Letter collision size
+    args: [letterWidth, 4.5, 4.5], // Letter collision size
     material: { restitution: 0.3 },
     userData: { type: "letter", index },
     onCollide: (e) => {
@@ -213,7 +217,7 @@ function LetterCollider({ position, index, onCollide }) {
 
   return (
     <mesh ref={ref} visible={false}>
-      <boxGeometry args={[letterWidth, 3, 3]} />
+      <boxGeometry args={[letterWidth, 4.5, 4.5]} />
       <meshStandardMaterial color="red" transparent opacity={0.1} />
     </mesh>
   );
@@ -234,27 +238,29 @@ const Letter = React.memo(function Letter({
   const [ref, api] = useBox(() => ({
     mass: 0,
     position,
-    args: [2.5, 2.5, 2.5],
+    args: [3.8, 3.8, 3.8],
     material: { restitution: 0.3 },
     userData: { type: "letter", letter, index },
     onCollide: (e) => {
       if (!exploded && e.body.userData?.type === "ball") {
+        // Immediately disable collision to prevent fragment trapping
+        api.position.set(0, -1000, 0);
+        api.mass.set(0);
+
         // Trigger explosion directly from letter collision
         setExploded(true);
         createLetterFragments(position, e.body.velocity || ballVelocity);
         setLetterVisible(false);
-        // Remove the physics body completely
-        api.position.set(0, -1000, 0); // Move far away
-        api.mass.set(0);
       }
     },
   }));
 
-  // Generate fragment data without creating physics objects
+  // Generate fragment data without creating physics objects - optimized count for performance
   const generateFragmentData = (count, letterChar) => {
     const fragmentData = [];
+    const optimizedCount = Math.min(count, 10); // Allow up to 10 fragments for better visual impact
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < optimizedCount; i++) {
       // LARGER SIZE for better visual impact with fewer fragments
       const size = [
         0.6 + Math.random() * 0.8, // Increased base size
@@ -276,114 +282,147 @@ const Letter = React.memo(function Letter({
         distanceWeight: Math.pow(Math.random(), 1.5), // Adjusted power for more center bias
         theta: Math.random() * Math.PI * 2, // Horizontal angle
         phi: Math.random() * Math.PI, // Vertical angle
-        color: letterChar === "T" ? "#ff4400" : "#32CD32",
+        color: "#32CD32", // Consistent green color for all letters
       });
     }
 
     return fragmentData;
   };
 
-  // Create physical fragments based on impact
-  const createLetterFragments = (pos, impactVelocity = [0, 0, 10]) => {
-    if (!fragmentsRef.current) return;
+  // Optimized fragment creation with delayed processing to prevent hitches
+  const createLetterFragments = useCallback(
+    (pos, impactVelocity = [0, 0, 10]) => {
+      if (!fragmentsRef.current) return;
 
-    // Calculate impact point - exact center for better consistency
-    const impactPoint = [...pos];
-
-    // Ball direction normalized
-    const impactDirection = [
-      impactVelocity[0] || 0,
-      impactVelocity[1] || 0,
-      impactVelocity[2] || 0,
-    ];
-
-    // Normalize only if magnitude is non-zero
-    let normalizedDirection = [0, 0, -1]; // Default direction
-    const impactMagnitude = Math.sqrt(
-      impactDirection[0] ** 2 +
-        impactDirection[1] ** 2 +
-        impactDirection[2] ** 2
-    );
-
-    if (impactMagnitude > 0.001) {
-      normalizedDirection = impactDirection.map((v) => v / impactMagnitude);
-    }
-
-    const newFragments = fragmentsRef.current.map((fragData) => {
-      const maxDistance = 3.0; // Increased from 1.5 for wider spread
-      const distance = fragData.distanceWeight * maxDistance;
-
-      // Calculate position relative to impact point using pre-calculated angles
-      // Add more upward bias for dramatic effect
-      const fragPos = [
-        impactPoint[0] +
-          distance * Math.sin(fragData.phi) * Math.cos(fragData.theta),
-        impactPoint[1] +
-          distance * Math.sin(fragData.phi) * Math.sin(fragData.theta) +
-          0.8, // Increased upward bias from 0.3 to 0.8
-        impactPoint[2] + distance * Math.cos(fragData.phi),
+      // Pre-calculate impact data to reduce collision-time computation
+      const impactPoint = [...pos];
+      const impactDirection = [
+        impactVelocity[0] || 0,
+        impactVelocity[1] || 0,
+        impactVelocity[2] || 0,
       ];
 
-      // Size inversely proportional to distance (smaller fragments near impact)
-      const sizeScale = 0.8 + 0.4 * (1 - fragData.distanceWeight);
-      const size = fragData.size.map((s) => s * sizeScale);
+      let normalizedDirection = [0, 0, -1];
+      const impactMagnitude = Math.sqrt(
+        impactDirection[0] ** 2 +
+          impactDirection[1] ** 2 +
+          impactDirection[2] ** 2
+      );
 
-      // Dramatically increased velocity and upward force
-      const velocityScale = 25 * (1 - fragData.distanceWeight * 0.5); // Increased from 10 and adjusted scaling
-      const upwardBoost = 8; // Significant upward force
+      if (impactMagnitude > 0.001) {
+        normalizedDirection = impactDirection.map((v) => v / impactMagnitude);
+      }
 
-      const velocity = [
-        normalizedDirection[0] * velocityScale * 0.8 +
-          (fragPos[0] - impactPoint[0]) * velocityScale * 0.9,
-        normalizedDirection[1] * velocityScale * 0.8 +
-          (fragPos[1] - impactPoint[1]) * velocityScale * 0.9 +
-          upwardBoost, // Add strong upward velocity
-        normalizedDirection[2] * velocityScale * 0.8 +
-          (fragPos[2] - impactPoint[2]) * velocityScale * 0.9,
-      ];
+      // Process fragments in batches to spread work across frames
+      const processFragmentBatch = (startIndex = 0) => {
+        const batchSize = 3; // Process 3 fragments per frame (increased for more fragments)
+        const endIndex = Math.min(
+          startIndex + batchSize,
+          fragmentsRef.current.length
+        );
 
-      return {
-        ...fragData,
-        position: fragPos,
-        size,
-        velocity,
+        const newFragments = [];
+
+        for (let i = startIndex; i < endIndex; i++) {
+          const fragData = fragmentsRef.current[i];
+          const maxDistance = 2.0; // Reduced spread for more centralized explosion
+          const distance = fragData.distanceWeight * maxDistance;
+
+          // Ensure fragments spawn well outside collision area and above ground
+          const minDistance = 2.8; // Reduced minimum distance for tighter grouping
+          const safeDistance = Math.max(distance, minDistance);
+
+          const fragPos = [
+            impactPoint[0] +
+              safeDistance * Math.sin(fragData.phi) * Math.cos(fragData.theta),
+            Math.max(
+              impactPoint[1] +
+                safeDistance *
+                  Math.sin(fragData.phi) *
+                  Math.sin(fragData.theta) +
+                1.5, // More controlled height spawn
+              1.0 // Ensure always above ground level (ground is at -2, so 1.0 is safe)
+            ),
+            impactPoint[2] + safeDistance * Math.cos(fragData.phi),
+          ];
+
+          const sizeScale = 0.8 + 0.4 * (1 - fragData.distanceWeight);
+          const size = fragData.size.map((s) => s * sizeScale);
+
+          const velocityScale = 15 * (1 - fragData.distanceWeight * 0.3); // Reduced velocity for centralized explosion
+          const upwardBoost = 3; // Minimal upward boost for subtle motion
+
+          const velocity = [
+            normalizedDirection[0] * velocityScale * 0.8 +
+              (fragPos[0] - impactPoint[0]) * velocityScale * 0.9,
+            normalizedDirection[1] * velocityScale * 0.8 +
+              (fragPos[1] - impactPoint[1]) * velocityScale * 0.9 +
+              upwardBoost,
+            normalizedDirection[2] * velocityScale * 0.8 +
+              (fragPos[2] - impactPoint[2]) * velocityScale * 0.9,
+          ];
+
+          newFragments.push({
+            ...fragData,
+            position: fragPos,
+            size,
+            velocity,
+          });
+        }
+
+        // Update fragments incrementally
+        if (startIndex === 0) {
+          setFragments(newFragments);
+        } else {
+          setFragments((prev) => [...prev, ...newFragments]);
+        }
+
+        // Continue processing remaining fragments in next frame
+        if (endIndex < fragmentsRef.current.length) {
+          requestAnimationFrame(() => processFragmentBatch(endIndex));
+        }
       };
-    });
 
-    setFragments(newFragments);
-  };
+      // Start batch processing
+      processFragmentBatch(0);
+    },
+    []
+  );
 
   // Pre-generate fragment data on mount to avoid calculation during collision
   useEffect(() => {
-    fragmentsRef.current = generateFragmentData(7, letter);
+    fragmentsRef.current = generateFragmentData(10, letter); // Increased to 8 fragments for better visual impact
   }, [letter]);
 
-  // Handle explosion triggered from parent with optimized timing
+  // Handle explosion triggered from parent with optimized timing and minimal re-renders
   useEffect(() => {
     if (shouldExplode && !exploded) {
-      createLetterFragments(position, ballVelocity);
-      setLetterVisible(false);
-      setExploded(true);
-      // Remove the physics body completely
-      api.position.set(0, -1000, 0); // Move far away
-      api.mass.set(0);
+      // Batch all explosion operations together
+      requestAnimationFrame(() => {
+        // Collision box already removed in onCollide, just handle visuals
+        createLetterFragments(position, ballVelocity);
+        setLetterVisible(false);
+        setExploded(true);
+      });
     }
-  }, [shouldExplode, ballVelocity, exploded, index, letter, position, api]);
+  }, [shouldExplode, ballVelocity, exploded, createLetterFragments, position]);
 
   return (
     <>
       {letterVisible && (
         <>
           <Text3D
-            font="/fonts/Grotesk_Bold.json"
+            font="/fonts/Gill_Sans_Bold.json"
             position={position}
-            size={3}
-            height={2}
+            size={4.5}
+            height={3}
             bevelEnabled
-            bevelSize={0.3}
-            bevelThickness={0.3}
-            bevelSegments={10}
-            curveSegments={32}
+            bevelSize={0.45}
+            bevelThickness={0.45}
+            bevelSegments={12}
+            curveSegments={36}
+            castShadow
+            receiveShadow
           >
             {letter}
             <meshPhysicalMaterial
@@ -401,7 +440,7 @@ const Letter = React.memo(function Letter({
           {/* Only render collision box if not exploded */}
           {!exploded && (
             <mesh ref={ref} position={position} visible={false}>
-              <boxGeometry args={[2.5, 2.5, 2.5]} />
+              <boxGeometry args={[3.8, 3.8, 3.8]} />
               <meshStandardMaterial color="red" transparent opacity={0.2} />
             </mesh>
           )}
@@ -424,18 +463,41 @@ const Letter = React.memo(function Letter({
 
 // Update Scene component's collision handling
 function Scene({ onComplete }) {
-  const letters = "Kirill.Kirill";
+  const letters = "Kirill.Agency";
   const letterArray = letters.split("");
 
-  // Calculate letter positions with explicit center alignment
-  const totalWidth = letterArray.length * 3;
-  const startX = -totalWidth / 2 + 1.5; // Center the word and offset by half letter width
+  // Define custom spacing for each letter based on visual width - increased for better kerning
+  const letterSpacing = {
+    K: 5.2,
+    i: 2.2,
+    r: 3.7,
+    l: 2.9,
+    ".": 3.2,
+    A: 5.2,
+    g: 3.9,
+    e: 3.9,
+    n: 3.9,
+    c: 3.0,
+    y: 3.4,
+  };
 
-  const letterPositions = letterArray.map((letter, i) => {
+  // Calculate letter positions with proper kerning
+  let currentX = 0;
+  const letterPositions = letterArray.map((letter) => {
+    const spacing = letterSpacing[letter] || 2.5; // Default spacing
+    const position = [currentX, 0.5, 0]; // Position letters above ground (ground is at -2, letters need clearance)
+    currentX += spacing;
     return {
       letter,
-      position: [startX + i * 3, 0, 0],
+      position,
     };
+  });
+
+  // Center the entire word
+  const totalWidth = currentX;
+  const centerOffset = -totalWidth / 2;
+  letterPositions.forEach((item) => {
+    item.position[0] += centerOffset;
   });
 
   const wordExplodedRef = useRef(false);
@@ -443,42 +505,41 @@ function Scene({ onComplete }) {
   const [ballImpactVelocity, setBallImpactVelocity] = useState([0, 0, -25]);
   const [lettersToExplode, setLettersToExplode] = useState([]);
 
-  // Handle letter collision - direct and precise
-  const handleLetterCollision = (letterIndex, velocity) => {
-    // Prevent multiple explosions
-    if (wordExplodedRef.current) return;
+  // Optimized collision handler with debouncing and minimal computation
+  const handleLetterCollision = useCallback(
+    (letterIndex, velocity) => {
+      // Prevent multiple explosions
+      if (wordExplodedRef.current) return;
 
-    console.log(
-      `Letter collision: ${letterIndex} (${letterArray[letterIndex]})`
-    );
+      // Mark as exploded immediately to prevent duplicate calls
+      wordExplodedRef.current = true;
 
-    // Mark as exploded
-    wordExplodedRef.current = true;
+      // Simplified impact calculation - only explode hit letter for performance
+      const impactIndices = [letterIndex];
 
-    // Create array of letters to explode (hit letter and maybe adjacent)
-    const impactIndices = [letterIndex];
-
-    // Maybe add adjacent letters based on velocity magnitude
-    const velocityMagnitude = Math.sqrt(
-      velocity[0] * velocity[0] +
+      // Pre-calculate velocity magnitude (faster than sqrt for threshold check)
+      const velocityMagnitudeSquared =
+        velocity[0] * velocity[0] +
         velocity[1] * velocity[1] +
-        velocity[2] * velocity[2]
-    );
+        velocity[2] * velocity[2];
 
-    // For strong impacts, maybe break adjacent letters
-    if (velocityMagnitude > 20) {
-      if (letterIndex > 0) impactIndices.push(letterIndex - 1);
-      if (letterIndex < letterArray.length - 1)
-        impactIndices.push(letterIndex + 1);
-    }
+      // Only add adjacent letters for very strong impacts (avoid sqrt calculation)
+      if (velocityMagnitudeSquared > 400) {
+        // 400 = 20^2
+        if (letterIndex > 0) impactIndices.push(letterIndex - 1);
+        if (letterIndex < letterArray.length - 1)
+          impactIndices.push(letterIndex + 1);
+      }
 
-    console.log("Breaking letters:", impactIndices);
-
-    // Update state
-    setBallImpactVelocity(velocity);
-    setLettersToExplode(impactIndices);
-    setWordExploded(true);
-  };
+      // Batch state updates to prevent multiple re-renders
+      requestAnimationFrame(() => {
+        setBallImpactVelocity(velocity);
+        setLettersToExplode(impactIndices);
+        setWordExploded(true);
+      });
+    },
+    [letterArray.length]
+  );
 
   // Add effect to trigger onComplete after ball launch and collision
   useEffect(() => {
@@ -491,28 +552,51 @@ function Scene({ onComplete }) {
 
   return (
     <>
-      <ambientLight intensity={0.8} />
+      {/* Increased ambient light for more even base illumination */}
+      <ambientLight intensity={1.0} />
+
+      {/* Main directional light centered above the text */}
       <directionalLight
-        position={[10, 10, 5]}
-        intensity={1.5}
+        position={[0, 15, 10]}
+        intensity={1.2}
         castShadow
-        shadow-mapSize={[4096, 4096]}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={20}
-        shadow-camera-bottom={-20}
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-left={-25}
+        shadow-camera-right={25}
+        shadow-camera-top={25}
+        shadow-camera-bottom={-25}
         shadow-camera-near={0.1}
         shadow-camera-far={50}
         shadow-bias={-0.001}
         shadow-normalBias={0.02}
       />
 
+      {/* Additional directional light from the front for even illumination */}
+      <directionalLight
+        position={[-2, 8, 15]}
+        intensity={0.6}
+        color="#ffffff"
+      />
+
+      {/* Point light centered above for consistent reflections */}
       <pointLight
-        position={[0, 10, 0]}
-        intensity={1.5}
+        position={[-1, 12, 5]}
+        intensity={0.9}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.001}
+      />
+
+      {/* Subtle fill lights from sides for balanced illumination */}
+      <pointLight position={[-12, 8, 8]} intensity={0.7} color="#ffffff" />
+      <pointLight position={[12, 8, 8]} intensity={0.4} color="#ffffff" />
+
+      {/* Additional targeted lighting for "Kirill" to brighten it */}
+      <pointLight position={[-8, 6, 12]} intensity={0.8} color="#ffffff" />
+      <directionalLight
+        position={[-10, 10, 8]}
+        intensity={0.6}
+        color="#ffffff"
       />
 
       <Ground />
@@ -562,7 +646,9 @@ export default function FallingText({ onComplete }) {
         <Physics
           gravity={[0, -20, 0]}
           defaultContactMaterial={{ restitution: 0.7 }}
-          iterations={20}
+          iterations={15}
+          tolerance={0.001}
+          broadphase="SAP"
         >
           <Scene onComplete={onComplete} />
         </Physics>
