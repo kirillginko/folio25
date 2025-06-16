@@ -420,8 +420,8 @@ const About = () => {
               </header>
               <div className={styles.imageWrapper}>
                 <Image
-                  src="https://res.cloudinary.com/dtps5ugbf/image/upload/c_crop,ar_1:1/v1736362617/ascii-art_n8ttiz.png"
-                  alt="ASCII Art"
+                  src="https://res.cloudinary.com/dtps5ugbf/image/upload/v1750116973/dither6_ndw6ps.png"
+                  alt="Kirill Ginko"
                   width={600}
                   height={600}
                   priority
