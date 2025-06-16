@@ -16,6 +16,9 @@ const ImageGallery = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const originalPositions = useRef(new Map()); // Store original positions of components
   const lastKnownPositions = useRef(new Map()); // Store last known positions before flying off-screen
+  const isAnimatingComponents = useRef(false); // Track if components are currently animating
+  const animationTimeouts = useRef([]); // Store timeout references for cleanup
+  const isGalleryClosing = useRef(false); // Track if gallery is in the process of closing
   const {
     setShowAbout,
     setShowBrushCanvas,
@@ -25,6 +28,74 @@ const ImageGallery = () => {
     showWorkButton,
     setActiveComponent,
   } = useGlobalState();
+
+  // Helper functions for animation management
+  const clearAllTimeouts = () => {
+    animationTimeouts.current.forEach((timeout) => clearTimeout(timeout));
+    animationTimeouts.current = [];
+  };
+
+  const addTimeout = (callback, delay) => {
+    const timeoutId = setTimeout(callback, delay);
+    animationTimeouts.current.push(timeoutId);
+    return timeoutId;
+  };
+
+  const storeCurrentPositions = () => {
+    // Store current positions of all components before any animation
+    const allDraggables = document.querySelectorAll(
+      '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
+    );
+
+    allDraggables.forEach((element, index) => {
+      // Skip if this is part of the ImageGallery or Email component
+      if (
+        element.closest(".interactive-element") ||
+        element.className.toLowerCase().includes("email") ||
+        element.id?.toLowerCase().includes("email")
+      ) {
+        return;
+      }
+
+      const elementKey = element.id || `element-${index}`;
+      const currentX = gsap.getProperty(element, "x") || 0;
+      const currentY = gsap.getProperty(element, "y") || 0;
+      const isMusicPlayer = element.className
+        .toLowerCase()
+        .includes("musicplayer");
+
+      // Store current position (no rotation for components)
+      lastKnownPositions.current.set(elementKey, {
+        x: currentX,
+        y: currentY,
+        rotation: 0, // Always keep components at 0 rotation
+        isMusicPlayer: isMusicPlayer,
+      });
+
+      // Store original position only if it hasn't been stored yet
+      if (!originalPositions.current.has(elementKey)) {
+        let finalX = currentX;
+        let finalY = currentY;
+
+        if (isMusicPlayer) {
+          const rect = element.getBoundingClientRect();
+          const computedStyle = window.getComputedStyle(element);
+
+          if (computedStyle.position === "fixed") {
+            finalX = currentX !== 0 ? currentX : rect.left || finalX;
+            finalY = currentY !== 0 ? currentY : rect.top || finalY;
+          }
+        }
+
+        originalPositions.current.set(elementKey, {
+          x: finalX,
+          y: finalY,
+          rotation: 0, // Always keep components at 0 rotation
+          isMusicPlayer: isMusicPlayer,
+        });
+      }
+    });
+  };
 
   const getRandomPosition = () => {
     const imageSize = 220;
@@ -96,11 +167,25 @@ const ImageGallery = () => {
   const flyComponentsOffScreen = () => {
     console.log("flyComponentsOffScreen called");
 
+    // Clear any pending timeouts and set animation state
+    clearAllTimeouts();
+    isAnimatingComponents.current = true;
+    isGalleryClosing.current = false; // Reset closing flag when opening
+
+    // Store current positions immediately before any animation
+    storeCurrentPositions();
+
     // Force minimize any expanded components first by resetting activeComponent
     setActiveComponent(null);
 
     // Small delay to allow components to minimize before animating off-screen
-    setTimeout(() => {
+    addTimeout(() => {
+      // Double-check if we should still be animating (user might have closed quickly)
+      if (!isAnimatingComponents.current || isGalleryClosing.current) {
+        console.log("Animation cancelled - components should not fly off");
+        return;
+      }
+
       // Get all draggable wrapper elements (About, BrushCanvas, AnalogClock) and MusicPlayer using attribute selector
       const allDraggables = document.querySelectorAll(
         '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
@@ -125,64 +210,6 @@ const ImageGallery = () => {
           return;
         }
 
-        // For MusicPlayer, store position differently since it has its own positioning logic
-        const isMusicPlayer = element.className
-          .toLowerCase()
-          .includes("musicplayer");
-        if (isMusicPlayer) {
-          console.log(`Found MusicPlayer element ${index}`);
-        }
-
-        // Store current position before animating off-screen
-        const elementKey = element.id || `element-${index}`;
-        const currentX = gsap.getProperty(element, "x") || 0;
-        const currentY = gsap.getProperty(element, "y") || 0;
-        const currentRotation = gsap.getProperty(element, "rotation") || 0;
-
-        // Store the last known position
-        lastKnownPositions.current.set(elementKey, {
-          x: currentX,
-          y: currentY,
-          rotation: currentRotation,
-          isMusicPlayer: isMusicPlayer,
-        });
-
-        // Store original position only if it hasn't been stored yet
-        if (!originalPositions.current.has(elementKey)) {
-          let finalX = currentX;
-          let finalY = currentY;
-
-          if (isMusicPlayer) {
-            const rect = element.getBoundingClientRect();
-            const computedStyle = window.getComputedStyle(element);
-
-            if (computedStyle.position === "fixed") {
-              finalX = currentX !== 0 ? currentX : rect.left || finalX;
-              finalY = currentY !== 0 ? currentY : rect.top || finalY;
-            }
-
-            console.log(`MusicPlayer position details:`, {
-              gsapX: currentX,
-              gsapY: currentY,
-              rectLeft: rect.left,
-              rectTop: rect.top,
-              finalX,
-              finalY,
-            });
-          }
-
-          originalPositions.current.set(elementKey, {
-            x: finalX,
-            y: finalY,
-            rotation: currentRotation,
-            isMusicPlayer: isMusicPlayer,
-          });
-          console.log(
-            `Stored original position for ${elementKey}:`,
-            originalPositions.current.get(elementKey)
-          );
-        }
-
         console.log(`Animating element ${index} off-screen`);
         const pos = getComponentOffScreenPosition();
         console.log(`Target position:`, pos);
@@ -190,7 +217,6 @@ const ImageGallery = () => {
         gsap.to(element, {
           x: pos.x,
           y: pos.y,
-          rotation: Math.random() * 30 - 15,
           duration: 1.2,
           ease: "power2.out",
           onComplete: () =>
@@ -222,90 +248,125 @@ const ImageGallery = () => {
     }
   };
 
-  // Function to restore components to their original positions
-  const restoreComponentsToOriginalPositions = () => {
-    console.log("restoreComponentsToOriginalPositions called");
+  // Function to restore components with animation (but immediately cancel conflicts)
+  const immediatelyRestoreComponents = () => {
+    console.log("immediatelyRestoreComponents called");
 
-    // Small delay to ensure any animations have completed
-    setTimeout(() => {
-      // Get all draggable wrapper elements and MusicPlayer
-      const allDraggables = document.querySelectorAll(
-        '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
-      );
-      console.log("Found draggable elements to restore:", allDraggables.length);
+    // Clear any pending timeouts and stop any ongoing animations
+    clearAllTimeouts();
+    isAnimatingComponents.current = false;
+    isGalleryClosing.current = true; // Set closing flag immediately to prevent off-screen animations
 
-      allDraggables.forEach((element, index) => {
-        // Skip if this is part of the ImageGallery
-        if (element.closest(".interactive-element")) {
-          console.log(`Skipping element ${index} - part of gallery`);
-          return;
-        }
+    // Get all draggable wrapper elements and MusicPlayer
+    const allDraggables = document.querySelectorAll(
+      '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
+    );
+    console.log(
+      "Found draggable elements to restore with animation:",
+      allDraggables.length
+    );
 
-        // Skip Email component (keep this stationary)
-        if (
-          element.className.toLowerCase().includes("email") ||
-          element.id?.toLowerCase().includes("email")
-        ) {
+    allDraggables.forEach((element, index) => {
+      // Skip if this is part of the ImageGallery
+      if (element.closest(".interactive-element")) {
+        console.log(`Skipping element ${index} - part of gallery`);
+        return;
+      }
+
+      // Skip Email component (keep this stationary)
+      if (
+        element.className.toLowerCase().includes("email") ||
+        element.id?.toLowerCase().includes("email")
+      ) {
+        console.log(
+          `Skipping element ${index} - Email component during restore`
+        );
+        return;
+      }
+
+      // Skip if element is not visible (display: none) as we can't animate it
+      const computedStyle = window.getComputedStyle(element);
+      if (computedStyle.display === "none") {
+        console.log(
+          `Skipping element ${index} - element is hidden (display: none)`
+        );
+        return;
+      }
+
+      const elementKey = element.id || `element-${index}`;
+      const lastKnownPos = lastKnownPositions.current.get(elementKey);
+      const isMusicPlayer = element.className
+        .toLowerCase()
+        .includes("musicplayer");
+
+      // Kill any ongoing animations on this element first
+      gsap.killTweensOf(element);
+
+      if (lastKnownPos) {
+        console.log(
+          `Restoring element ${index} to last known position with animation:`,
+          lastKnownPos
+        );
+
+        // Use gsap.to for smooth animation back to position
+        // For MusicPlayer, use a longer duration
+        const duration = isMusicPlayer ? 1.0 : 0.7;
+
+        gsap.to(element, {
+          x: lastKnownPos.x,
+          y: lastKnownPos.y,
+          rotation: 0, // Always reset rotation to 0 for components
+          duration: duration,
+          ease: "power2.out",
+          onComplete: () => {
+            console.log(`Restoration complete for element ${index}`);
+
+            // For MusicPlayer, ensure position is locked after restoration
+            if (isMusicPlayer) {
+              // Add a class to indicate we're restoring position
+              element.classList.add("position-restoring");
+
+              addTimeout(() => {
+                gsap.set(element, {
+                  x: lastKnownPos.x,
+                  y: lastKnownPos.y,
+                });
+
+                // Remove the flag after a longer delay
+                addTimeout(() => {
+                  element.classList.remove("position-restoring");
+                }, 500);
+              }, 50);
+            }
+          },
+        });
+      } else {
+        // If no last known position, try to use original position as fallback
+        const originalPos = originalPositions.current.get(elementKey);
+        if (originalPos) {
           console.log(
-            `Skipping element ${index} - Email component during restore`
+            `Using original position as animated fallback for element ${index}`
           );
-          return;
-        }
-
-        const elementKey = element.id || `element-${index}`;
-        const lastKnownPos = lastKnownPositions.current.get(elementKey);
-        const isMusicPlayer = element.className
-          .toLowerCase()
-          .includes("musicplayer");
-
-        if (lastKnownPos) {
-          console.log(
-            `Restoring element ${index} to last known position:`,
-            lastKnownPos
-          );
-
-          // For MusicPlayer, use a longer duration and different approach
-          const duration = isMusicPlayer ? 1.0 : 0.7;
-
           gsap.to(element, {
-            x: lastKnownPos.x,
-            y: lastKnownPos.y,
-            rotation: lastKnownPos.rotation,
-            duration: duration,
+            x: originalPos.x,
+            y: originalPos.y,
+            rotation: 0, // Always reset rotation to 0 for components
+            duration: 0.7,
             ease: "power2.out",
-            onComplete: () => {
-              console.log(`Restoration complete for element ${index}`);
-
-              // For MusicPlayer, ensure position is locked after restoration
-              if (isMusicPlayer) {
-                // Add a class to indicate we're restoring position
-                element.classList.add("position-restoring");
-
-                setTimeout(() => {
-                  gsap.set(element, {
-                    x: lastKnownPos.x,
-                    y: lastKnownPos.y,
-                  });
-
-                  // Remove the flag after a longer delay
-                  setTimeout(() => {
-                    element.classList.remove("position-restoring");
-                  }, 500);
-                }, 50);
-              }
-            },
           });
-        } else {
-          console.log(`No last known position found for element ${index}`);
         }
-      });
-    }, 100); // 100ms delay to ensure proper timing
+      }
+    });
   };
 
   const shuffleImages = () => {
     if (!isVisible) {
       // If images are hidden, bring them back first
       setIsVisible(true);
+      // Also make sure we're not in the middle of component animations
+      clearAllTimeouts();
+      isAnimatingComponents.current = false;
+      isGalleryClosing.current = false;
     }
 
     imageRefs.current.forEach((ref) => {
@@ -343,21 +404,36 @@ const ImageGallery = () => {
     // Handle component animations based on gallery visibility
     if (newVisibility) {
       // Gallery is becoming visible, fly other components off-screen
+      // Reset closing flag before flying components off
+      isGalleryClosing.current = false;
       flyComponentsOffScreen();
     } else {
-      // Gallery is closing, restore components and their visibility
-      restoreComponentsToOriginalPositions();
+      // Gallery is closing, immediately restore components to prevent timing issues
+
+      // Set closing flag immediately to prevent any pending off-screen animations
+      isGalleryClosing.current = true;
+
+      // First, restore visibility immediately (before animating) to ensure components can be animated
       setShowAbout(true);
       setShowBrushCanvas(true);
       setShowMusicPlayer(true);
       setShowEmail(true);
       setShowAnalogClock(true);
 
+      // Reset active component state
+      setActiveComponent(null);
+
+      // Then, immediately cancel any ongoing component animations and restore with a small delay
+      // to allow the visibility changes to take effect
+      addTimeout(() => {
+        immediatelyRestoreComponents();
+      }, 50);
+
       // Force recreation of draggables after a delay to ensure proper state restoration
-      setTimeout(() => {
+      addTimeout(() => {
         // Dispatch a custom event to tell components to recreate their draggables
         window.dispatchEvent(new CustomEvent("recreateDraggables"));
-      }, 200);
+      }, 250);
     }
   };
 
@@ -565,6 +641,7 @@ const ImageGallery = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
       draggableInstances.current.forEach((instance) => instance?.kill());
+      clearAllTimeouts(); // Clean up any pending timeouts
     };
   }, []); // Empty dependency array to run only once on mount
 

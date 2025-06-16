@@ -63,6 +63,12 @@ const AnalogClock = () => {
     };
 
     const handleRecreateDraggables = () => {
+      // Kill any existing draggable immediately
+      if (draggableInstance.current) {
+        draggableInstance.current.kill();
+      }
+
+      // Create new draggable with a small delay
       setTimeout(() => {
         createDraggable();
       }, 50);
@@ -85,7 +91,7 @@ const AnalogClock = () => {
         handleRecreateDraggables
       );
     };
-  }, [isMinimized, isMobile]);
+  }, [isMinimized, isMobile, showAnalogClock]);
 
   // Position and resize handling
   useEffect(() => {
@@ -155,33 +161,45 @@ const AnalogClock = () => {
     setTimeout(setInitialPosition, 100);
   }, []);
 
-  // Clock update
+  // Clock update function (extracted so it can be reused)
+  const updateClock = () => {
+    const now = new Date();
+    const hours = now.getHours() % 12;
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    const hourAngle = (hours + minutes / 60) * 30;
+    const minuteAngle = (minutes + seconds / 60) * 6;
+    const secondAngle = seconds * 6;
+
+    if (hourHandRef.current) {
+      hourHandRef.current.style.transform = `rotate(${hourAngle}deg)`;
+    }
+    if (minuteHandRef.current) {
+      minuteHandRef.current.style.transform = `rotate(${minuteAngle}deg)`;
+    }
+    if (secondHandRef.current) {
+      secondHandRef.current.style.transform = `rotate(${secondAngle}deg)`;
+    }
+  };
+
+  // Clock update interval
   useEffect(() => {
-    const updateClock = () => {
-      const now = new Date();
-      const hours = now.getHours() % 12;
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-
-      const hourAngle = (hours + minutes / 60) * 30;
-      const minuteAngle = (minutes + seconds / 60) * 6;
-      const secondAngle = seconds * 6;
-
-      if (hourHandRef.current) {
-        hourHandRef.current.style.transform = `rotate(${hourAngle}deg)`;
-      }
-      if (minuteHandRef.current) {
-        minuteHandRef.current.style.transform = `rotate(${minuteAngle}deg)`;
-      }
-      if (secondHandRef.current) {
-        secondHandRef.current.style.transform = `rotate(${secondAngle}deg)`;
-      }
-    };
-
     updateClock();
     const interval = setInterval(updateClock, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Update clock immediately when component becomes visible
+  useEffect(() => {
+    if (showAnalogClock) {
+      // Small delay to ensure the component is fully rendered before updating
+      const timer = setTimeout(() => {
+        updateClock();
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [showAnalogClock]);
 
   const toggleMinimized = () => {
     if (!isMinimized) {

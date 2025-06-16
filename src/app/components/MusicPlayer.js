@@ -32,6 +32,12 @@ const MusicPlayer = () => {
 
     const handleRecreateDraggables = () => {
       // Force recreation of draggable when gallery interaction is complete
+      // Kill any existing draggable immediately
+      if (draggableInstance.current) {
+        draggableInstance.current.kill();
+      }
+
+      // Create new draggable with a small delay
       setTimeout(() => {
         createDraggable();
       }, 50);
@@ -77,7 +83,7 @@ const MusicPlayer = () => {
         handleRecreateDraggables
       );
     };
-  }, [isMusicPlayerMinimized]);
+  }, [isMusicPlayerMinimized, showMusicPlayer]);
 
   const toggleMinimized = () => {
     setIsMusicPlayerMinimized((prev) => !prev);
