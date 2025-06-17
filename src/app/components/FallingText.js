@@ -163,26 +163,39 @@ const LetterFragment = React.memo(function LetterFragment({
   size,
   velocity,
 }) {
+  const [canInteractWithLetters, setCanInteractWithLetters] = useState(false);
+
+  // Enable letter collision after delay to prevent getting stuck in impact zone
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCanInteractWithLetters(true);
+    }, 500); // 500ms delay to clear impact area
+    return () => clearTimeout(timer);
+  }, []);
+
   const [ref] = useBox(() => ({
-    mass: 0.15, // Slightly reduced mass for better performance
-    position: [position[0], position[1], position[2]], // Use exact position since we already positioned safely
+    mass: 0.15,
+    position: [position[0], position[1], position[2]],
     rotation,
     args: size,
     velocity,
     angularVelocity: [
-      (Math.random() - 0.5) * 1.0, // Minimal angular velocity for calm motion
+      (Math.random() - 0.5) * 1.0,
       (Math.random() - 0.5) * 1.0,
       (Math.random() - 0.5) * 1.0,
     ],
-    linearDamping: 0.3, // Slightly reduced damping for better motion
+    linearDamping: 0.3,
     angularDamping: 0.4,
     material: {
-      friction: 0.3, // Reduced friction to prevent sticking
-      restitution: 0.25, // Slightly higher restitution for better bounce
+      friction: 0.3,
+      restitution: 0.25,
     },
-    sleepSpeedLimit: 0.2, // Lower threshold for sleep
-    sleepTimeLimit: 0.5, // Faster sleep
+    sleepSpeedLimit: 0.2,
+    sleepTimeLimit: 0.5,
     allowSleep: true,
+    // Use different collision groups to avoid letter collision area initially
+    collisionFilterGroup: canInteractWithLetters ? 1 : 2,
+    collisionFilterMask: canInteractWithLetters ? 1 : 1, // Always collide with ground (group 1)
   }));
 
   // Use shared geometry and material for better performance
@@ -198,22 +211,33 @@ const LetterFragment = React.memo(function LetterFragment({
   );
 });
 
-// Individual letter collision box
-function LetterCollider({ position, index, onCollide }) {
-  const letterWidth = 3.8; // Slightly narrower than visual size for precision
+// Individual letter collision box with immediate removal capability
+function LetterCollider({ position, index, onCollide, isExploded }) {
+  const letterWidth = 3.8;
 
-  const [ref] = useBox(() => ({
+  const [ref, api] = useBox(() => ({
     mass: 0,
-    position,
-    args: [letterWidth, 4.5, 4.5], // Letter collision size
+    position: isExploded ? [0, -1000, 0] : position, // Start far away if already exploded
+    args: [letterWidth, 4.5, 4.5],
     material: { restitution: 0.3 },
     userData: { type: "letter", index },
     onCollide: (e) => {
-      if (e.body.userData?.type === "ball") {
+      if (!isExploded && e.body.userData?.type === "ball") {
+        // Immediately remove collision body on impact
+        api.position.set(0, -1000, 0);
+        api.mass.set(0);
         onCollide(index, e.body.velocity || [0, 0, -25]);
       }
     },
   }));
+
+  // Remove collision box if letter exploded
+  useEffect(() => {
+    if (isExploded) {
+      api.position.set(0, -1000, 0);
+      api.mass.set(0);
+    }
+  }, [isExploded, api]);
 
   return (
     <mesh ref={ref} visible={false}>
@@ -329,7 +353,7 @@ const Letter = React.memo(function Letter({
           const distance = fragData.distanceWeight * maxDistance;
 
           // Ensure fragments spawn well outside collision area and above ground
-          const minDistance = 2.8; // Reduced minimum distance for tighter grouping
+          const minDistance = 4.5; // Increased minimum distance to completely clear impact zone
           const safeDistance = Math.max(distance, minDistance);
 
           const fragPos = [
@@ -602,18 +626,16 @@ function Scene({ onComplete }) {
       <Ground />
       <TennisBall />
 
-      {/* Individual letter collision boxes - only render if not exploded */}
-      {letterPositions.map(
-        (item, i) =>
-          !lettersToExplode.includes(i) && (
-            <LetterCollider
-              key={`collider-${i}`}
-              position={item.position}
-              index={i}
-              onCollide={handleLetterCollision}
-            />
-          )
-      )}
+      {/* Individual letter collision boxes - dynamically managed */}
+      {letterPositions.map((item, i) => (
+        <LetterCollider
+          key={`collider-${i}`}
+          position={item.position}
+          index={i}
+          onCollide={handleLetterCollision}
+          isExploded={lettersToExplode.includes(i)}
+        />
+      ))}
 
       {/* Render letters */}
       {letterPositions.map((item, i) => (
