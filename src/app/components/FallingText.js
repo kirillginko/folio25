@@ -495,7 +495,7 @@ function Scene({ onComplete }) {
     K: 5.2,
     i: 2.2,
     r: 3.7,
-    l: 2.9,
+    l: 2.3,
     ".": 3.2,
     A: 5.2,
     g: 3.9,
