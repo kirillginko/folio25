@@ -229,6 +229,7 @@ export default function RootLayout({ children }) {
           <Providers>{children}</Providers>
           <Analytics mode="production" />
         </GlobalStateProvider>
+        <Script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" />
       </body>
     </html>
   );

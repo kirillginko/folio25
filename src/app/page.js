@@ -15,6 +15,7 @@ import BrushCanvas from "./components/BrushCanvas";
 import FallingText from "./components/FallingText";
 import AnalogClock from "./components/AnalogClock";
 import { useGlobalState } from "./context/GlobalStateContext";
+import FallingLetters from "./components/FallingLetters";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -137,6 +138,7 @@ export default function Home() {
           className={styles.main}
           style={{ opacity: 0 }}
         >
+          <FallingLetters />
           {showThemeSelector && (
             <div
               className={`
