@@ -151,23 +151,21 @@ const imagesData = [
   },
   {
     id: 16,
-    url: "https://res.cloudinary.com/dtps5ugbf/image/upload/v1732584483/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzNzAyNTc4L29yaWdpbmFsXzRhZjJiZWNmOTMzNWYxMGVjZWUwYTE2YjYxMDQ4MjVmLmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6NjAwLCJoZWlnaHQiOjYwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW_rn2ie7.webp",
-    title: "Case Study 16",
-    description: "This is a detailed description of Case Study 16.",
-    year: 2022,
-    technologies: "JavaScript, GSAP",
-    link: "https://example.com/case-study-16",
-    type: "image",
+    url: "https://res.cloudinary.com/dtps5ugbf/video/upload/v1751079183/STG_vessel-ezgif.com-crop-video_njuern.mp4",
+
+    title: "The Shape of Things to Come",
+    description: "Motion graphic art piece",
+    year: 2025,
+    technologies: "P5, Adobe After Effects, JavaScript",
+    type: "video",
   },
   {
     id: 17,
     url: "https://res.cloudinary.com/dtps5ugbf/video/upload/v1751070732/a570bca3-90ac-f473-4927-b94ff290a9e4-ezgif.com-crop-video_hr93xs.mp4",
-    poster:
-      "https://res.cloudinary.com/dtps5ugbf/image/upload/v1732588424/pexels-kelly-2949824_hnsopl.jpg",
     title: "Generative Art",
     description:
-      "A generative art piece that uses p5.js to create a dynamic and interactive visual experience.",
-    year: 2023,
+      "A generative art piece that uses p5.js to create a dynamic visual pattern.",
+    year: 2025,
     technologies: "P5, Video, JavaScript",
     type: "video",
   },
