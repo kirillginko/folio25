@@ -533,6 +533,19 @@ const ImageGallery = () => {
         ease: "power2.inOut",
         onStart: () => {
           draggableInstances.current[index].disable();
+          const media = images[index];
+          if (media.type === "video") {
+            const video = imageRefs.current[index].querySelector("video");
+            if (video) {
+              const playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.catch((error) => {
+                  console.error("Error attempting to play video:", error);
+                });
+              }
+              video.muted = false;
+            }
+          }
         },
       });
     }
@@ -724,6 +737,28 @@ const ImageGallery = () => {
             className={`${styles.imageWrapper} ${
               selectedImage === index ? styles.selected : ""
             }`}
+            onMouseEnter={(e) => {
+              if (image.type === "video" && selectedImage !== index) {
+                const video = e.currentTarget.querySelector("video");
+                if (video) {
+                  const playPromise = video.play();
+                  if (playPromise !== undefined) {
+                    playPromise.catch((error) => {
+                      console.error("Error attempting to play video:", error);
+                    });
+                  }
+                }
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (image.type === "video" && selectedImage !== index) {
+                const video = e.currentTarget.querySelector("video");
+                if (video) {
+                  video.pause();
+                  video.currentTime = 0;
+                }
+              }
+            }}
           >
             <span
               className={styles.detailButton}
@@ -734,15 +769,29 @@ const ImageGallery = () => {
             >
               {selectedImage === index ? "close" : "< more info"}
             </span>
-            <Image
-              src={image.url}
-              alt={`Image ${image.id}`}
-              className={styles.image}
-              width={200}
-              height={200}
-              priority={index < 4}
-              quality={75}
-            />
+            {image.type === "video" ? (
+              <video
+                src={image.url}
+                poster={image.poster}
+                className={styles.image}
+                width={200}
+                height={200}
+                loop
+                muted
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <Image
+                src={image.url}
+                alt={`Image ${image.id}`}
+                className={styles.image}
+                width={200}
+                height={200}
+                priority={index < 4}
+                quality={75}
+              />
+            )}
           </div>
         ))}
       </div>

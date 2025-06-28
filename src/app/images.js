@@ -1,4 +1,4 @@
-const images = [
+const imagesData = [
   {
     id: 1,
     url: "https://res.cloudinary.com/dtps5ugbf/image/upload/v1732584481/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIxMjMxNjM1My9vcmlnaW5hbF8yY2IwZmE4OWQ0NjQ2NjUyODNlMjVlNDk2ZDg1ZTc2ZC5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjYwMCwiaGVpZ2h0Ijo2MDAsImZpdCI6Imluc2lkZSIsIndpdGhvdXRFbmxhcmdlbW_efuv3t.webp",
@@ -7,6 +7,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-3",
+    type: "image",
   },
   {
     id: 2,
@@ -16,6 +17,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-2",
+    type: "image",
   },
   {
     id: 3,
@@ -25,6 +27,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-3",
+    type: "image",
   },
   {
     id: 4,
@@ -34,6 +37,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-4",
+    type: "image",
   },
   {
     id: 5,
@@ -43,6 +47,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-5",
+    type: "image",
   },
   {
     id: 6,
@@ -52,6 +57,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-6",
+    type: "image",
   },
   {
     id: 7,
@@ -61,6 +67,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-7",
+    type: "image",
   },
   {
     id: 8,
@@ -70,6 +77,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-8",
+    type: "image",
   },
   {
     id: 9,
@@ -79,6 +87,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-9",
+    type: "image",
   },
   {
     id: 10,
@@ -88,6 +97,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-10",
+    type: "image",
   },
   {
     id: 11,
@@ -97,6 +107,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-11",
+    type: "image",
   },
   {
     id: 12,
@@ -106,6 +117,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-12",
+    type: "image",
   },
   {
     id: 13,
@@ -115,6 +127,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-13",
+    type: "image",
   },
   {
     id: 14,
@@ -124,6 +137,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-14",
+    type: "image",
   },
   {
     id: 15,
@@ -133,6 +147,7 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-15",
+    type: "image",
   },
   {
     id: 16,
@@ -142,7 +157,28 @@ const images = [
     year: 2022,
     technologies: "JavaScript, GSAP",
     link: "https://example.com/case-study-16",
+    type: "image",
+  },
+  {
+    id: 17,
+    url: "https://res.cloudinary.com/dtps5ugbf/video/upload/v1751070732/a570bca3-90ac-f473-4927-b94ff290a9e4-ezgif.com-crop-video_hr93xs.mp4",
+    poster:
+      "https://res.cloudinary.com/dtps5ugbf/image/upload/v1732588424/pexels-kelly-2949824_hnsopl.jpg",
+    title: "Generative Art",
+    description:
+      "A generative art piece that uses p5.js to create a dynamic and interactive visual experience.",
+    year: 2023,
+    technologies: "P5, Video, JavaScript",
+    type: "video",
   },
 ];
+
+const images = imagesData.map((media) => {
+  if (media.type === "video" && media.url.includes("cloudinary")) {
+    const posterUrl = media.url.replace(/\.mp4$/, ".jpg");
+    return { ...media, poster: posterUrl };
+  }
+  return media;
+});
 
 export default images;
