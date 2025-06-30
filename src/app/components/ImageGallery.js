@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
@@ -11,14 +11,18 @@ const ImageGallery = () => {
   const imageRefs = useRef([]);
   const draggableInstances = useRef([]);
   const zIndexCounter = useRef(1);
+  const videoRefs = useRef(new Map());
   const [isVisible, setIsVisible] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const originalPositions = useRef(new Map()); // Store original positions of components
-  const lastKnownPositions = useRef(new Map()); // Store last known positions before flying off-screen
-  const isAnimatingComponents = useRef(false); // Track if components are currently animating
-  const animationTimeouts = useRef([]); // Store timeout references for cleanup
-  const isGalleryClosing = useRef(false); // Track if gallery is in the process of closing
+  const originalPositions = useRef(new Map());
+  const lastKnownPositions = useRef(new Map());
+  const isAnimatingComponents = useRef(false);
+  const animationTimeouts = useRef([]);
+  const isGalleryClosing = useRef(false);
+  const isAnimating = useRef(false); // Prevent overlapping animations
+  const hoverTimeouts = useRef(new Map()); // Debounce hover events
+
   const {
     setShowAbout,
     setShowBrushCanvas,
@@ -29,7 +33,107 @@ const ImageGallery = () => {
     setActiveComponent,
   } = useGlobalState();
 
-  // Helper functions for animation management
+  // Memoized calculations for better performance
+  const windowCenter = useMemo(
+    () => ({
+      x: (window.innerWidth - 200) / 2,
+      y: (window.innerHeight - 200) / 2,
+    }),
+    []
+  );
+
+  const getScaleForScreen = useMemo(
+    () => (window.innerWidth <= 768 ? 1.2 : 2.5), // Reduced from 3 to 2.5 for better performance
+    []
+  );
+
+  // Optimized video controls with reduced operations
+  const handleVideoPlay = useCallback((videoElement, shouldUnmute = false) => {
+    if (!videoElement) return;
+
+    // Use requestAnimationFrame for smoother video operations
+    requestAnimationFrame(() => {
+      try {
+        if (shouldUnmute) {
+          videoElement.muted = false;
+        }
+        videoElement.play().catch(() => {
+          // Silently handle play failures
+        });
+      } catch (error) {
+        // Silently handle errors
+      }
+    });
+  }, []);
+
+  const handleVideoPause = useCallback((videoElement) => {
+    if (!videoElement) return;
+
+    requestAnimationFrame(() => {
+      try {
+        videoElement.pause();
+        videoElement.currentTime = 0;
+      } catch (error) {
+        // Silently handle errors
+      }
+    });
+  }, []);
+
+  // Batch state updates for better performance
+  const batchStateUpdate = useCallback((updates) => {
+    requestAnimationFrame(() => {
+      updates.forEach((update) => update());
+    });
+  }, []);
+
+  // Performant hover video controls with debouncing
+  const handleVideoHoverPlay = useCallback(
+    (index) => {
+      // Only play on hover if not selected and is a video
+      if (selectedImage === index || images[index].type !== "video") return;
+
+      const video = videoRefs.current.get(index);
+      if (!video) return;
+
+      // Clear any existing timeout for this video
+      const existingTimeout = hoverTimeouts.current.get(index);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+      }
+
+      // Debounce the play operation
+      const playTimeout = setTimeout(() => {
+        handleVideoPlay(video, false); // Keep muted on hover
+        hoverTimeouts.current.delete(index);
+      }, 50); // Small delay to prevent rapid triggers
+
+      hoverTimeouts.current.set(index, playTimeout);
+    },
+    [selectedImage, handleVideoPlay]
+  );
+
+  const handleVideoHoverPause = useCallback(
+    (index) => {
+      // Only pause hover videos if not selected
+      if (selectedImage === index || images[index].type !== "video") return;
+
+      const video = videoRefs.current.get(index);
+      if (!video) return;
+
+      // Clear any pending play timeout
+      const existingTimeout = hoverTimeouts.current.get(index);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        hoverTimeouts.current.delete(index);
+      }
+
+      // Immediately pause and reset
+      handleVideoPause(video);
+    },
+    [selectedImage, handleVideoPause]
+  );
+
+  // Simplified animation helpers
   const clearAllTimeouts = () => {
     animationTimeouts.current.forEach((timeout) => clearTimeout(timeout));
     animationTimeouts.current = [];
@@ -42,13 +146,11 @@ const ImageGallery = () => {
   };
 
   const storeCurrentPositions = () => {
-    // Store current positions of all components before any animation
     const allDraggables = document.querySelectorAll(
       '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
     );
 
     allDraggables.forEach((element, index) => {
-      // Skip if this is part of the ImageGallery or Email component
       if (
         element.closest(".interactive-element") ||
         element.className.toLowerCase().includes("email") ||
@@ -64,15 +166,13 @@ const ImageGallery = () => {
         .toLowerCase()
         .includes("musicplayer");
 
-      // Store current position (no rotation for components)
       lastKnownPositions.current.set(elementKey, {
         x: currentX,
         y: currentY,
-        rotation: 0, // Always keep components at 0 rotation
+        rotation: 0,
         isMusicPlayer: isMusicPlayer,
       });
 
-      // Store original position only if it hasn't been stored yet
       if (!originalPositions.current.has(elementKey)) {
         let finalX = currentX;
         let finalY = currentY;
@@ -90,7 +190,7 @@ const ImageGallery = () => {
         originalPositions.current.set(elementKey, {
           x: finalX,
           y: finalY,
-          rotation: 0, // Always keep components at 0 rotation
+          rotation: 0,
           isMusicPlayer: isMusicPlayer,
         });
       }
@@ -99,7 +199,6 @@ const ImageGallery = () => {
 
   const getRandomPosition = () => {
     const imageSize = 220;
-
     return {
       x: Math.random() * (window.innerWidth - imageSize),
       y: Math.random() * (window.innerHeight - imageSize),
@@ -107,26 +206,26 @@ const ImageGallery = () => {
   };
 
   const getOffScreenPosition = () => {
-    const side = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
-    const padding = 300; // Distance off screen for gallery images
+    const side = Math.floor(Math.random() * 4);
+    const padding = 300;
 
     switch (side) {
-      case 0: // top
+      case 0:
         return {
           x: Math.random() * window.innerWidth,
           y: -padding,
         };
-      case 1: // right
+      case 1:
         return {
           x: window.innerWidth + padding,
           y: Math.random() * window.innerHeight,
         };
-      case 2: // bottom
+      case 2:
         return {
           x: Math.random() * window.innerWidth,
           y: window.innerHeight + padding,
         };
-      case 3: // left
+      case 3:
         return {
           x: -padding,
           y: Math.random() * window.innerHeight,
@@ -134,28 +233,27 @@ const ImageGallery = () => {
     }
   };
 
-  // Separate function for components with larger padding to ensure they're completely off-screen
   const getComponentOffScreenPosition = () => {
-    const side = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
-    const padding = Math.max(window.innerWidth, window.innerHeight) + 500; // Use viewport size + extra padding
+    const side = Math.floor(Math.random() * 4);
+    const padding = Math.max(window.innerWidth, window.innerHeight) + 500;
 
     switch (side) {
-      case 0: // top
+      case 0:
         return {
           x: Math.random() * window.innerWidth,
           y: -padding,
         };
-      case 1: // right
+      case 1:
         return {
           x: window.innerWidth + padding,
           y: Math.random() * window.innerHeight,
         };
-      case 2: // bottom
+      case 2:
         return {
           x: Math.random() * window.innerWidth,
           y: window.innerHeight + padding,
         };
-      case 3: // left
+      case 3:
         return {
           x: -padding,
           y: Math.random() * window.innerHeight,
@@ -163,133 +261,85 @@ const ImageGallery = () => {
     }
   };
 
-  // Function to animate specific components off-screen when work button is clicked
   const flyComponentsOffScreen = () => {
-    console.log("flyComponentsOffScreen called");
-
-    // Clear any pending timeouts and set animation state
     clearAllTimeouts();
     isAnimatingComponents.current = true;
-    isGalleryClosing.current = false; // Reset closing flag when opening
-
-    // Store current positions immediately before any animation
+    isGalleryClosing.current = false;
     storeCurrentPositions();
-
-    // Force minimize any expanded components first by resetting activeComponent
     setActiveComponent(null);
 
-    // Small delay to allow components to minimize before animating off-screen
     addTimeout(() => {
-      // Double-check if we should still be animating (user might have closed quickly)
       if (!isAnimatingComponents.current || isGalleryClosing.current) {
-        console.log("Animation cancelled - components should not fly off");
         return;
       }
 
-      // Get all draggable wrapper elements (About, BrushCanvas, AnalogClock) and MusicPlayer using attribute selector
       const allDraggables = document.querySelectorAll(
         '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
       );
-      console.log("Found draggable elements:", allDraggables.length);
 
-      allDraggables.forEach((element, index) => {
-        console.log(`Element ${index}:`, element);
-
-        // Skip if this is part of the ImageGallery
+      allDraggables.forEach((element) => {
         if (element.closest(".interactive-element")) {
-          console.log(`Skipping element ${index} - part of gallery`);
           return;
         }
 
-        // Skip Email component (keep this stationary)
         if (
           element.className.toLowerCase().includes("email") ||
           element.id?.toLowerCase().includes("email")
         ) {
-          console.log(`Skipping element ${index} - Email component`);
           return;
         }
 
-        console.log(`Animating element ${index} off-screen`);
         const pos = getComponentOffScreenPosition();
-        console.log(`Target position:`, pos);
+
+        // Add performance hints
+        element.style.willChange = "transform";
 
         gsap.to(element, {
           x: pos.x,
           y: pos.y,
-          duration: 1.2,
+          duration: 1.0, // Slightly reduced
           ease: "power2.out",
-          onComplete: () =>
-            console.log(`Animation complete for element ${index}`),
+          force3D: true, // Force GPU acceleration
+          onComplete: () => {
+            element.style.willChange = "auto";
+          },
         });
       });
-    }, 100); // 100ms delay to allow minimization
+    }, 100);
   };
 
-  // Function to handle theme button visibility for individual image expansion
   const handleThemeButtonForImage = (hide) => {
     const themeButton = document.querySelector('[class*="flowerContainer"]');
     if (themeButton) {
-      if (hide) {
-        // Hide theme button when expanding individual image
-        gsap.to(themeButton, {
-          opacity: 0,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      } else {
-        // Show theme button when minimizing individual image
-        gsap.to(themeButton, {
-          opacity: 1,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      }
+      // Use simple opacity change instead of GSAP for better performance
+      themeButton.style.transition = "opacity 0.2s ease";
+      themeButton.style.opacity = hide ? "0" : "1";
     }
   };
 
-  // Function to restore components with animation (but immediately cancel conflicts)
   const immediatelyRestoreComponents = () => {
-    console.log("immediatelyRestoreComponents called");
-
-    // Clear any pending timeouts and stop any ongoing animations
     clearAllTimeouts();
     isAnimatingComponents.current = false;
-    isGalleryClosing.current = true; // Set closing flag immediately to prevent off-screen animations
+    isGalleryClosing.current = true;
 
-    // Get all draggable wrapper elements and MusicPlayer
     const allDraggables = document.querySelectorAll(
       '[class*="draggableWrapper"], [class*="musicPlayerWrapper"]'
     );
-    console.log(
-      "Found draggable elements to restore with animation:",
-      allDraggables.length
-    );
 
     allDraggables.forEach((element, index) => {
-      // Skip if this is part of the ImageGallery
       if (element.closest(".interactive-element")) {
-        console.log(`Skipping element ${index} - part of gallery`);
         return;
       }
 
-      // Skip Email component (keep this stationary)
       if (
         element.className.toLowerCase().includes("email") ||
         element.id?.toLowerCase().includes("email")
       ) {
-        console.log(
-          `Skipping element ${index} - Email component during restore`
-        );
         return;
       }
 
-      // Skip if element is not visible (display: none) as we can't animate it
       const computedStyle = window.getComputedStyle(element);
       if (computedStyle.display === "none") {
-        console.log(
-          `Skipping element ${index} - element is hidden (display: none)`
-        );
         return;
       }
 
@@ -299,31 +349,24 @@ const ImageGallery = () => {
         .toLowerCase()
         .includes("musicplayer");
 
-      // Kill any ongoing animations on this element first
       gsap.killTweensOf(element);
 
       if (lastKnownPos) {
-        console.log(
-          `Restoring element ${index} to last known position with animation:`,
-          lastKnownPos
-        );
+        const duration = isMusicPlayer ? 0.8 : 0.5; // Reduced durations
 
-        // Use gsap.to for smooth animation back to position
-        // For MusicPlayer, use a longer duration
-        const duration = isMusicPlayer ? 1.0 : 0.7;
+        element.style.willChange = "transform";
 
         gsap.to(element, {
           x: lastKnownPos.x,
           y: lastKnownPos.y,
-          rotation: 0, // Always reset rotation to 0 for components
+          rotation: 0,
           duration: duration,
           ease: "power2.out",
+          force3D: true,
           onComplete: () => {
-            console.log(`Restoration complete for element ${index}`);
+            element.style.willChange = "auto";
 
-            // For MusicPlayer, ensure position is locked after restoration
             if (isMusicPlayer) {
-              // Add a class to indicate we're restoring position
               element.classList.add("position-restoring");
 
               addTimeout(() => {
@@ -332,27 +375,28 @@ const ImageGallery = () => {
                   y: lastKnownPos.y,
                 });
 
-                // Remove the flag after a longer delay
                 addTimeout(() => {
                   element.classList.remove("position-restoring");
-                }, 500);
+                }, 200);
               }, 50);
             }
           },
         });
       } else {
-        // If no last known position, try to use original position as fallback
         const originalPos = originalPositions.current.get(elementKey);
         if (originalPos) {
-          console.log(
-            `Using original position as animated fallback for element ${index}`
-          );
+          element.style.willChange = "transform";
+
           gsap.to(element, {
             x: originalPos.x,
             y: originalPos.y,
-            rotation: 0, // Always reset rotation to 0 for components
-            duration: 0.7,
+            rotation: 0,
+            duration: 0.5,
             ease: "power2.out",
+            force3D: true,
+            onComplete: () => {
+              element.style.willChange = "auto";
+            },
           });
         }
       }
@@ -361,9 +405,7 @@ const ImageGallery = () => {
 
   const shuffleImages = () => {
     if (!isVisible) {
-      // If images are hidden, bring them back first
       setIsVisible(true);
-      // Also make sure we're not in the middle of component animations
       clearAllTimeouts();
       isAnimatingComponents.current = false;
       isGalleryClosing.current = false;
@@ -372,12 +414,19 @@ const ImageGallery = () => {
     imageRefs.current.forEach((ref) => {
       if (!ref) return;
       const pos = getRandomPosition();
+
+      ref.style.willChange = "transform";
+
       gsap.to(ref, {
         x: pos.x,
         y: pos.y,
         rotation: Math.random() * 30 - 15,
-        duration: 0.7,
+        duration: 0.5, // Reduced duration
         ease: "power2.out",
+        force3D: true,
+        onComplete: () => {
+          ref.style.willChange = "auto";
+        },
       });
     });
   };
@@ -386,66 +435,57 @@ const ImageGallery = () => {
     const newVisibility = !isVisible;
     setIsVisible(newVisibility);
 
-    // Animate gallery images
     imageRefs.current.forEach((ref) => {
       if (!ref) return;
 
       const pos = isVisible ? getOffScreenPosition() : getRandomPosition();
+
+      ref.style.willChange = "transform";
+
       gsap.to(ref, {
         x: pos.x,
         y: pos.y,
         rotation: Math.random() * 30 - 15,
-        duration: 0.7,
+        duration: 0.5, // Reduced duration
         ease: "power2.out",
-        stagger: 0.05,
+        force3D: true,
+        stagger: 0.03, // Reduced stagger
+        onComplete: () => {
+          ref.style.willChange = "auto";
+        },
       });
     });
 
-    // Handle component animations based on gallery visibility
     if (newVisibility) {
-      // Gallery is becoming visible, fly other components off-screen
-      // Reset closing flag before flying components off
       isGalleryClosing.current = false;
       flyComponentsOffScreen();
     } else {
-      // Gallery is closing, immediately restore components to prevent timing issues
-
-      // Set closing flag immediately to prevent any pending off-screen animations
       isGalleryClosing.current = true;
 
-      // First, restore visibility immediately (before animating) to ensure components can be animated
-      setShowAbout(true);
-      setShowBrushCanvas(true);
-      setShowMusicPlayer(true);
-      setShowEmail(true);
-      setShowAnalogClock(true);
+      // Batch state updates
+      batchStateUpdate([
+        () => setShowAbout(true),
+        () => setShowBrushCanvas(true),
+        () => setShowMusicPlayer(true),
+        () => setShowEmail(true),
+        () => setShowAnalogClock(true),
+        () => setActiveComponent(null),
+      ]);
 
-      // Reset active component state
-      setActiveComponent(null);
-
-      // Then, immediately cancel any ongoing component animations and restore with a small delay
-      // to allow the visibility changes to take effect
       addTimeout(() => {
         immediatelyRestoreComponents();
       }, 50);
 
-      // Force recreation of draggables after a delay to ensure proper state restoration
       addTimeout(() => {
-        // Dispatch a custom event to tell components to recreate their draggables
         window.dispatchEvent(new CustomEvent("recreateDraggables"));
-      }, 250);
+      }, 200);
     }
   };
 
-  const getWindowCenter = () => {
-    return {
-      x: (window.innerWidth - 200) / 2, // 200 is the base image width
-      y: (window.innerHeight - 200) / 2, // 200 is the base image height
-    };
-  };
-
   const handleDetailClick = (index, e) => {
-    // eslint-disable-next-line no-param-reassign
+    // Prevent overlapping animations
+    if (isAnimating.current) return;
+
     e = e || { stopPropagation: () => {} };
     e.stopPropagation();
 
@@ -453,99 +493,128 @@ const ImageGallery = () => {
       e.preventDefault();
     }
 
-    const getScaleForScreen = () => {
-      return window.innerWidth <= 768 ? 1.2 : 3;
-    };
+    isAnimating.current = true;
+    const media = images[index];
+    const currentRef = imageRefs.current[index];
 
     if (selectedImage === index) {
-      // Minimize
-      gsap.to(imageRefs.current[index], {
-        x: getRandomPosition().x,
-        y: getRandomPosition().y,
+      // Minimize - ultra-simplified animation
+      const targetPos = getRandomPosition();
+
+      // Add performance hints
+      currentRef.style.willChange = "transform";
+
+      // Immediately disable dragging and stop video
+      draggableInstances.current[index].enable();
+      if (media.type === "video") {
+        const video = videoRefs.current.get(index);
+        if (video) {
+          handleVideoPause(video);
+        }
+      }
+
+      // Single, fast animation
+      gsap.to(currentRef, {
+        x: targetPos.x,
+        y: targetPos.y,
         scale: 1,
         rotation: Math.random() * 30 - 15,
-        duration: 0.5,
-        ease: "power2.inOut",
+        duration: 0.25, // Much faster
+        ease: "power1.out", // Simpler easing
+        force3D: true,
         onStart: () => {
-          draggableInstances.current[index].enable();
+          // Batch state updates
+          batchStateUpdate([
+            () => setSelectedImage(null),
+            () => handleThemeButtonForImage(false),
+            () => setActiveComponent(null),
+          ]);
+
+          if (!isVisible) {
+            batchStateUpdate([
+              () => setShowAbout(true),
+              () => setShowBrushCanvas(true),
+              () => setShowMusicPlayer(true),
+              () => setShowEmail(true),
+              () => setShowAnalogClock(true),
+            ]);
+          }
         },
         onComplete: () => {
-          setSelectedImage(null);
-
-          // Show theme button when minimizing an image
-          handleThemeButtonForImage(false);
-
-          // Only restore visibility if the gallery itself is hidden
-          if (!isVisible) {
-            setShowAbout(true);
-            setShowBrushCanvas(true);
-            setShowMusicPlayer(true);
-            setShowEmail(true);
-            setShowAnalogClock(true);
-          }
-
-          // Reset active component immediately
-          setActiveComponent(null);
-
-          // Reset z-index so theme button can stay on top of non-selected images
-          gsap.set(imageRefs.current[index], { zIndex: 1 });
+          currentRef.style.willChange = "auto";
+          gsap.set(currentRef, { zIndex: 1 });
+          isAnimating.current = false;
         },
       });
     } else {
+      // Handle previously selected image quickly
       if (selectedImage !== null) {
-        gsap.to(imageRefs.current[selectedImage], {
+        const prevRef = imageRefs.current[selectedImage];
+        const prevMedia = images[selectedImage];
+
+        if (prevMedia.type === "video") {
+          const prevVideo = videoRefs.current.get(selectedImage);
+          if (prevVideo) {
+            handleVideoPause(prevVideo);
+          }
+        }
+
+        prevRef.style.willChange = "transform";
+        draggableInstances.current[selectedImage].enable();
+
+        gsap.to(prevRef, {
           x: getRandomPosition().x,
           y: getRandomPosition().y,
           scale: 1,
           rotation: Math.random() * 30 - 15,
-          duration: 0.5,
-          ease: "power2.inOut",
-          onStart: () => {
-            draggableInstances.current[selectedImage].enable();
-          },
+          duration: 0.2, // Very fast
+          ease: "power1.out",
+          force3D: true,
           onComplete: () => {
-            // Reset z-index for previously selected image
-            gsap.set(imageRefs.current[selectedImage], { zIndex: 1 });
+            prevRef.style.willChange = "auto";
+            gsap.set(prevRef, { zIndex: 1 });
           },
         });
       }
 
-      const windowCenter = getWindowCenter();
-      setSelectedImage(index);
-      setShowAbout(false);
-      setShowBrushCanvas(false);
-      setShowMusicPlayer(false);
-      setShowAnalogClock(false);
-      setActiveComponent("image");
+      // Expand new image - simplified animation
+      currentRef.style.willChange = "transform";
+      draggableInstances.current[index].disable();
 
-      // Hide theme button when expanding an image
-      handleThemeButtonForImage(true);
+      // Batch state updates
+      batchStateUpdate([
+        () => setSelectedImage(index),
+        () => setShowAbout(false),
+        () => setShowBrushCanvas(false),
+        () => setShowMusicPlayer(false),
+        () => setShowAnalogClock(false),
+        () => setActiveComponent("image"),
+        () => handleThemeButtonForImage(true),
+      ]);
 
       zIndexCounter.current += 1;
 
-      gsap.to(imageRefs.current[index], {
+      gsap.to(currentRef, {
         x: windowCenter.x,
         y: windowCenter.y,
-        scale: getScaleForScreen(),
+        scale: getScaleForScreen,
         rotation: 0,
         zIndex: zIndexCounter.current,
-        duration: 0.5,
-        ease: "power2.inOut",
+        duration: 0.25, // Much faster
+        ease: "power1.out", // Simpler easing
+        force3D: true,
         onStart: () => {
-          draggableInstances.current[index].disable();
-          const media = images[index];
+          // Only play video when expanded
           if (media.type === "video") {
-            const video = imageRefs.current[index].querySelector("video");
+            const video = videoRefs.current.get(index);
             if (video) {
-              const playPromise = video.play();
-              if (playPromise !== undefined) {
-                playPromise.catch((error) => {
-                  console.error("Error attempting to play video:", error);
-                });
-              }
-              video.muted = false;
+              handleVideoPlay(video, true);
             }
           }
+        },
+        onComplete: () => {
+          currentRef.style.willChange = "auto";
+          isAnimating.current = false;
         },
       });
     }
@@ -557,7 +626,7 @@ const ImageGallery = () => {
   };
 
   const navigateImage = (direction) => {
-    if (selectedImage === null) return;
+    if (selectedImage === null || isAnimating.current) return;
 
     const newIndex =
       direction === "next"
@@ -568,14 +637,15 @@ const ImageGallery = () => {
   };
 
   useEffect(() => {
-    // Register the Draggable plugin first
     if (!gsap.registerPlugin) {
       return;
     }
     gsap.registerPlugin(Draggable);
 
+    // Set GSAP defaults for better performance
+    gsap.defaults({ force3D: true });
+
     const createDraggables = () => {
-      // Kill existing draggables first
       draggableInstances.current.forEach((instance) => instance?.kill());
       draggableInstances.current = [];
 
@@ -588,6 +658,7 @@ const ImageGallery = () => {
           y: pos.y,
           rotation: Math.random() * 30 - 15,
           zIndex: 1,
+          force3D: true,
         });
 
         const draggable = Draggable.create(ref, {
@@ -606,16 +677,22 @@ const ImageGallery = () => {
             });
           },
           onDragStart: function () {
+            this.target.style.willChange = "transform";
             gsap.to(this.target, {
-              scale: 1.1,
-              duration: 0.2,
+              scale: 1.05, // Reduced scale
+              duration: 0.15, // Faster
               zIndex: getNextZIndex(),
+              force3D: true,
             });
           },
           onDragEnd: function () {
             gsap.to(this.target, {
               scale: 1,
-              duration: 0.2,
+              duration: 0.15, // Faster
+              force3D: true,
+              onComplete: () => {
+                this.target.style.willChange = "auto";
+              },
             });
           },
         })[0];
@@ -624,7 +701,6 @@ const ImageGallery = () => {
       });
     };
 
-    // Call createDraggables immediately
     createDraggables();
 
     const handleResize = () => {
@@ -637,13 +713,15 @@ const ImageGallery = () => {
         if (rect.right > windowWidth) {
           gsap.to(ref, {
             x: windowWidth - rect.width - 20,
-            duration: 0.3,
+            duration: 0.2, // Faster
+            force3D: true,
           });
         }
         if (rect.bottom > windowHeight) {
           gsap.to(ref, {
             y: windowHeight - rect.height - 20,
-            duration: 0.3,
+            duration: 0.2, // Faster
+            force3D: true,
           });
         }
       });
@@ -654,13 +732,14 @@ const ImageGallery = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
       draggableInstances.current.forEach((instance) => instance?.kill());
-      clearAllTimeouts(); // Clean up any pending timeouts
+      clearAllTimeouts();
+      // Clean up hover timeouts
+      hoverTimeouts.current.forEach((timeout) => clearTimeout(timeout));
+      hoverTimeouts.current.clear();
     };
-  }, []); // Empty dependency array to run only once on mount
+  }, []);
 
-  // Helper to keep regular images below Theme button (Theme button z-index = 550)
   const getNextZIndex = () => {
-    // Cycle between 1 and 500
     zIndexCounter.current = (zIndexCounter.current % 500) + 1;
     return zIndexCounter.current;
   };
@@ -737,28 +816,11 @@ const ImageGallery = () => {
             className={`${styles.imageWrapper} ${
               selectedImage === index ? styles.selected : ""
             }`}
-            onMouseEnter={(e) => {
-              if (image.type === "video" && selectedImage !== index) {
-                const video = e.currentTarget.querySelector("video");
-                if (video) {
-                  const playPromise = video.play();
-                  if (playPromise !== undefined) {
-                    playPromise.catch((error) => {
-                      console.error("Error attempting to play video:", error);
-                    });
-                  }
-                }
-              }
+            style={{
+              willChange: selectedImage === index ? "transform" : "auto",
             }}
-            onMouseLeave={(e) => {
-              if (image.type === "video" && selectedImage !== index) {
-                const video = e.currentTarget.querySelector("video");
-                if (video) {
-                  video.pause();
-                  video.currentTime = 0;
-                }
-              }
-            }}
+            onMouseEnter={() => handleVideoHoverPlay(index)}
+            onMouseLeave={() => handleVideoHoverPause(index)}
           >
             <span
               className={styles.detailButton}
@@ -771,6 +833,9 @@ const ImageGallery = () => {
             </span>
             {image.type === "video" ? (
               <video
+                ref={(el) => {
+                  if (el) videoRefs.current.set(index, el);
+                }}
                 src={image.url}
                 poster={image.poster}
                 className={styles.image}
@@ -779,7 +844,11 @@ const ImageGallery = () => {
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload="none"
+                loading="lazy"
+                style={{
+                  willChange: selectedImage === index ? "auto" : "auto",
+                }}
               />
             ) : (
               <Image
@@ -790,6 +859,7 @@ const ImageGallery = () => {
                 height={200}
                 priority={index < 4}
                 quality={75}
+                loading={index < 4 ? "eager" : "lazy"}
               />
             )}
           </div>

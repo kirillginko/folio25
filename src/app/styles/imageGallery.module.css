@@ -46,6 +46,10 @@
   -ms-user-select: none; /* IE10+/Edge */
   -webkit-user-drag: none;
   -webkit-tap-highlight-color: transparent;
+  /* Performance optimizations */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .imageWrapper:active {
@@ -64,6 +68,9 @@
   -ms-user-select: none;
   -webkit-user-drag: none;
   draggable: false;
+  /* Performance optimizations */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .buttonContainer {
@@ -75,7 +82,7 @@
   gap: 10px;
   transform: translateX(-50%);
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease; /* Reduced from 0.3s */
   pointer-events: none;
 }
 
@@ -100,16 +107,19 @@
   font-size: 0.6em;
   z-index: 500;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease; /* Reduced from 0.2s */
+  /* Performance optimizations */
+  transform: translate3d(-50%, 0, 0);
+  backface-visibility: hidden;
 }
 
 .workButton:hover {
   background-color: #7a708f;
-  transform: translateX(-50%) scale(1.05);
+  transform: translate3d(-50%, 0, 0) scale(1.05);
 }
 
 .workButton:active {
-  transform: translateX(-50%) scale(0.95);
+  transform: translate3d(-50%, 0, 0) scale(0.95);
 }
 
 .shuffleButton {
@@ -123,7 +133,10 @@
   font-size: 0.6em;
   margin-right: 35px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease; /* Reduced from 0.2s */
+  /* Performance optimizations */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 @media (max-width: 768px) {
@@ -147,26 +160,28 @@
 
 .shuffleButton:hover {
   background-color: #7a708f;
-  transform: scale(1.05);
+  transform: translate3d(0, 0, 0) scale(1.05);
 }
 
 .shuffleButton:active {
-  transform: scale(0.95);
+  transform: translate3d(0, 0, 0) scale(0.95);
 }
 
 .hideButton:hover {
   background-color: #7a708f;
-  transform: scale(1.05);
+  transform: translate3d(0, 0, 0) scale(1.05);
 }
 
 .hideButton:active {
-  transform: scale(0.95);
+  transform: translate3d(0, 0, 0) scale(0.95);
 }
 
 .selected {
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   z-index: 1600 !important;
+  /* Performance optimizations for expanded state */
+  will-change: transform, opacity;
 }
 
 .selected:hover {
@@ -182,9 +197,12 @@
   background-color: rgba(0, 0, 0, 0.85);
   z-index: 1500;
   opacity: 0;
-  animation: fadeInBackdrop 0.3s ease forwards;
+  animation: fadeInBackdrop 0.2s ease forwards; /* Reduced from 0.3s */
   cursor: pointer;
   pointer-events: none;
+  /* Performance optimizations */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .backdrop::after {
