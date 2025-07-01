@@ -161,7 +161,7 @@ const imagesData = [
   },
   {
     id: 17,
-    url: "https://res.cloudinary.com/dtps5ugbf/video/upload/v1751070732/a570bca3-90ac-f473-4927-b94ff290a9e4-ezgif.com-crop-video_hr93xs.mp4",
+    url: "https://res.cloudinary.com/dtps5ugbf/video/upload/v1751338797/a570bca3-90ac-f473-4927-b94ff290a9e4-ezgif.com-crop-video_1_om2qdv.mp4",
     title: "Generative Art",
     description:
       "A generative art piece that uses p5.js to create a dynamic visual pattern.",
