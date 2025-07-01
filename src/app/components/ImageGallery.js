@@ -291,18 +291,11 @@ const ImageGallery = () => {
 
         const pos = getComponentOffScreenPosition();
 
-        // Add performance hints
-        element.style.willChange = "transform";
-
         gsap.to(element, {
           x: pos.x,
           y: pos.y,
           duration: 1.0, // Slightly reduced
           ease: "power2.out",
-          force3D: true, // Force GPU acceleration
-          onComplete: () => {
-            element.style.willChange = "auto";
-          },
         });
       });
     }, 100);
@@ -354,18 +347,13 @@ const ImageGallery = () => {
       if (lastKnownPos) {
         const duration = isMusicPlayer ? 0.8 : 0.5; // Reduced durations
 
-        element.style.willChange = "transform";
-
         gsap.to(element, {
           x: lastKnownPos.x,
           y: lastKnownPos.y,
           rotation: 0,
           duration: duration,
           ease: "power2.out",
-          force3D: true,
           onComplete: () => {
-            element.style.willChange = "auto";
-
             if (isMusicPlayer) {
               element.classList.add("position-restoring");
 
@@ -385,18 +373,13 @@ const ImageGallery = () => {
       } else {
         const originalPos = originalPositions.current.get(elementKey);
         if (originalPos) {
-          element.style.willChange = "transform";
-
           gsap.to(element, {
             x: originalPos.x,
             y: originalPos.y,
             rotation: 0,
             duration: 0.5,
             ease: "power2.out",
-            force3D: true,
-            onComplete: () => {
-              element.style.willChange = "auto";
-            },
+            onComplete: () => {},
           });
         }
       }
@@ -415,18 +398,12 @@ const ImageGallery = () => {
       if (!ref) return;
       const pos = getRandomPosition();
 
-      ref.style.willChange = "transform";
-
       gsap.to(ref, {
         x: pos.x,
         y: pos.y,
         rotation: Math.random() * 30 - 15,
         duration: 0.5, // Reduced duration
         ease: "power2.out",
-        force3D: true,
-        onComplete: () => {
-          ref.style.willChange = "auto";
-        },
       });
     });
   };
@@ -440,19 +417,13 @@ const ImageGallery = () => {
 
       const pos = isVisible ? getOffScreenPosition() : getRandomPosition();
 
-      ref.style.willChange = "transform";
-
       gsap.to(ref, {
         x: pos.x,
         y: pos.y,
         rotation: Math.random() * 30 - 15,
         duration: 0.5, // Reduced duration
         ease: "power2.out",
-        force3D: true,
         stagger: 0.03, // Reduced stagger
-        onComplete: () => {
-          ref.style.willChange = "auto";
-        },
       });
     });
 
@@ -501,9 +472,6 @@ const ImageGallery = () => {
       // Minimize - ultra-simplified animation
       const targetPos = getRandomPosition();
 
-      // Add performance hints
-      currentRef.style.willChange = "transform";
-
       // Immediately disable dragging and stop video
       draggableInstances.current[index].enable();
       if (media.type === "video") {
@@ -521,7 +489,6 @@ const ImageGallery = () => {
         rotation: Math.random() * 30 - 15,
         duration: 0.25, // Much faster
         ease: "power1.out", // Simpler easing
-        force3D: true,
         onStart: () => {
           // Batch state updates
           batchStateUpdate([
@@ -541,7 +508,6 @@ const ImageGallery = () => {
           }
         },
         onComplete: () => {
-          currentRef.style.willChange = "auto";
           gsap.set(currentRef, { zIndex: 1 });
           isAnimating.current = false;
         },
@@ -569,7 +535,6 @@ const ImageGallery = () => {
           rotation: Math.random() * 30 - 15,
           duration: 0.2, // Very fast
           ease: "power1.out",
-          force3D: true,
           onComplete: () => {
             prevRef.style.willChange = "auto";
             gsap.set(prevRef, { zIndex: 1 });
@@ -602,7 +567,6 @@ const ImageGallery = () => {
         zIndex: zIndexCounter.current,
         duration: 0.25, // Much faster
         ease: "power1.out", // Simpler easing
-        force3D: true,
         onStart: () => {
           // Only play video when expanded
           if (media.type === "video") {
@@ -613,7 +577,6 @@ const ImageGallery = () => {
           }
         },
         onComplete: () => {
-          currentRef.style.willChange = "auto";
           isAnimating.current = false;
         },
       });
@@ -642,9 +605,6 @@ const ImageGallery = () => {
     }
     gsap.registerPlugin(Draggable);
 
-    // Set GSAP defaults for better performance
-    gsap.defaults({ force3D: true });
-
     const createDraggables = () => {
       draggableInstances.current.forEach((instance) => instance?.kill());
       draggableInstances.current = [];
@@ -658,7 +618,6 @@ const ImageGallery = () => {
           y: pos.y,
           rotation: Math.random() * 30 - 15,
           zIndex: 1,
-          force3D: true,
         });
 
         const draggable = Draggable.create(ref, {
@@ -677,22 +636,17 @@ const ImageGallery = () => {
             });
           },
           onDragStart: function () {
-            this.target.style.willChange = "transform";
             gsap.to(this.target, {
               scale: 1.05, // Reduced scale
               duration: 0.15, // Faster
               zIndex: getNextZIndex(),
-              force3D: true,
             });
           },
           onDragEnd: function () {
             gsap.to(this.target, {
               scale: 1,
               duration: 0.15, // Faster
-              force3D: true,
-              onComplete: () => {
-                this.target.style.willChange = "auto";
-              },
+              onComplete: () => {},
             });
           },
         })[0];
@@ -714,14 +668,12 @@ const ImageGallery = () => {
           gsap.to(ref, {
             x: windowWidth - rect.width - 20,
             duration: 0.2, // Faster
-            force3D: true,
           });
         }
         if (rect.bottom > windowHeight) {
           gsap.to(ref, {
             y: windowHeight - rect.height - 20,
             duration: 0.2, // Faster
-            force3D: true,
           });
         }
       });
@@ -816,9 +768,6 @@ const ImageGallery = () => {
             className={`${styles.imageWrapper} ${
               selectedImage === index ? styles.selected : ""
             }`}
-            style={{
-              willChange: selectedImage === index ? "transform" : "auto",
-            }}
             onMouseEnter={() => handleVideoHoverPlay(index)}
             onMouseLeave={() => handleVideoHoverPause(index)}
           >
@@ -846,9 +795,6 @@ const ImageGallery = () => {
                 playsInline
                 preload="none"
                 loading="lazy"
-                style={{
-                  willChange: selectedImage === index ? "auto" : "auto",
-                }}
               />
             ) : (
               <Image
