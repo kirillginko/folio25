@@ -254,7 +254,7 @@ const AnalogClock = () => {
               const markerRadius = isMinimized
                 ? 28
                 : window.innerWidth <= 768
-                ? 160
+                ? 130
                 : 120;
               const numberRadius = markerRadius - (isMinimized ? 8 : 25);
               return (
@@ -284,7 +284,7 @@ const AnalogClock = () => {
               const markerRadius = isMinimized
                 ? 28
                 : window.innerWidth <= 768
-                ? 160
+                ? 130
                 : 120;
               return (
                 i % 5 !== 0 && (
