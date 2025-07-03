@@ -54,14 +54,37 @@ const ImageGallery = () => {
     // Use requestAnimationFrame for smoother video operations
     requestAnimationFrame(() => {
       try {
+        // Reset video to ensure clean state
+        videoElement.currentTime = 0;
+
         if (shouldUnmute) {
           videoElement.muted = false;
         }
-        videoElement.play().catch(() => {
-          // Silently handle play failures
-        });
+
+        // Ensure video is in a playable state
+        if (videoElement.readyState >= 2) {
+          // HAVE_CURRENT_DATA
+          videoElement.play().catch((error) => {
+            console.log("Video play failed:", error);
+            // Fallback: try playing after a short delay
+            setTimeout(() => {
+              videoElement.play().catch(() => {
+                console.log("Video play retry failed");
+              });
+            }, 100);
+          });
+        } else {
+          // Wait for video to be ready
+          const onCanPlay = () => {
+            videoElement.removeEventListener("canplay", onCanPlay);
+            videoElement.play().catch((error) => {
+              console.log("Video play failed after loading:", error);
+            });
+          };
+          videoElement.addEventListener("canplay", onCanPlay);
+        }
       } catch (error) {
-        // Silently handle errors
+        console.log("Video play error:", error);
       }
     });
   }, []);
@@ -73,8 +96,9 @@ const ImageGallery = () => {
       try {
         videoElement.pause();
         videoElement.currentTime = 0;
+        videoElement.muted = true; // Reset to muted state
       } catch (error) {
-        // Silently handle errors
+        console.log("Video pause error:", error);
       }
     });
   }, []);
@@ -103,7 +127,10 @@ const ImageGallery = () => {
 
       // Debounce the play operation
       const playTimeout = setTimeout(() => {
-        handleVideoPlay(video, false); // Keep muted on hover
+        // Double-check that we're still not selected (in case state changed)
+        if (selectedImage !== index) {
+          handleVideoPlay(video, false); // Keep muted on hover
+        }
         hoverTimeouts.current.delete(index);
       }, 50); // Small delay to prevent rapid triggers
 
@@ -127,8 +154,10 @@ const ImageGallery = () => {
         hoverTimeouts.current.delete(index);
       }
 
-      // Immediately pause and reset
-      handleVideoPause(video);
+      // Only pause if video is not selected (double-check)
+      if (selectedImage !== index) {
+        handleVideoPause(video);
+      }
     },
     [selectedImage, handleVideoPause]
   );
@@ -513,6 +542,7 @@ const ImageGallery = () => {
         },
       });
     } else {
+      // EXPAND NEW IMAGE
       // Handle previously selected image quickly
       if (selectedImage !== null) {
         const prevRef = imageRefs.current[selectedImage];
@@ -568,15 +598,26 @@ const ImageGallery = () => {
         duration: 0.25, // Much faster
         ease: "power1.out", // Simpler easing
         onStart: () => {
-          // Only play video when expanded
+          // Clear any hover timeouts for this video first
           if (media.type === "video") {
-            const video = videoRefs.current.get(index);
-            if (video) {
-              handleVideoPlay(video, true);
+            const existingTimeout = hoverTimeouts.current.get(index);
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+              hoverTimeouts.current.delete(index);
             }
           }
         },
         onComplete: () => {
+          // Play video after animation completes for better reliability
+          if (media.type === "video") {
+            const video = videoRefs.current.get(index);
+            if (video) {
+              // Add a small delay to ensure video is ready
+              setTimeout(() => {
+                handleVideoPlay(video, true);
+              }, 50);
+            }
+          }
           isAnimating.current = false;
         },
       });
@@ -595,6 +636,15 @@ const ImageGallery = () => {
       direction === "next"
         ? (selectedImage + 1) % images.length
         : (selectedImage - 1 + images.length) % images.length;
+
+    // Pause current video if it's a video
+    const currentMedia = images[selectedImage];
+    if (currentMedia.type === "video") {
+      const currentVideo = videoRefs.current.get(selectedImage);
+      if (currentVideo) {
+        handleVideoPause(currentVideo);
+      }
+    }
 
     handleDetailClick(newIndex, { stopPropagation: () => {} });
   };
@@ -783,7 +833,22 @@ const ImageGallery = () => {
             {image.type === "video" ? (
               <video
                 ref={(el) => {
-                  if (el) videoRefs.current.set(index, el);
+                  if (el) {
+                    videoRefs.current.set(index, el);
+
+                    // Add event listeners for better video management
+                    el.addEventListener("loadeddata", () => {
+                      // Video is loaded and ready to play
+                      el.currentTime = 0;
+                    });
+
+                    el.addEventListener("error", (e) => {
+                      console.log(`Video ${index} error:`, e);
+                    });
+
+                    // Ensure video starts muted
+                    el.muted = true;
+                  }
                 }}
                 src={image.url}
                 poster={image.poster}
@@ -793,7 +858,7 @@ const ImageGallery = () => {
                 loop
                 muted
                 playsInline
-                preload="none"
+                preload="metadata"
                 loading="lazy"
               />
             ) : (
