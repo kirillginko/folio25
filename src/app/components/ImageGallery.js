@@ -81,8 +81,8 @@ const ImageGallery = () => {
             videoElement.load();
             const onLoadedData = () => {
               videoElement.removeEventListener("loadeddata", onLoadedData);
-              videoElement.play().catch((error) => {
-                console.log("Mobile video play failed:", error);
+              videoElement.play().catch(() => {
+                // Silently handle mobile video play error
               });
             };
             videoElement.addEventListener("loadeddata", onLoadedData);
@@ -92,12 +92,11 @@ const ImageGallery = () => {
           // Ensure video is in a playable state
           if (videoElement.readyState >= 2) {
             // HAVE_CURRENT_DATA
-            videoElement.play().catch((error) => {
-              console.log("Video play failed:", error);
+            videoElement.play().catch(() => {
               // Fallback: try playing after a short delay
               setTimeout(() => {
                 videoElement.play().catch(() => {
-                  console.log("Video play retry failed");
+                  // Silently handle retry failure
                 });
               }, 100);
             });
@@ -105,8 +104,8 @@ const ImageGallery = () => {
             // Wait for video to be ready
             const onCanPlay = () => {
               videoElement.removeEventListener("canplay", onCanPlay);
-              videoElement.play().catch((error) => {
-                console.log("Video play failed after loading:", error);
+              videoElement.play().catch(() => {
+                // Silently handle video play error
               });
             };
             videoElement.addEventListener("canplay", onCanPlay);
@@ -134,8 +133,8 @@ const ImageGallery = () => {
         if (!videoElement.classList?.contains("expanded-video")) {
           videoElement.muted = true;
         }
-      } catch (error) {
-        console.log("Video pause error:", error);
+      } catch {
+        // Silently handle video pause error
       }
     });
   }, []);
@@ -150,9 +149,6 @@ const ImageGallery = () => {
   // Performant hover video controls with debouncing
   const handleVideoHoverPlay = useCallback(
     (index) => {
-      // Skip hover functionality on mobile devices
-      if (isMobile) return;
-
       // Only play on hover if not selected and is a video
       if (selectedImage === index || images[index].type !== "video") return;
 
@@ -182,14 +178,11 @@ const ImageGallery = () => {
 
       hoverTimeouts.current.set(index, playTimeout);
     },
-    [selectedImage, handleVideoPlay, isMobile]
+    [selectedImage, handleVideoPlay]
   );
 
   const handleVideoHoverPause = useCallback(
     (index) => {
-      // Skip hover functionality on mobile devices
-      if (isMobile) return;
-
       // Only pause hover videos if not selected
       if (selectedImage === index || images[index].type !== "video") return;
 
@@ -208,7 +201,26 @@ const ImageGallery = () => {
         handleVideoPause(video);
       }
     },
-    [selectedImage, handleVideoPause, isMobile]
+    [selectedImage, handleVideoPause]
+  );
+
+  // Add touch event handlers for mobile video interaction
+  const handleVideoTouch = useCallback(
+    (index) => {
+      // Only handle touch for videos
+      if (images[index].type !== "video") return;
+
+      const video = videoRefs.current.get(index);
+      if (!video) return;
+
+      // If the video is paused, play it; otherwise pause it
+      if (video.paused) {
+        handleVideoPlay(video, false); // Keep muted on touch preview
+      } else {
+        handleVideoPause(video);
+      }
+    },
+    [handleVideoPlay, handleVideoPause]
   );
 
   // Simplified animation helpers
@@ -888,6 +900,7 @@ const ImageGallery = () => {
             }`}
             onMouseEnter={() => handleVideoHoverPlay(index)}
             onMouseLeave={() => handleVideoHoverPause(index)}
+            onTouchStart={() => handleVideoTouch(index)}
           >
             <span
               className={styles.detailButton}
@@ -919,13 +932,12 @@ const ImageGallery = () => {
                       }
                     };
 
-                    const handleError = (e) => {
-                      console.log(`Video ${index} error:`, e);
+                    const handleError = () => {
+                      // Silently handle video errors
                     };
 
                     const handleCanPlay = () => {
                       // Video is ready to play
-                      console.log(`Video ${index} can play`);
                     };
 
                     // Remove existing listeners to prevent duplicates
