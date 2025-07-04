@@ -47,49 +47,77 @@ const ImageGallery = () => {
     []
   );
 
-  // Optimized video controls with reduced operations
-  const handleVideoPlay = useCallback((videoElement, shouldUnmute = false) => {
-    if (!videoElement) return;
-
-    // Use requestAnimationFrame for smoother video operations
-    requestAnimationFrame(() => {
-      try {
-        // Only reset currentTime if video is not already playing from start
-        if (videoElement.currentTime > 0.1) {
-          videoElement.currentTime = 0;
-        }
-
-        if (shouldUnmute) {
-          videoElement.muted = false;
-        }
-
-        // Ensure video is in a playable state
-        if (videoElement.readyState >= 2) {
-          // HAVE_CURRENT_DATA
-          videoElement.play().catch((error) => {
-            console.log("Video play failed:", error);
-            // Fallback: try playing after a short delay
-            setTimeout(() => {
-              videoElement.play().catch(() => {
-                console.log("Video play retry failed");
-              });
-            }, 100);
-          });
-        } else {
-          // Wait for video to be ready
-          const onCanPlay = () => {
-            videoElement.removeEventListener("canplay", onCanPlay);
-            videoElement.play().catch((error) => {
-              console.log("Video play failed after loading:", error);
-            });
-          };
-          videoElement.addEventListener("canplay", onCanPlay);
-        }
-      } catch (error) {
-        console.log("Video play error:", error);
-      }
-    });
+  // Add mobile detection helper
+  const isMobile = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0
+    );
   }, []);
+
+  // Optimized video controls with reduced operations
+  const handleVideoPlay = useCallback(
+    (videoElement, shouldUnmute = false) => {
+      if (!videoElement) return;
+
+      // Use requestAnimationFrame for smoother video operations
+      requestAnimationFrame(() => {
+        try {
+          // Only reset currentTime if video is not already playing from start
+          if (videoElement.currentTime > 0.1) {
+            videoElement.currentTime = 0;
+          }
+
+          if (shouldUnmute) {
+            videoElement.muted = false;
+          }
+
+          // On mobile, ensure video is loaded first
+          if (isMobile && videoElement.readyState < 2) {
+            videoElement.load();
+            const onLoadedData = () => {
+              videoElement.removeEventListener("loadeddata", onLoadedData);
+              videoElement.play().catch((error) => {
+                console.log("Mobile video play failed:", error);
+              });
+            };
+            videoElement.addEventListener("loadeddata", onLoadedData);
+            return;
+          }
+
+          // Ensure video is in a playable state
+          if (videoElement.readyState >= 2) {
+            // HAVE_CURRENT_DATA
+            videoElement.play().catch((error) => {
+              console.log("Video play failed:", error);
+              // Fallback: try playing after a short delay
+              setTimeout(() => {
+                videoElement.play().catch(() => {
+                  console.log("Video play retry failed");
+                });
+              }, 100);
+            });
+          } else {
+            // Wait for video to be ready
+            const onCanPlay = () => {
+              videoElement.removeEventListener("canplay", onCanPlay);
+              videoElement.play().catch((error) => {
+                console.log("Video play failed after loading:", error);
+              });
+            };
+            videoElement.addEventListener("canplay", onCanPlay);
+          }
+        } catch (error) {
+          console.log("Video play error:", error);
+        }
+      });
+    },
+    [isMobile]
+  );
 
   const handleVideoPause = useCallback((videoElement) => {
     if (!videoElement) return;
@@ -122,6 +150,9 @@ const ImageGallery = () => {
   // Performant hover video controls with debouncing
   const handleVideoHoverPlay = useCallback(
     (index) => {
+      // Skip hover functionality on mobile devices
+      if (isMobile) return;
+
       // Only play on hover if not selected and is a video
       if (selectedImage === index || images[index].type !== "video") return;
 
@@ -151,11 +182,14 @@ const ImageGallery = () => {
 
       hoverTimeouts.current.set(index, playTimeout);
     },
-    [selectedImage, handleVideoPlay]
+    [selectedImage, handleVideoPlay, isMobile]
   );
 
   const handleVideoHoverPause = useCallback(
     (index) => {
+      // Skip hover functionality on mobile devices
+      if (isMobile) return;
+
       // Only pause hover videos if not selected
       if (selectedImage === index || images[index].type !== "video") return;
 
@@ -174,7 +208,7 @@ const ImageGallery = () => {
         handleVideoPause(video);
       }
     },
-    [selectedImage, handleVideoPause]
+    [selectedImage, handleVideoPause, isMobile]
   );
 
   // Simplified animation helpers
@@ -889,17 +923,29 @@ const ImageGallery = () => {
                       console.log(`Video ${index} error:`, e);
                     };
 
+                    const handleCanPlay = () => {
+                      // Video is ready to play
+                      console.log(`Video ${index} can play`);
+                    };
+
                     // Remove existing listeners to prevent duplicates
                     el.removeEventListener("loadeddata", handleLoadedData);
                     el.removeEventListener("error", handleError);
+                    el.removeEventListener("canplay", handleCanPlay);
 
                     // Add new listeners
                     el.addEventListener("loadeddata", handleLoadedData);
                     el.addEventListener("error", handleError);
+                    el.addEventListener("canplay", handleCanPlay);
 
                     // Ensure video starts in correct state
                     el.muted = selectedImage === index ? false : true;
                     el.currentTime = 0;
+
+                    // Force video to load on mobile
+                    if (isMobile) {
+                      el.load();
+                    }
                   }
                 }}
                 src={image.url}
@@ -910,8 +956,17 @@ const ImageGallery = () => {
                 loop
                 muted={selectedImage !== index}
                 playsInline
-                preload="auto"
+                preload={isMobile ? "metadata" : "auto"}
                 loading="lazy"
+                controls={false}
+                webkit-playsinline="true"
+                x5-playsinline="true"
+                style={{
+                  objectFit: "cover",
+                  display: "block",
+                  width: "100%",
+                  height: "100%",
+                }}
               />
             ) : (
               <Image
