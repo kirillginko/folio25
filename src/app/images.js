@@ -156,12 +156,12 @@ const imagesData = [
   {
     id: 16,
     url: "https://res.cloudinary.com/dtps5ugbf/video/upload/v1751079183/STG_vessel-ezgif.com-crop-video_njuern.mp4",
-
     title: "The Shape of Things to Come",
     description:
       "Motion graphic typography using p5.js and video processing tools.",
     year: 2025,
     technologies: "P5, Adobe After Effects, JavaScript",
+    link: "",
     type: "video",
   },
   {
@@ -172,6 +172,7 @@ const imagesData = [
       "A generative art piece that uses p5.js to create a dynamic visual pattern.",
     year: 2025,
     technologies: "P5, Video, JavaScript",
+    link: "",
     type: "video",
   },
 ];

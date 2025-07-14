@@ -420,7 +420,7 @@ const About = () => {
               </header>
               <div className={styles.imageWrapper}>
                 <Image
-                  src="https://res.cloudinary.com/dtps5ugbf/image/upload/v1750116973/dither6_ndw6ps.png"
+                  src="https://res.cloudinary.com/dtps5ugbf/image/upload/v1752462042/t_6s___0c0a0b1b-b02e-42bd-886c-9b9fa77dbf08__2025-07-13_22-54-15_1_jtgvze.png"
                   alt="Kirill Ginko"
                   width={600}
                   height={600}
@@ -431,16 +431,23 @@ const About = () => {
               <section className={styles.bioSection}>
                 <h2 className={styles.bioTitle}>About Me</h2>
                 <p className={styles.bioText}>
-                  Kirill Ginko is a creative developer and visual storyteller—
-                  shaping digital experiences, visuals, and brand identities.
-                  His work moves between interactive design, visual identity,
-                  illustration, and video, with a focus on building cohesive
-                  branding across mediums.
+                  Kirill Ginko is a creative developer working at the
+                  intersection of art and technology, creating digital
+                  experiences that explore the evolving relationship between
+                  human creativity and computational systems. His practice spans
+                  interactive media, generative art, and immersive web
+                  environments, with a focus on creating visual narratives that
+                  resonate across digital and physical media.
+                </p>
+                <p className={styles.bioText}>
+                  His web design and motion graphics work spans from subtle
+                  interface animations to complex procedural systems, creating
+                  visual languages that enhance brand storytelling.
                 </p>
                 <p className={styles.bioText}>
                   Rooted in a deep understanding of branding and marketing,
                   helping companies, and individuals craft experiences that tell
-                  a story. His approach to digital is immersive, blending
+                  a story. His approach to digital media is immersive, blending
                   design, motion graphics, and interactivity to create
                   environments that invite users to engage, explore, and
                   remember.
