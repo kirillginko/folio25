@@ -80,7 +80,7 @@ const ImageGallery = () => {
           if (isMobile && videoElement.readyState < 2) {
             // For newer videos, use a more aggressive loading approach
             const videoSrc = videoElement.src;
-            const isNewerVideo = videoSrc.includes('v1752') || videoSrc.includes('q_auto:low');
+            const isNewerVideo = videoSrc.includes('v1752') || videoSrc.includes('q_auto:good');
             
             if (isNewerVideo) {
               // Force load with timeout for newer videos
@@ -996,7 +996,7 @@ const ImageGallery = () => {
                 loop
                 muted={selectedImage !== index}
                 playsInline
-                preload={isMobile ? "none" : "metadata"}
+                preload={isMobile ? "metadata" : "auto"}
                 loading="lazy"
                 controls={false}
                 webkit-playsinline="true"
