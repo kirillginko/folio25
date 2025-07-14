@@ -78,40 +78,14 @@ const ImageGallery = () => {
 
           // On mobile, ensure video is loaded first
           if (isMobile && videoElement.readyState < 2) {
-            // For newer videos, use a more aggressive loading approach
-            const videoSrc = videoElement.src;
-            const isNewerVideo = videoSrc.includes('v1752') || videoSrc.includes('q_auto:best');
-            
-            if (isNewerVideo) {
-              // Force load with timeout for newer videos
-              videoElement.load();
-              const loadTimeout = setTimeout(() => {
-                videoElement.removeEventListener("loadeddata", onLoadedData);
-                // Try to play anyway even if not fully loaded
-                videoElement.play().catch(() => {
-                  console.log("Mobile video play failed for newer video");
-                });
-              }, 2000);
-              
-              const onLoadedData = () => {
-                clearTimeout(loadTimeout);
-                videoElement.removeEventListener("loadeddata", onLoadedData);
-                videoElement.play().catch(() => {
-                  // Silently handle mobile video play error
-                });
-              };
-              videoElement.addEventListener("loadeddata", onLoadedData);
-            } else {
-              // Original logic for older videos
-              videoElement.load();
-              const onLoadedData = () => {
-                videoElement.removeEventListener("loadeddata", onLoadedData);
-                videoElement.play().catch(() => {
-                  // Silently handle mobile video play error
-                });
-              };
-              videoElement.addEventListener("loadeddata", onLoadedData);
-            }
+            videoElement.load();
+            const onLoadedData = () => {
+              videoElement.removeEventListener("loadeddata", onLoadedData);
+              videoElement.play().catch(() => {
+                // Silently handle mobile video play error
+              });
+            };
+            videoElement.addEventListener("loadeddata", onLoadedData);
             return;
           }
 
@@ -956,16 +930,14 @@ const ImageGallery = () => {
                       if (el.currentTime > 0) {
                         el.currentTime = 0;
                       }
-                      console.log(`Video ${index} loaded successfully`, el.src);
                     };
 
-                    const handleError = (e) => {
-                      console.error(`Video ${index} failed to load:`, e, el.src);
+                    const handleError = () => {
+                      // Silently handle video errors
                     };
 
                     const handleCanPlay = () => {
                       // Video is ready to play
-                      console.log(`Video ${index} can play`, el.src);
                     };
 
                     // Remove existing listeners to prevent duplicates
@@ -988,7 +960,7 @@ const ImageGallery = () => {
                     }
                   }
                 }}
-                src={isMobile && image.mobileUrl ? image.mobileUrl : image.url}
+                src={image.url}
                 poster={image.poster}
                 className={styles.image}
                 width={200}
