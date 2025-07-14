@@ -100,6 +100,13 @@ video.image {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
+
+  .imageWrapper.selected {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
 }
 
 .buttonContainer {
@@ -401,6 +408,10 @@ video.image {
     transform: translate(-50%, -95%) !important;
     z-index: 1000 !important;
     overflow: hidden !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .selected .image {
@@ -409,6 +420,9 @@ video.image {
     object-fit: cover !important;
     object-position: center !important;
     background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
   .selected .detailButton {
     display: none;
@@ -420,8 +434,12 @@ video.image {
     left: 0;
     right: 0;
     bottom: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.8);
     z-index: 999;
+    border: none;
+    outline: none;
   }
 }
 
