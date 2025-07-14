@@ -400,6 +400,15 @@ video.image {
     height: 290px !important;
     transform: translate(-50%, -95%) !important;
     z-index: 1000 !important;
+    overflow: hidden !important;
+  }
+
+  .selected .image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    background-color: transparent !important;
   }
   .selected .detailButton {
     display: none;
