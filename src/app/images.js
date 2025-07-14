@@ -180,7 +180,26 @@ const imagesData = [
 const images = imagesData.map((media) => {
   if (media.type === "video" && media.url.includes("cloudinary")) {
     const posterUrl = media.url.replace(/\.mp4$/, ".jpg");
-    return { ...media, poster: posterUrl };
+    
+    // Add mobile-optimized video URL for newer videos (those with higher version numbers)
+    const versionMatch = media.url.match(/\/v(\d+)\//);
+    const version = versionMatch ? parseInt(versionMatch[1]) : 0;
+    
+    // For newer videos (likely larger), add mobile optimization
+    let mobileUrl = media.url;
+    if (version > 1751500000) { // Videos uploaded after January 2025
+      // Add Cloudinary transformations for mobile optimization
+      mobileUrl = media.url.replace(
+        '/video/upload/',
+        '/video/upload/q_auto:low,w_400,h_400,c_fill,f_mp4/'
+      );
+    }
+    
+    return { 
+      ...media, 
+      poster: posterUrl,
+      mobileUrl: mobileUrl
+    };
   }
   return media;
 });

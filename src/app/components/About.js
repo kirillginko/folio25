@@ -109,6 +109,7 @@ const About = () => {
     const timer = setTimeout(adjustPositionAndSize, 10);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMinimized, isMobile, activeComponent, showAbout]);
 
   // Enhance the draggable creation to ensure it's recreated properly after image interaction
