@@ -80,7 +80,7 @@ const ImageGallery = () => {
           if (isMobile && videoElement.readyState < 2) {
             // For newer videos, use a more aggressive loading approach
             const videoSrc = videoElement.src;
-            const isNewerVideo = videoSrc.includes('v1752') || videoSrc.includes('q_auto:good');
+            const isNewerVideo = videoSrc.includes('v1752') || videoSrc.includes('q_auto:best');
             
             if (isNewerVideo) {
               // Force load with timeout for newer videos

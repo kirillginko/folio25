@@ -188,10 +188,10 @@ const images = imagesData.map((media) => {
     // For newer videos (likely larger), add mobile optimization
     let mobileUrl = media.url;
     if (version > 1751500000) { // Videos uploaded after January 2025
-      // Add Cloudinary transformations for mobile optimization with better quality
+      // Add Cloudinary transformations for mobile optimization with high quality
       mobileUrl = media.url.replace(
         '/video/upload/',
-        '/video/upload/q_auto:good,w_600,h_600,c_fill,f_mp4,br_800k/'
+        '/video/upload/q_auto:best,f_mp4,vc_h264,br_2000k/'
       );
     }
     
