@@ -153,14 +153,14 @@ const MusicPlayer = () => {
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            console.log("Playback started successfully");
+            console.log("Playbook started successfully");
           })
           .catch((error) => {
             console.error("Playback failed:", error);
           });
       }
     }
-  }, [currentSongIndex, isPlaying]);
+  }, [currentSongIndex]); // Removed isPlaying from dependency array
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -168,16 +168,52 @@ const MusicPlayer = () => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  // Track if we just handled a touch event to prevent duplicate click events
+  const lastTouchTime = useRef(0);
+
   const handleProgressClick = (e) => {
-    if (!audioRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // On mobile, prevent synthetic click events after touch
+    if (e.type === 'click') {
+      const now = Date.now();
+      if (now - lastTouchTime.current < 500) {
+        // This is likely a synthetic click event after touch, ignore it
+        return;
+      }
+    }
+    
+    if (e.type === 'touchend') {
+      lastTouchTime.current = Date.now();
+    }
+    
+    if (!audioRef.current || !duration) return;
 
     const progressBar = e.currentTarget;
-    const clickPosition = e.nativeEvent.offsetX;
-    const progressBarWidth = progressBar.offsetWidth;
-    const newTime = (clickPosition / progressBarWidth) * duration;
-
-    audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
+    const rect = progressBar.getBoundingClientRect();
+    
+    // Handle both mouse and touch events
+    let clickPosition;
+    if (e.type === 'touchstart' || e.type === 'touchend') {
+      const touch = e.touches[0] || e.changedTouches[0];
+      clickPosition = touch.clientX - rect.left;
+    } else {
+      clickPosition = e.clientX - rect.left;
+    }
+    
+    // Ensure click position is within bounds
+    clickPosition = Math.max(0, Math.min(clickPosition, rect.width));
+    
+    const progressBarWidth = rect.width;
+    const percentage = clickPosition / progressBarWidth;
+    const newTime = percentage * duration;
+    
+    // Ensure newTime is valid
+    if (newTime >= 0 && newTime <= duration) {
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
   };
 
   const handleSongEnd = () => {
@@ -313,16 +349,7 @@ const MusicPlayer = () => {
         dataArray.reduce((a, b) => a + b * b, 0) / dataArray.length
       );
 
-      console.log("Frequency Analysis:", {
-        subBass: Math.round(subBass),
-        bass: Math.round(bass),
-        lowMids: Math.round(lowMids),
-        mids: Math.round(mids),
-        highMids: Math.round(highMids),
-        presence: Math.round(presence),
-        brilliance: Math.round(brilliance),
-        volume: Math.round(volume),
-      });
+      // Frequency analysis data available for visualizer
 
       animationFrameRef.current = requestAnimationFrame(analyzeFrequency);
     };
@@ -452,7 +479,14 @@ const MusicPlayer = () => {
               <div
                 className={styles.progressBar}
                 onClick={handleProgressClick}
-                style={{ cursor: "pointer" }}
+                onTouchEnd={handleProgressClick}
+                style={{ 
+                  cursor: "pointer", 
+                  touchAction: "manipulation",
+                  pointerEvents: "auto",
+                  position: "relative",
+                  zIndex: 1000
+                }}
               >
                 <div
                   className={styles.progress}

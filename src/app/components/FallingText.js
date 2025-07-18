@@ -53,8 +53,8 @@ function TennisBall() {
     userData: { type: "ball" },
     linearDamping: 0.05, // Reduced damping for less slowdown
     angularDamping: 0.1,
-    collisionFilterGroup: 1,
-    collisionFilterMask: 1,
+    collisionFilterGroup: 1, // Ball in group 1
+    collisionFilterMask: 1 | 2, // Collide with ground (group 1) and letters (group 2)
   }));
 
   useEffect(() => {
@@ -109,9 +109,11 @@ function Ground() {
     type: "Static",
     position: [0, -2, 0],
     args: [100, 1, 100],
+    collisionFilterGroup: 1, // Ground in group 1
+    collisionFilterMask: 1 | 4, // Collide with balls (group 1) and fragments (group 4)
     material: {
-      restitution: 0.3, // Slightly more bounce to prevent sticking
-      friction: 0.5, // Reduced friction to prevent fragments getting stuck
+      restitution: 0.4, // More bounce to prevent sticking
+      friction: 0.3, // Further reduced friction to prevent fragments getting stuck
     },
   }));
 
@@ -169,11 +171,11 @@ const LetterFragment = React.memo(function LetterFragment({
   useEffect(() => {
     const timer = setTimeout(() => {
       setCanInteractWithLetters(true);
-    }, 500); // 500ms delay to clear impact area
+    }, 1000); // Increased to 1000ms delay to completely clear impact area
     return () => clearTimeout(timer);
   }, []);
 
-  const [ref] = useBox(() => ({
+  const [ref, api] = useBox(() => ({
     mass: 0.15,
     position: [position[0], position[1], position[2]],
     rotation,
@@ -194,9 +196,55 @@ const LetterFragment = React.memo(function LetterFragment({
     sleepTimeLimit: 0.5,
     allowSleep: true,
     // Use different collision groups to avoid letter collision area initially
-    collisionFilterGroup: canInteractWithLetters ? 1 : 2,
-    collisionFilterMask: canInteractWithLetters ? 1 : 1, // Always collide with ground (group 1)
+    collisionFilterGroup: canInteractWithLetters ? 1 : 4,
+    collisionFilterMask: canInteractWithLetters ? 1 : 1, // Always collide with ground (group 1), avoid letters (group 2)
   }));
+
+  // Add force field effect to push fragments away from collision area for first few seconds
+  useEffect(() => {
+    if (!ref.current || !api) return;
+    
+    const forceInterval = setInterval(() => {
+      if (ref.current) {
+        const fragPos = ref.current.position;
+        const collisionCenterY = 0.5; // Letter collision area Y position
+        const collisionAreaRadius = 6; // Area around letters to avoid
+        
+        // Calculate distance from collision area center
+        const distanceFromCenter = Math.sqrt(
+          fragPos.x * fragPos.x + 
+          (fragPos.y - collisionCenterY) * (fragPos.y - collisionCenterY) + 
+          fragPos.z * fragPos.z
+        );
+        
+        // Apply very gentle force only if fragment gets stuck in collision area
+        if (distanceFromCenter < 3 && fragPos.y > -1 && fragPos.y < 2) {
+          const forceStrength = 2 * (1 - distanceFromCenter / 3); // Gentle anti-stick force
+          const forceDirection = [
+            fragPos.x / distanceFromCenter || 0,
+            Math.max((fragPos.y - collisionCenterY) / distanceFromCenter, 0.1),
+            fragPos.z / distanceFromCenter || 0
+          ];
+          
+          api.applyImpulse([
+            forceDirection[0] * forceStrength,
+            forceDirection[1] * forceStrength,
+            forceDirection[2] * forceStrength
+          ], [0, 0, 0]);
+        }
+      }
+    }, 50); // Check every 50ms
+    
+    // Clear force field after 2 seconds
+    const clearTimer = setTimeout(() => {
+      clearInterval(forceInterval);
+    }, 2000);
+    
+    return () => {
+      clearInterval(forceInterval);
+      clearTimeout(clearTimer);
+    };
+  }, [api, ref]);
 
   // Use shared geometry and material for better performance
   return (
@@ -221,11 +269,15 @@ function LetterCollider({ position, index, onCollide, isExploded }) {
     args: [letterWidth, 4.5, 4.5],
     material: { restitution: 0.3 },
     userData: { type: "letter", index },
+    collisionFilterGroup: 2, // Letters in group 2
+    collisionFilterMask: 1 | 2, // Collide with balls (group 1) and other letters (group 2)
     onCollide: (e) => {
       if (!isExploded && e.body.userData?.type === "ball") {
-        // Immediately remove collision body on impact
+        // Immediately remove collision body on impact and disable all physics
         api.position.set(0, -1000, 0);
         api.mass.set(0);
+        api.collisionFilterGroup.set(0); // Disable all collisions
+        api.collisionFilterMask.set(0);
         onCollide(index, e.body.velocity || [0, 0, -25]);
       }
     },
@@ -236,6 +288,8 @@ function LetterCollider({ position, index, onCollide, isExploded }) {
     if (isExploded) {
       api.position.set(0, -1000, 0);
       api.mass.set(0);
+      api.collisionFilterGroup.set(0); // Disable all collisions
+      api.collisionFilterMask.set(0);
     }
   }, [isExploded, api]);
 
@@ -265,11 +319,15 @@ const Letter = React.memo(function Letter({
     args: [3.8, 3.8, 3.8],
     material: { restitution: 0.3 },
     userData: { type: "letter", letter, index },
+    collisionFilterGroup: 2, // Letters in group 2
+    collisionFilterMask: 1 | 2, // Collide with balls (group 1) and other letters (group 2)
     onCollide: (e) => {
       if (!exploded && e.body.userData?.type === "ball") {
         // Immediately disable collision to prevent fragment trapping
         api.position.set(0, -1000, 0);
         api.mass.set(0);
+        api.collisionFilterGroup.set(0); // Disable all collisions
+        api.collisionFilterMask.set(0);
 
         // Trigger explosion directly from letter collision
         setExploded(true);
@@ -282,7 +340,7 @@ const Letter = React.memo(function Letter({
   // Generate fragment data without creating physics objects - optimized count for performance
   const generateFragmentData = (count, letterChar) => {
     const fragmentData = [];
-    const optimizedCount = Math.min(count, 10); // Allow up to 10 fragments for better visual impact
+    const optimizedCount = Math.min(count, 15); // Allow up to 15 fragments for dramatic raining effect
 
     for (let i = 0; i < optimizedCount; i++) {
       // LARGER SIZE for better visual impact with fewer fragments
@@ -349,11 +407,11 @@ const Letter = React.memo(function Letter({
 
         for (let i = startIndex; i < endIndex; i++) {
           const fragData = fragmentsRef.current[i];
-          const maxDistance = 2.0; // Reduced spread for more centralized explosion
+          const maxDistance = 2.5; // Optimal spread for ideal fragment distribution
           const distance = fragData.distanceWeight * maxDistance;
 
-          // Ensure fragments spawn well outside collision area and above ground
-          const minDistance = 4.5; // Increased minimum distance to completely clear impact zone
+          // Fragments spawn at moderate distance for natural fall pattern
+          const minDistance = 2.5; // Moderate distance so fragments fall near original position
           const safeDistance = Math.max(distance, minDistance);
 
           const fragPos = [
@@ -364,8 +422,8 @@ const Letter = React.memo(function Letter({
                 safeDistance *
                   Math.sin(fragData.phi) *
                   Math.sin(fragData.theta) +
-                1.5, // More controlled height spawn
-              1.0 // Ensure always above ground level (ground is at -2, so 1.0 is safe)
+                1.0, // Moderate spawn height for natural fall
+              0.8 // Above letter level but not too high
             ),
             impactPoint[2] + safeDistance * Math.cos(fragData.phi),
           ];
@@ -373,17 +431,20 @@ const Letter = React.memo(function Letter({
           const sizeScale = 0.8 + 0.4 * (1 - fragData.distanceWeight);
           const size = fragData.size.map((s) => s * sizeScale);
 
-          const velocityScale = 15 * (1 - fragData.distanceWeight * 0.3); // Reduced velocity for centralized explosion
-          const upwardBoost = 3; // Minimal upward boost for subtle motion
+          const velocityScale = 15 * (1 - fragData.distanceWeight * 0.4); // Fine-tuned velocity for optimal spread
+          const upwardBoost = 5; // Optimal upward boost for perfect arcs
 
+          // Add moderate randomness for natural variation
+          const randomBoost = 0.8 + Math.random() * 0.4; // Random multiplier between 0.8-1.2
+          const randomUpward = upwardBoost * (0.9 + Math.random() * 0.2); // Slight upward variation
+          
           const velocity = [
-            normalizedDirection[0] * velocityScale * 0.8 +
-              (fragPos[0] - impactPoint[0]) * velocityScale * 0.9,
-            normalizedDirection[1] * velocityScale * 0.8 +
-              (fragPos[1] - impactPoint[1]) * velocityScale * 0.9 +
-              upwardBoost,
-            normalizedDirection[2] * velocityScale * 0.8 +
-              (fragPos[2] - impactPoint[2]) * velocityScale * 0.9,
+            ((fragPos[0] - impactPoint[0]) * velocityScale * 1.1 + 
+              normalizedDirection[0] * velocityScale * 0.4) * randomBoost, // Optimal horizontal spread
+            randomUpward + (fragPos[1] - impactPoint[1]) * velocityScale * 0.7 + 
+              Math.abs(normalizedDirection[1]) * velocityScale * 0.3, // Perfect arcing trajectories
+            ((fragPos[2] - impactPoint[2]) * velocityScale * 1.1 + 
+              normalizedDirection[2] * velocityScale * 0.4) * randomBoost, // Optimal depth spread
           ];
 
           newFragments.push({
@@ -415,7 +476,7 @@ const Letter = React.memo(function Letter({
 
   // Pre-generate fragment data on mount to avoid calculation during collision
   useEffect(() => {
-    fragmentsRef.current = generateFragmentData(10, letter); // Increased to 8 fragments for better visual impact
+    fragmentsRef.current = generateFragmentData(15, letter); // Increased to 15 fragments for dramatic raining effect
   }, [letter]);
 
   // Handle explosion triggered from parent with optimized timing and minimal re-renders
