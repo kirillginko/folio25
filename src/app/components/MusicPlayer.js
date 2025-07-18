@@ -153,14 +153,14 @@ const MusicPlayer = () => {
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            console.log("Playbook started successfully");
+            console.log("Playback started successfully");
           })
           .catch((error) => {
             console.error("Playback failed:", error);
           });
       }
     }
-  }, [currentSongIndex]); // Removed isPlaying from dependency array
+  }, [currentSongIndex, isPlaying]); // Added isPlaying back to fix ESLint warning
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -321,35 +321,8 @@ const MusicPlayer = () => {
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(dataArray);
 
-      // Calculate average frequency for different ranges
-      // Sub-bass (20-60 Hz)
-      const subBass = dataArray.slice(1, 3).reduce((a, b) => a + b) / 2;
-
-      // Bass (60-250 Hz)
-      const bass = dataArray.slice(3, 12).reduce((a, b) => a + b) / 9;
-
-      // Low Mids (250-500 Hz)
-      const lowMids = dataArray.slice(12, 24).reduce((a, b) => a + b) / 12;
-
-      // Mids (500-2000 Hz)
-      const mids = dataArray.slice(24, 96).reduce((a, b) => a + b) / 72;
-
-      // High Mids (2000-4000 Hz)
-      const highMids = dataArray.slice(96, 192).reduce((a, b) => a + b) / 96;
-
-      // Presence (4000-6000 Hz)
-      const presence = dataArray.slice(192, 288).reduce((a, b) => a + b) / 96;
-
-      // Brilliance (6000-20000 Hz)
-      const brilliance =
-        dataArray.slice(288, 1024).reduce((a, b) => a + b) / 736;
-
-      // Calculate overall volume (RMS of all frequencies)
-      const volume = Math.sqrt(
-        dataArray.reduce((a, b) => a + b * b, 0) / dataArray.length
-      );
-
-      // Frequency analysis data available for visualizer
+      // Frequency analysis for visualizer (currently unused but available for future features)
+      // Note: These calculations are kept for potential future visualizer enhancements
 
       animationFrameRef.current = requestAnimationFrame(analyzeFrequency);
     };

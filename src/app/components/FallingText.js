@@ -208,7 +208,7 @@ const LetterFragment = React.memo(function LetterFragment({
       if (ref.current) {
         const fragPos = ref.current.position;
         const collisionCenterY = 0.5; // Letter collision area Y position
-        const collisionAreaRadius = 6; // Area around letters to avoid
+        const collisionAreaRadius = 3; // Area around letters to avoid
         
         // Calculate distance from collision area center
         const distanceFromCenter = Math.sqrt(
@@ -218,8 +218,8 @@ const LetterFragment = React.memo(function LetterFragment({
         );
         
         // Apply very gentle force only if fragment gets stuck in collision area
-        if (distanceFromCenter < 3 && fragPos.y > -1 && fragPos.y < 2) {
-          const forceStrength = 2 * (1 - distanceFromCenter / 3); // Gentle anti-stick force
+        if (distanceFromCenter < collisionAreaRadius && fragPos.y > -1 && fragPos.y < 2) {
+          const forceStrength = 2 * (1 - distanceFromCenter / collisionAreaRadius); // Gentle anti-stick force
           const forceDirection = [
             fragPos.x / distanceFromCenter || 0,
             Math.max((fragPos.y - collisionCenterY) / distanceFromCenter, 0.1),
@@ -259,47 +259,7 @@ const LetterFragment = React.memo(function LetterFragment({
   );
 });
 
-// Individual letter collision box with immediate removal capability
-function LetterCollider({ position, index, onCollide, isExploded }) {
-  const letterWidth = 3.8;
-
-  const [ref, api] = useBox(() => ({
-    mass: 0,
-    position: isExploded ? [0, -1000, 0] : position, // Start far away if already exploded
-    args: [letterWidth, 4.5, 4.5],
-    material: { restitution: 0.3 },
-    userData: { type: "letter", index },
-    collisionFilterGroup: 2, // Letters in group 2
-    collisionFilterMask: 1 | 2, // Collide with balls (group 1) and other letters (group 2)
-    onCollide: (e) => {
-      if (!isExploded && e.body.userData?.type === "ball") {
-        // Immediately remove collision body on impact and disable all physics
-        api.position.set(0, -1000, 0);
-        api.mass.set(0);
-        api.collisionFilterGroup.set(0); // Disable all collisions
-        api.collisionFilterMask.set(0);
-        onCollide(index, e.body.velocity || [0, 0, -25]);
-      }
-    },
-  }));
-
-  // Remove collision box if letter exploded
-  useEffect(() => {
-    if (isExploded) {
-      api.position.set(0, -1000, 0);
-      api.mass.set(0);
-      api.collisionFilterGroup.set(0); // Disable all collisions
-      api.collisionFilterMask.set(0);
-    }
-  }, [isExploded, api]);
-
-  return (
-    <mesh ref={ref} visible={false}>
-      <boxGeometry args={[letterWidth, 4.5, 4.5]} />
-      <meshStandardMaterial color="red" transparent opacity={0.1} />
-    </mesh>
-  );
-}
+// LetterCollider removed - collision detection now handled directly in Letter component for better performance
 
 // Letter with simplified explosion logic and direct collision detection
 const Letter = React.memo(function Letter({
@@ -308,32 +268,49 @@ const Letter = React.memo(function Letter({
   index,
   shouldExplode,
   ballVelocity,
+  onCollide,
 }) {
   const [exploded, setExploded] = useState(false);
   const [letterVisible, setLetterVisible] = useState(true);
   const [fragments, setFragments] = useState([]);
   const fragmentsRef = useRef(null);
+  const explodedRef = useRef(false); // Prevent multiple collision triggers
+  
   const [ref, api] = useBox(() => ({
     mass: 0,
     position,
-    args: [3.8, 3.8, 3.8],
+    args: [3.8, 4.5, 4.5], // Slightly larger collision box for better detection
     material: { restitution: 0.3 },
     userData: { type: "letter", letter, index },
     collisionFilterGroup: 2, // Letters in group 2
-    collisionFilterMask: 1 | 2, // Collide with balls (group 1) and other letters (group 2)
+    collisionFilterMask: 1, // Only collide with balls (group 1)
     onCollide: (e) => {
-      if (!exploded && e.body.userData?.type === "ball") {
-        // Immediately disable collision to prevent fragment trapping
+      // Optimize collision detection with early returns
+      if (explodedRef.current || e.body.userData?.type !== "ball") return;
+      
+      // Immediately mark as exploded to prevent duplicate triggers
+      explodedRef.current = true;
+      
+      // Use requestAnimationFrame to defer heavy operations
+      requestAnimationFrame(() => {
+        // Disable collision immediately
         api.position.set(0, -1000, 0);
         api.mass.set(0);
-        api.collisionFilterGroup.set(0); // Disable all collisions
+        api.collisionFilterGroup.set(0);
         api.collisionFilterMask.set(0);
-
-        // Trigger explosion directly from letter collision
+        
+        // Trigger parent collision handler for coordinated explosion
+        onCollide?.(index, e.body.velocity || ballVelocity || [0, 0, -25]);
+        
+        // Trigger local explosion with minimal delay
         setExploded(true);
-        createLetterFragments(position, e.body.velocity || ballVelocity);
         setLetterVisible(false);
-      }
+        
+        // Defer fragment creation to next frame to prevent stutter
+        requestAnimationFrame(() => {
+          createLetterFragments(position, e.body.velocity || ballVelocity);
+        });
+      });
     },
   }));
 
@@ -395,9 +372,9 @@ const Letter = React.memo(function Letter({
         normalizedDirection = impactDirection.map((v) => v / impactMagnitude);
       }
 
-      // Process fragments in batches to spread work across frames
+      // Process fragments in larger batches to reduce frame spreading overhead
       const processFragmentBatch = (startIndex = 0) => {
-        const batchSize = 3; // Process 3 fragments per frame (increased for more fragments)
+        const batchSize = 8; // Larger batch size to reduce overhead
         const endIndex = Math.min(
           startIndex + batchSize,
           fragmentsRef.current.length
@@ -687,16 +664,7 @@ function Scene({ onComplete }) {
       <Ground />
       <TennisBall />
 
-      {/* Individual letter collision boxes - dynamically managed */}
-      {letterPositions.map((item, i) => (
-        <LetterCollider
-          key={`collider-${i}`}
-          position={item.position}
-          index={i}
-          onCollide={handleLetterCollision}
-          isExploded={lettersToExplode.includes(i)}
-        />
-      ))}
+      {/* Collision detection handled directly in Letter components */}
 
       {/* Render letters */}
       {letterPositions.map((item, i) => (
@@ -707,6 +675,7 @@ function Scene({ onComplete }) {
           index={i}
           shouldExplode={wordExploded && lettersToExplode.includes(i)}
           ballVelocity={ballImpactVelocity}
+          onCollide={handleLetterCollision}
         />
       ))}
     </>
@@ -729,9 +698,10 @@ export default function FallingText({ onComplete }) {
         <Physics
           gravity={[0, -20, 0]}
           defaultContactMaterial={{ restitution: 0.7 }}
-          iterations={15}
-          tolerance={0.001}
+          iterations={10}
+          tolerance={0.01}
           broadphase="SAP"
+          allowSleep={true}
         >
           <Scene onComplete={onComplete} />
         </Physics>
