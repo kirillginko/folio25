@@ -90,7 +90,7 @@ const ImageGallery = () => {
                 videoElement.removeEventListener("loadeddata", onLoadedData);
                 // Try to play anyway even if not fully loaded
                 videoElement.play().catch(() => {
-                  console.log("Mobile video play failed for newer video");
+                  // Silently handle mobile video play error
                 });
               }, 2000);
 
@@ -138,7 +138,7 @@ const ImageGallery = () => {
             videoElement.addEventListener("canplay", onCanPlay);
           }
         } catch (error) {
-          console.log("Video play error:", error);
+          // Silently handle video play error
         }
       });
     },
@@ -957,20 +957,15 @@ const ImageGallery = () => {
                       if (el.currentTime > 0) {
                         el.currentTime = 0;
                       }
-                      console.log(`Video ${index} loaded successfully`, el.src);
+                      // Video is loaded and ready to play
                     };
 
                     const handleError = (e) => {
-                      console.error(
-                        `Video ${index} failed to load:`,
-                        e,
-                        el.src
-                      );
+                      // Silently handle video load error
                     };
 
                     const handleCanPlay = () => {
                       // Video is ready to play
-                      console.log(`Video ${index} can play`, el.src);
                     };
 
                     // Remove existing listeners to prevent duplicates

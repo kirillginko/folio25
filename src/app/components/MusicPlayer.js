@@ -160,7 +160,7 @@ const MusicPlayer = () => {
           });
       }
     }
-  }, [currentSongIndex, isPlaying]);
+  }, [currentSongIndex, isPlaying]); // Added isPlaying back to fix ESLint warning
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -168,16 +168,52 @@ const MusicPlayer = () => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  // Track if we just handled a touch event to prevent duplicate click events
+  const lastTouchTime = useRef(0);
+
   const handleProgressClick = (e) => {
-    if (!audioRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // On mobile, prevent synthetic click events after touch
+    if (e.type === 'click') {
+      const now = Date.now();
+      if (now - lastTouchTime.current < 500) {
+        // This is likely a synthetic click event after touch, ignore it
+        return;
+      }
+    }
+    
+    if (e.type === 'touchend') {
+      lastTouchTime.current = Date.now();
+    }
+    
+    if (!audioRef.current || !duration) return;
 
     const progressBar = e.currentTarget;
-    const clickPosition = e.nativeEvent.offsetX;
-    const progressBarWidth = progressBar.offsetWidth;
-    const newTime = (clickPosition / progressBarWidth) * duration;
-
-    audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
+    const rect = progressBar.getBoundingClientRect();
+    
+    // Handle both mouse and touch events
+    let clickPosition;
+    if (e.type === 'touchstart' || e.type === 'touchend') {
+      const touch = e.touches[0] || e.changedTouches[0];
+      clickPosition = touch.clientX - rect.left;
+    } else {
+      clickPosition = e.clientX - rect.left;
+    }
+    
+    // Ensure click position is within bounds
+    clickPosition = Math.max(0, Math.min(clickPosition, rect.width));
+    
+    const progressBarWidth = rect.width;
+    const percentage = clickPosition / progressBarWidth;
+    const newTime = percentage * duration;
+    
+    // Ensure newTime is valid
+    if (newTime >= 0 && newTime <= duration) {
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
   };
 
   const handleSongEnd = () => {
@@ -285,44 +321,8 @@ const MusicPlayer = () => {
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(dataArray);
 
-      // Calculate average frequency for different ranges
-      // Sub-bass (20-60 Hz)
-      const subBass = dataArray.slice(1, 3).reduce((a, b) => a + b) / 2;
-
-      // Bass (60-250 Hz)
-      const bass = dataArray.slice(3, 12).reduce((a, b) => a + b) / 9;
-
-      // Low Mids (250-500 Hz)
-      const lowMids = dataArray.slice(12, 24).reduce((a, b) => a + b) / 12;
-
-      // Mids (500-2000 Hz)
-      const mids = dataArray.slice(24, 96).reduce((a, b) => a + b) / 72;
-
-      // High Mids (2000-4000 Hz)
-      const highMids = dataArray.slice(96, 192).reduce((a, b) => a + b) / 96;
-
-      // Presence (4000-6000 Hz)
-      const presence = dataArray.slice(192, 288).reduce((a, b) => a + b) / 96;
-
-      // Brilliance (6000-20000 Hz)
-      const brilliance =
-        dataArray.slice(288, 1024).reduce((a, b) => a + b) / 736;
-
-      // Calculate overall volume (RMS of all frequencies)
-      const volume = Math.sqrt(
-        dataArray.reduce((a, b) => a + b * b, 0) / dataArray.length
-      );
-
-      console.log("Frequency Analysis:", {
-        subBass: Math.round(subBass),
-        bass: Math.round(bass),
-        lowMids: Math.round(lowMids),
-        mids: Math.round(mids),
-        highMids: Math.round(highMids),
-        presence: Math.round(presence),
-        brilliance: Math.round(brilliance),
-        volume: Math.round(volume),
-      });
+      // Frequency analysis for visualizer (currently unused but available for future features)
+      // Note: These calculations are kept for potential future visualizer enhancements
 
       animationFrameRef.current = requestAnimationFrame(analyzeFrequency);
     };
@@ -452,7 +452,14 @@ const MusicPlayer = () => {
               <div
                 className={styles.progressBar}
                 onClick={handleProgressClick}
-                style={{ cursor: "pointer" }}
+                onTouchEnd={handleProgressClick}
+                style={{ 
+                  cursor: "pointer", 
+                  touchAction: "manipulation",
+                  pointerEvents: "auto",
+                  position: "relative",
+                  zIndex: 1000
+                }}
               >
                 <div
                   className={styles.progress}

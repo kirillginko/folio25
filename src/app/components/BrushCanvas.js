@@ -60,6 +60,9 @@ const BrushCanvas = () => {
 
   // Add isMobile state at the top with other states
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Add state to store last position for mobile
+  const lastPositionRef = useRef({ x: 0, y: 0 });
 
   const setup = (p5, canvasParentRef) => {
     let canvasWidth = 1000;
@@ -502,6 +505,14 @@ const BrushCanvas = () => {
           },
           onDragEnd: function () {
             gsap.to(this.target, { scale: 1, duration: 0.2 });
+            
+            // Save position after dragging on mobile
+            if (isMobile) {
+              lastPositionRef.current = {
+                x: gsap.getProperty(this.target, "x") || 0,
+                y: gsap.getProperty(this.target, "y") || 0,
+              };
+            }
           },
         })[0];
       } else if (draggableInstance.current) {
@@ -540,9 +551,13 @@ const BrushCanvas = () => {
         };
 
         if (isMobile && !isMinimized) {
+          // Use stored last position or fallback to center
+          const currentX = gsap.getProperty(containerRef.current, "x") || lastPositionRef.current.x;
+          const currentY = gsap.getProperty(containerRef.current, "y") || lastPositionRef.current.y;
+          
           gsap.to(containerRef.current, {
-            x: 0,
-            y: 0,
+            x: currentX,
+            y: currentY,
             ...animConfig,
           });
 
@@ -609,6 +624,14 @@ const BrushCanvas = () => {
   const toggleMinimized = () => {
     if (!isMinimized) {
       saveCanvasState();
+      
+      // Save current position before minimizing on mobile
+      if (isMobile && containerRef.current) {
+        lastPositionRef.current = {
+          x: gsap.getProperty(containerRef.current, "x") || 0,
+          y: gsap.getProperty(containerRef.current, "y") || 0,
+        };
+      }
 
       // When minimizing, hide the backdrop
       setShowBackdrop(false);
