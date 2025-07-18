@@ -74,8 +74,8 @@ function TennisBall() {
         // Much stronger horizontal velocity for guaranteed hit
         api.velocity.set(
           randomX * -0.5, // Same correction toward center
-          -4, // Less downward velocity
-          -70 // Dramatically increased forward velocity
+          -6, // Increased downward velocity for faster movement
+          -95 // Further increased forward velocity for faster, more direct impact
         );
 
         // Add angular velocity for spin effect
