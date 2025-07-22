@@ -274,14 +274,14 @@
   top: 88px; /* Position below the 80px minimized container + 8px gap */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.8em;
+  font-size: 0.6em;
   color: rgb(255, 255, 255);
   font-weight: 400;
-  font-family: var(--font-founders-grotesk);
+  /* font-family: var(--font-founders-grotesk); */
   pointer-events: none;
   z-index: 1;
   white-space: nowrap;
-  letter-spacing: -0.01em;
+  /* letter-spacing: -0.01em; */
   background-color: rgb(0, 0, 0);
   border: 1px solid rgb(0, 0, 0);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
