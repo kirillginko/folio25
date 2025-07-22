@@ -403,6 +403,8 @@ const About = () => {
           )}
         </div>
 
+        {isMinimized && <div className={styles.infoTextLabel}>About</div>}
+
         <div
           className={`${styles.designContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer

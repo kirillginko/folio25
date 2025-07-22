@@ -18,6 +18,18 @@ const instructionFont = localFont({
   weight: "100 900",
 });
 
+const foundersGrotesk = localFont({
+  src: "./fonts/fg-regular.woff2",
+  variable: "--font-founders-grotesk",
+  weight: "100 900",
+});
+
+const foundersGroteskLight = localFont({
+  src: "./fonts/fg-light.woff2",
+  variable: "--font-founders-grotesk-light",
+  weight: "100 400",
+});
+
 export const metadata = {
   title: "Kirill Ginko | Creative Developer & Digital Designer in NYC",
   description:
@@ -221,7 +233,7 @@ export default function RootLayout({ children }) {
         </Script>
       </head>
       <body
-        className={`${instructionFont.variable} ${AustinCyRoman.variable}`}
+        className={`${instructionFont.variable} ${AustinCyRoman.variable} ${foundersGrotesk.variable} ${foundersGroteskLight.variable}`}
         suppressHydrationWarning
       >
         <GlobalStateProvider>

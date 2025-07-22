@@ -233,6 +233,9 @@ const AnalogClock = () => {
             <BsArrowsAngleContract className={styles.toggleIcon} />
           )}
         </div>
+
+        {isMinimized && <div className={styles.timeTextLabel}>Time</div>}
+        
         <div
           ref={clockContainerRef}
           className={`${styles.clockContainer} ${

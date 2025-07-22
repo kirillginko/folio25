@@ -39,6 +39,7 @@ const BrushCanvas = () => {
 
   // Add new refs and state
   const containerRef = useRef(null);
+  const designContainerRef = useRef(null);
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
 
@@ -561,7 +562,7 @@ const BrushCanvas = () => {
             ...animConfig,
           });
 
-          gsap.to(containerRef.current.children[1], {
+          gsap.to(designContainerRef.current, {
             width: `${viewportWidth * 0.9}px`,
             height: `${viewportHeight * 0.8}px`,
             borderRadius: "16px",
@@ -591,7 +592,7 @@ const BrushCanvas = () => {
             ...animConfig,
           });
 
-          gsap.to(containerRef.current.children[1], {
+          gsap.to(designContainerRef.current, {
             width: isMinimized ? "100px" : "800px",
             height: isMinimized ? "50px" : "600px",
             borderRadius: isMinimized ? "25px" : "16px",
@@ -714,7 +715,11 @@ const BrushCanvas = () => {
             <BsArrowsAngleContract className={styles.toggleIcon} />
           )}
         </div>
+
+        {isMinimized && <div className={styles.paintTextLabel}>Paint</div>}
+        
         <div
+          ref={designContainerRef}
           className={`${styles.designContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer
           }`}
