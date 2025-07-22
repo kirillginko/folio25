@@ -274,7 +274,7 @@
   top: 88px; /* Position below the 80px minimized container + 8px gap */
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1em;
+  font-size: 0.8em;
   color: rgb(255, 255, 255);
   font-weight: 400;
   font-family: var(--font-founders-grotesk);
