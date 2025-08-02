@@ -42,10 +42,11 @@ const ImageGallery = () => {
     []
   );
 
-  const getScaleForScreen = useMemo(
-    () => (window.innerWidth <= 768 ? 1.2 : 2.5), // Reduced from 3 to 2.5 for better performance
-    []
-  );
+  const getScaleForScreen = useMemo(() => {
+    if (window.innerWidth <= 768) return 1.5;
+    // Scale to match info container height (600px) from base size (200px)
+    return 600 / 200; // 3.0 scale to match 600px height
+  }, []);
 
   // Add mobile detection helper
   const isMobile = useMemo(() => {

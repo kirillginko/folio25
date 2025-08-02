@@ -36,7 +36,7 @@
   cursor: grab;
   pointer-events: auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background: white;
+  background: transparent;
   transform-origin: center center;
   z-index: 1;
   user-select: none;
@@ -64,6 +64,9 @@
   -webkit-user-drag: none;
   draggable: false;
   display: block;
+  border-radius: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Ensure video elements display properly */
