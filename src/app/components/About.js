@@ -423,7 +423,7 @@ const About = () => {
               </header>
               <div className={styles.imageWrapper}>
                 <Image
-                  src="https://res.cloudinary.com/dtps5ugbf/image/upload/v1752462042/t_6s___0c0a0b1b-b02e-42bd-886c-9b9fa77dbf08__2025-07-13_22-54-15_1_jtgvze.png"
+                  src="https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148774/t_6s___0c0a0b1b-b02e-42bd-886c-9b9fa77dbf08__2025-07-13_22-54-15_1_jtgvze_z6adyd.png"
                   alt="Kirill Ginko"
                   width={600}
                   height={600}

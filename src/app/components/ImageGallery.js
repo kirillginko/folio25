@@ -1015,9 +1015,12 @@ const ImageGallery = () => {
                 className={styles.image}
                 width={200}
                 height={200}
-                priority={index < 4}
-                quality={75}
-                loading={index < 4 ? "eager" : "lazy"}
+                priority={index < 3}
+                quality={60}
+                loading={index < 3 ? "eager" : "lazy"}
+                sizes="(max-width: 768px) 200px, (max-width: 1200px) 300px, 400px"
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
               />
             )}
           </div>
