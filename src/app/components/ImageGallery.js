@@ -79,30 +79,62 @@ const ImageGallery = () => {
 
           // On mobile, ensure video is loaded first
           if (isMobile && videoElement.readyState < 2) {
-            // For newer videos, use a more aggressive loading approach
+            // For newer videos (including v1754), use a more aggressive loading approach
             const videoSrc = videoElement.src;
             const isNewerVideo =
-              videoSrc.includes("v1752") || videoSrc.includes("q_auto:low");
+              videoSrc.includes("v1752") || 
+              videoSrc.includes("v1754") || 
+              videoSrc.includes("q_auto:low") ||
+              videoSrc.includes("online-video-cutter.com");
 
             if (isNewerVideo) {
-              // Force load with timeout for newer videos
+              // Force load with extended timeout for newer videos
               videoElement.load();
+              
+              // Set up multiple loading strategies
+              let loadAttempts = 0;
+              const maxAttempts = 3;
+              
+              const attemptPlay = () => {
+                loadAttempts++;
+                
+                const playPromise = videoElement.play();
+                if (playPromise !== undefined) {
+                  playPromise.catch(() => {
+                    if (loadAttempts < maxAttempts) {
+                      // Try again after a short delay
+                      setTimeout(() => {
+                        videoElement.load();
+                        attemptPlay();
+                      }, 500);
+                    }
+                  });
+                }
+              };
+              
               const loadTimeout = setTimeout(() => {
                 videoElement.removeEventListener("loadeddata", onLoadedData);
+                videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
                 // Try to play anyway even if not fully loaded
-                videoElement.play().catch(() => {
-                  // Silently handle mobile video play error
-                });
-              }, 2000);
+                attemptPlay();
+              }, 3000); // Extended timeout for problematic videos
 
               const onLoadedData = () => {
                 clearTimeout(loadTimeout);
                 videoElement.removeEventListener("loadeddata", onLoadedData);
-                videoElement.play().catch(() => {
-                  // Silently handle mobile video play error
-                });
+                videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
+                attemptPlay();
               };
+              
+              const onCanPlayThrough = () => {
+                clearTimeout(loadTimeout);
+                videoElement.removeEventListener("loadeddata", onLoadedData);
+                videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
+                attemptPlay();
+              };
+              
               videoElement.addEventListener("loadeddata", onLoadedData);
+              videoElement.addEventListener("canplaythrough", onCanPlayThrough);
             } else {
               // Original logic for older videos
               videoElement.load();
@@ -997,11 +1029,12 @@ const ImageGallery = () => {
                 loop
                 muted={selectedImage !== index}
                 playsInline
-                preload={isMobile ? "none" : "metadata"}
+                preload={isMobile ? "metadata" : "metadata"}
                 loading="lazy"
                 controls={false}
                 webkit-playsinline="true"
                 x5-playsinline="true"
+                crossOrigin="anonymous"
                 style={{
                   objectFit: "cover",
                   display: "block",
