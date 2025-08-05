@@ -88,53 +88,90 @@ const ImageGallery = () => {
               videoSrc.includes("online-video-cutter.com");
 
             if (isNewerVideo) {
-              // Force load with extended timeout for newer videos
-              videoElement.load();
+              // Special handling for problematic videos (IDs 12, 13, 14)
+              const videoIndex = images.findIndex(img => img.url === videoSrc);
+              const isProblemVideo = videoIndex >= 0 && [12, 13, 14].includes(images[videoIndex].id);
               
-              // Set up multiple loading strategies
-              let loadAttempts = 0;
-              const maxAttempts = 3;
-              
-              const attemptPlay = () => {
-                loadAttempts++;
+              if (isProblemVideo) {
+                // More aggressive approach for problem videos
+                videoElement.preload = "auto";
+                videoElement.load();
                 
-                const playPromise = videoElement.play();
-                if (playPromise !== undefined) {
-                  playPromise.catch(() => {
-                    if (loadAttempts < maxAttempts) {
-                      // Try again after a short delay
-                      setTimeout(() => {
-                        videoElement.load();
-                        attemptPlay();
-                      }, 500);
-                    }
+                // Wait longer for these specific videos
+                const problemVideoTimeout = setTimeout(() => {
+                  // If still not ready, try playing anyway
+                  videoElement.play().catch(() => {
+                    // Last resort: reload and try again
+                    videoElement.load();
+                    setTimeout(() => {
+                      videoElement.play().catch(() => {
+                        // Give up silently
+                      });
+                    }, 1000);
                   });
-                }
-              };
-              
-              const loadTimeout = setTimeout(() => {
-                videoElement.removeEventListener("loadeddata", onLoadedData);
-                videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
-                // Try to play anyway even if not fully loaded
-                attemptPlay();
-              }, 3000); // Extended timeout for problematic videos
+                }, 5000); // 5 second timeout for problem videos
+                
+                const onReadyToPlay = () => {
+                  clearTimeout(problemVideoTimeout);
+                  videoElement.removeEventListener("canplay", onReadyToPlay);
+                  videoElement.removeEventListener("loadeddata", onReadyToPlay);
+                  videoElement.play().catch(() => {
+                    // Silently handle error
+                  });
+                };
+                
+                videoElement.addEventListener("canplay", onReadyToPlay);
+                videoElement.addEventListener("loadeddata", onReadyToPlay);
+                
+              } else {
+                // Original logic for other newer videos
+                videoElement.load();
+                
+                // Set up multiple loading strategies
+                let loadAttempts = 0;
+                const maxAttempts = 3;
+                
+                const attemptPlay = () => {
+                  loadAttempts++;
+                  
+                  const playPromise = videoElement.play();
+                  if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                      if (loadAttempts < maxAttempts) {
+                        // Try again after a short delay
+                        setTimeout(() => {
+                          videoElement.load();
+                          attemptPlay();
+                        }, 500);
+                      }
+                    });
+                  }
+                };
+                
+                const loadTimeout = setTimeout(() => {
+                  videoElement.removeEventListener("loadeddata", onLoadedData);
+                  videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
+                  // Try to play anyway even if not fully loaded
+                  attemptPlay();
+                }, 3000); // Extended timeout for problematic videos
 
-              const onLoadedData = () => {
-                clearTimeout(loadTimeout);
-                videoElement.removeEventListener("loadeddata", onLoadedData);
-                videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
-                attemptPlay();
-              };
-              
-              const onCanPlayThrough = () => {
-                clearTimeout(loadTimeout);
-                videoElement.removeEventListener("loadeddata", onLoadedData);
-                videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
-                attemptPlay();
-              };
-              
-              videoElement.addEventListener("loadeddata", onLoadedData);
-              videoElement.addEventListener("canplaythrough", onCanPlayThrough);
+                const onLoadedData = () => {
+                  clearTimeout(loadTimeout);
+                  videoElement.removeEventListener("loadeddata", onLoadedData);
+                  videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
+                  attemptPlay();
+                };
+                
+                const onCanPlayThrough = () => {
+                  clearTimeout(loadTimeout);
+                  videoElement.removeEventListener("loadeddata", onLoadedData);
+                  videoElement.removeEventListener("canplaythrough", onCanPlayThrough);
+                  attemptPlay();
+                };
+                
+                videoElement.addEventListener("loadeddata", onLoadedData);
+                videoElement.addEventListener("canplaythrough", onCanPlayThrough);
+              }
             } else {
               // Original logic for older videos
               videoElement.load();
@@ -993,7 +1030,7 @@ const ImageGallery = () => {
                       // Video is loaded and ready to play
                     };
 
-                    const handleError = (e) => {
+                    const handleError = () => {
                       // Silently handle video load error
                     };
 
@@ -1029,7 +1066,7 @@ const ImageGallery = () => {
                 loop
                 muted={selectedImage !== index}
                 playsInline
-                preload={isMobile ? "metadata" : "metadata"}
+                preload={isMobile && [12, 13, 14].includes(image.id) ? "auto" : "metadata"}
                 loading="lazy"
                 controls={false}
                 webkit-playsinline="true"

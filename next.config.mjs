@@ -22,6 +22,22 @@ const nextConfig = {
           },
         ],
       },
+    // Add redirects for SEO consistency
+    async redirects() {
+      return [
+        {
+          source: '/:path*',
+          has: [
+            {
+              type: 'host',
+              value: 'kirill.agency',
+            },
+          ],
+          destination: 'https://www.kirill.agency/:path*',
+          permanent: true,
+        },
+      ];
+    },
     // Disable CSS optimization in development
     experimental: {
       optimizeCss: process.env.NODE_ENV === 'production',

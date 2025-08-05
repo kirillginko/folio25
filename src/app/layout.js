@@ -107,6 +107,16 @@ export const metadata = {
     google: process.env.GOOGLE_SITE_VERIFICATION,
     bing: process.env.BING_SITE_VERIFICATION,
     yandex: process.env.YANDEX_VERIFICATION,
+    yahoo: process.env.YAHOO_SITE_VERIFICATION,
+  },
+  other: {
+    // Bing/Yahoo specific meta tags
+    'msapplication-TileColor': '#000000',
+    'msapplication-config': '/browserconfig.xml',
+    // Yahoo Directory submission
+    'yahoo-site-verification': process.env.YAHOO_SITE_VERIFICATION,
+    // Brave Search optimization
+    'brave-site-verification': process.env.BRAVE_SITE_VERIFICATION,
   },
 };
 
@@ -126,48 +136,91 @@ export default function RootLayout({ children }) {
         {
           "@type": ["WebSite", "ProfilePage"],
           "name": "Kirill Ginko - Official Portfolio",
+          "alternateName": "Kirill.Agency",
           "url": "https://www.kirill.agency",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.kirill.agency/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          },
           "mainEntity": {
             "@type": "Person",
             "name": "Kirill Ginko",
-            "jobTitle": "Creative Developer",
+            "alternateName": ["Kirill", "K. Ginko", "Creative Developer NYC"],
+            "jobTitle": ["Creative Developer", "Digital Designer", "Frontend Developer"],
             "url": "https://www.kirill.agency",
+            "image": "https://www.kirill.agency/flower.svg",
             "sameAs": [
               "https://www.linkedin.com/in/kirillginko/",
               "https://www.instagram.com/kirillginko/",
-              "https://github.com/kirillginko"
+              "https://github.com/kirillginko",
+              "https://twitter.com/kirillginko"
             ],
             "knowsAbout": [
               "Web Development",
-              "UI Design",
-              "React",
+              "UI/UX Design", 
+              "React.js",
               "Next.js",
               "Digital Experiences",
               "Frontend Development",
               "Interactive Design",
-              "Digital Marketing"
+              "Digital Marketing",
+              "JavaScript",
+              "GSAP Animation",
+              "Creative Technology",
+              "P5.js",
+              "Generative Art"
             ],
             "worksFor": {
               "@type": "Organization",
               "name": "Kirill.Agency",
-              "url": "https://www.kirill.agency"
+              "url": "https://www.kirill.agency",
+              "logo": "https://www.kirill.agency/flower.svg"
             },
             "location": {
               "@type": "Place",
+              "name": "New York City",
               "address": {
                 "@type": "PostalAddress",
                 "addressLocality": "New York",
                 "addressRegion": "NY",
                 "addressCountry": "US"
               }
+            },
+            "hasOccupation": {
+              "@type": "Occupation",
+              "name": "Creative Developer",
+              "occupationLocation": {
+                "@type": "City",
+                "name": "New York City"
+              },
+              "skills": [
+                "React Development",
+                "Next.js",
+                "UI Design",
+                "Frontend Development",
+                "JavaScript",
+                "Creative Coding"
+              ]
             }
           },
-            "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
-            "primaryImageOfPage": {
+          "description": "Creative developer in New York City creating engaging digital experiences. Specializing in React, Next.js, interactive web development, modern UI design, and digital marketing.",
+          "primaryImageOfPage": {
             "@type": "ImageObject",
             "url": "https://www.kirill.agency/flower.svg",
-            "name": "Kirill Ginko - Creative Developer"
-          }
+            "name": "Kirill Ginko - Creative Developer",
+            "caption": "Creative Developer and Digital Designer"
+          },
+          "keywords": [
+            "creative developer NYC",
+            "digital designer New York",
+            "React developer",
+            "Next.js expert",
+            "interactive web design",
+            "frontend development",
+            "UI/UX designer",
+            "creative technologist"
+          ]
         },
         {
           "@type": "ProfessionalService",

@@ -4,8 +4,11 @@ Allow: /
 Allow: /fonts/
 Allow: /favicon.ico
 Allow: /flower.svg
+Allow: /browserconfig.xml
+Allow: /BingSiteAuth.xml
 Disallow: /api/
 Disallow: /_next/
+Disallow: /private/
 
 # Google-specific rules
 User-agent: Googlebot
@@ -17,13 +20,28 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
 
+# Yahoo-specific rules (uses Bing crawler)
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Brave Search crawler
+User-agent: brave-search
+Allow: /
+Crawl-delay: 1
+
+# DuckDuckGo crawler (also used by some alternative engines)
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# Yandex crawler
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 2
+
 # Host
 Host: https://www.kirill.agency
 
 # Sitemaps
 Sitemap: https://www.kirill.agency/sitemap.xml
-
-# Block access to specific files
-Disallow: /private/
-Disallow: /*.json$
-Disallow: /*?*

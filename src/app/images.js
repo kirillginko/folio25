@@ -182,12 +182,21 @@ const images = imagesData.map((media) => {
     // Use static poster and avoid real-time transformations
     const posterUrl = media.url.replace(/\.mp4$/, ".jpg");
 
-    // Pre-optimize videos to avoid API token usage
-    // Only apply transformations if absolutely necessary
+    // Create mobile-optimized versions for problematic videos (IDs 12, 13, 14)
+    let mobileUrl = media.url;
+    
+    if ([12, 13, 14].includes(media.id)) {
+      // Create mobile-optimized URL with lower quality and different format
+      mobileUrl = media.url.replace(
+        "/video/upload/",
+        "/video/upload/f_mp4,q_auto:low,w_400,h_400,c_fill/"
+      );
+    }
+
     return {
       ...media,
       poster: posterUrl,
-      mobileUrl: media.url, // Use original URL to avoid transformation tokens
+      mobileUrl: mobileUrl,
     };
   }
   return media;
