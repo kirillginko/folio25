@@ -109,6 +109,15 @@ export const metadata = {
     yandex: process.env.YANDEX_VERIFICATION,
     yahoo: process.env.YAHOO_SITE_VERIFICATION,
   },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+    other: {
+      rel: 'apple-touch-icon-precomposed',
+      url: '/favicon.ico',
+    },
+  },
   other: {
     // Bing/Yahoo specific meta tags
     'msapplication-TileColor': '#000000',

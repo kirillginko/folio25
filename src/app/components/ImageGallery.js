@@ -310,14 +310,12 @@ const ImageGallery = () => {
       const video = videoRefs.current.get(index);
       if (!video) return;
 
-      // If the video is paused, play it; otherwise pause it
+      // Only play the video on touch, don't toggle
       if (video.paused) {
         handleVideoPlay(video, false); // Keep muted on touch preview
-      } else {
-        handleVideoPause(video);
       }
     },
-    [handleVideoPlay, handleVideoPause]
+    [handleVideoPlay]
   );
 
   // Simplified animation helpers
