@@ -1,0 +1,67 @@
+.draggableWrapper {
+  position: fixed;
+  left: 35%;
+  top: 50%;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  will-change: transform;
+  touch-action: none;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.draggableWrapper:active {
+  cursor: grabbing;
+}
+
+.cardContainer {
+  position: relative;
+  width: auto;
+  height: auto;
+  border-radius: 16px;
+  background: transparent;
+  user-select: none;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.cardImage {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+  border-radius: 16px;
+  max-width: 400px;
+  max-height: calc(100vh - 80px);
+  object-fit: contain;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: none;
+}
+
+/* Mobile styles */
+@media screen and (max-width: 768px) {
+  .cardImage {
+    max-width: 80vw;
+    max-height: 60vh;
+  }
+
+  .cardContainer {
+    max-width: 80vw;
+  }
+
+  .draggableWrapper {
+    max-width: 80vw;
+    max-height: 60vh;
+  }
+}
+
+/* Tablet styles */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .cardImage {
+    max-width: 350px;
+  }
+}
