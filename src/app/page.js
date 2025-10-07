@@ -16,6 +16,7 @@ import FallingText from "./components/FallingText";
 import AnalogClock from "./components/AnalogClock";
 import { useGlobalState } from "./context/GlobalStateContext";
 import FallingLetters from "./components/FallingLetters";
+import DraggableCard from "./components/DraggableCard";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -157,6 +158,7 @@ export default function Home() {
           <MusicPlayer />
           <Email />
           <Stamp />
+          <DraggableCard />
           <div className="interactive-element">
             <ImageGallery />
           </div>
