@@ -14,8 +14,7 @@ const DraggableCard = () => {
   const isInitialPositionSet = useRef(false);
   const stablePositionRef = useRef({ x: 0, y: 0 });
   const positionBeforeImageRef = useRef({ x: 0, y: 0 });
-  const { setShowBackdrop, setActiveComponent, activeComponent } =
-    useGlobalState();
+  const { activeComponent, isGalleryOpen } = useGlobalState();
 
   // Position adjustment effect
   useEffect(() => {
@@ -86,6 +85,7 @@ const DraggableCard = () => {
 
     const timer = setTimeout(adjustPositionAndSize, 10);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile, activeComponent]);
 
   // Draggable creation
@@ -303,31 +303,80 @@ const DraggableCard = () => {
     return () => clearInterval(trackInterval);
   }, [activeComponent]);
 
-  // Save position when image is about to be shown
+  // Save position when gallery opens and animate off-screen
   useEffect(() => {
-    if (activeComponent === "image" && containerRef.current) {
+    if (isGalleryOpen && containerRef.current) {
       const currentX = gsap.getProperty(containerRef.current, "x");
       const currentY = gsap.getProperty(containerRef.current, "y");
 
-      if (
-        currentX !== undefined &&
-        currentY !== undefined &&
-        (currentX !== 0 || currentY !== 0) &&
-        !(Math.abs(currentX) < 5 && Math.abs(currentY) < 5)
-      ) {
+      // Save current position before moving off-screen
+      const rect = containerRef.current.getBoundingClientRect();
+      const isOffScreen =
+        rect.right < 0 ||
+        rect.left > window.innerWidth ||
+        rect.bottom < 0 ||
+        rect.top > window.innerHeight;
+
+      if (!isOffScreen && currentX !== undefined && currentY !== undefined) {
         positionBeforeImageRef.current = { x: currentX, y: currentY };
         stablePositionRef.current = { x: currentX, y: currentY };
         setLastPosition({ x: currentX, y: currentY });
       }
+
+      // Always animate off-screen when gallery opens
+      const offScreenPos = getOffScreenPosition();
+      gsap.to(containerRef.current, {
+        x: offScreenPos.x,
+        y: offScreenPos.y,
+        duration: 1.0,
+        ease: "power2.out",
+      });
+    } else if (!isGalleryOpen && containerRef.current) {
+      // Restore position when gallery is closed
+      if (positionBeforeImageRef.current.x !== 0) {
+        gsap.to(containerRef.current, {
+          x: positionBeforeImageRef.current.x,
+          y: positionBeforeImageRef.current.y,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+      }
     }
-  }, [activeComponent]);
+  }, [isGalleryOpen]);
+
+  const getOffScreenPosition = () => {
+    const side = Math.floor(Math.random() * 4);
+    const padding = Math.max(window.innerWidth, window.innerHeight) + 500;
+
+    switch (side) {
+      case 0:
+        return {
+          x: Math.random() * window.innerWidth,
+          y: -padding,
+        };
+      case 1:
+        return {
+          x: window.innerWidth + padding,
+          y: Math.random() * window.innerHeight,
+        };
+      case 2:
+        return {
+          x: Math.random() * window.innerWidth,
+          y: window.innerHeight + padding,
+        };
+      case 3:
+        return {
+          x: -padding,
+          y: Math.random() * window.innerHeight,
+        };
+    }
+  };
 
   return (
     <div
       ref={containerRef}
-      className={`${styles.draggableWrapper} ${
-        activeComponent === "image" ? styles.hidden : ""
-      }`}
+      className={`${styles.draggableWrapper} ${isGalleryOpen ? styles.hidden : ""}`}
+      id="draggable-card"
     >
       <div className={styles.cardContainer}>
         <Image

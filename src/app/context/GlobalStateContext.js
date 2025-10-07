@@ -17,6 +17,7 @@ export function GlobalStateProvider({ children }) {
   const [isMusicPlayerMinimized, setIsMusicPlayerMinimized] = useState(false);
   const [showBackdrop, setShowBackdrop] = useState(false);
   const [activeComponent, setActiveComponent] = useState(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   return (
     <GlobalStateContext.Provider
@@ -47,6 +48,8 @@ export function GlobalStateProvider({ children }) {
         setActiveComponent,
         showThemeSelector,
         setShowThemeSelector,
+        isGalleryOpen,
+        setIsGalleryOpen,
       }}
     >
       {children}
