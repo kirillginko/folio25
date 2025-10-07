@@ -31,6 +31,7 @@ const ImageGallery = () => {
     setShowAnalogClock,
     showWorkButton,
     setActiveComponent,
+    setIsGalleryOpen,
   } = useGlobalState();
 
   // Memoized calculations for better performance
@@ -339,7 +340,8 @@ const ImageGallery = () => {
       if (
         element.closest(".interactive-element") ||
         element.className.toLowerCase().includes("email") ||
-        element.id?.toLowerCase().includes("email")
+        element.id?.toLowerCase().includes("email") ||
+        element.id === "draggable-card"
       ) {
         return;
       }
@@ -469,7 +471,8 @@ const ImageGallery = () => {
 
         if (
           element.className.toLowerCase().includes("email") ||
-          element.id?.toLowerCase().includes("email")
+          element.id?.toLowerCase().includes("email") ||
+          element.id === "draggable-card"
         ) {
           return;
         }
@@ -511,7 +514,8 @@ const ImageGallery = () => {
 
       if (
         element.className.toLowerCase().includes("email") ||
-        element.id?.toLowerCase().includes("email")
+        element.id?.toLowerCase().includes("email") ||
+        element.id === "draggable-card"
       ) {
         return;
       }
@@ -596,6 +600,7 @@ const ImageGallery = () => {
   const toggleImages = () => {
     const newVisibility = !isVisible;
     setIsVisible(newVisibility);
+    setIsGalleryOpen(newVisibility);
 
     imageRefs.current.forEach((ref) => {
       if (!ref) return;

@@ -61,9 +61,10 @@ const BrushCanvas = () => {
 
   // Add isMobile state at the top with other states
   const [isMobile, setIsMobile] = useState(false);
-  
+
   // Add state to store last position for mobile
   const lastPositionRef = useRef({ x: 0, y: 0 });
+  const isInitialPositionSet = useRef(false);
 
   const setup = (p5, canvasParentRef) => {
     let canvasWidth = 1000;
@@ -678,6 +679,80 @@ const BrushCanvas = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [p5Instance, isMobile, isMinimized, canvasData]);
+
+  // Position and resize handling
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const padding = 20;
+
+        // Get current transform position
+        const currentX = gsap.getProperty(containerRef.current, "x");
+        const currentY = gsap.getProperty(containerRef.current, "y");
+
+        // Calculate bounds
+        const maxX = windowWidth - rect.width - padding;
+        const maxY = windowHeight - rect.height - padding;
+        const minX = padding;
+        const minY = padding;
+
+        // Check if current position is out of bounds
+        if (
+          currentX < minX ||
+          currentX > maxX ||
+          currentY < minY ||
+          currentY > maxY
+        ) {
+          gsap.to(containerRef.current, {
+            x: Math.min(Math.max(currentX, minX), maxX),
+            y: Math.min(Math.max(currentY, minY), maxY),
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Initial positioning - only runs once
+  useEffect(() => {
+    if (isInitialPositionSet.current) return;
+
+    const setInitialPosition = () => {
+      if (containerRef.current) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const element = containerRef.current.getBoundingClientRect();
+
+        // Position in top-left with some padding
+        let newX = 20;
+        let newY = 20;
+
+        // Ensure it stays within bounds
+        newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
+        newY = Math.max(
+          20,
+          Math.min(newY, viewportHeight - element.height - 20)
+        );
+
+        gsap.set(containerRef.current, {
+          x: newX,
+          y: newY,
+        });
+
+        isInitialPositionSet.current = true;
+      }
+    };
+
+    // Initial position with a slight delay to ensure the component is mounted
+    setTimeout(setInitialPosition, 100);
+  }, []);
 
   return (
     <div style={{ display: showBrushCanvas ? "block" : "none" }}>
