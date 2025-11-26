@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { letterImages } from "../data/letters";
 import styles from "../styles/fallingLetters.module.css";
 import Image from "next/image";
@@ -10,15 +10,42 @@ const FallingLetters = () => {
   const [isActive, setIsActive] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [imagesPreloaded, setImagesPreloaded] = useState(false);
+
+  // Preload all images on mount
+  useEffect(() => {
+    const preloadImages = async () => {
+      const imagePromises = letterImages.map((letterImg) => {
+        return new Promise((resolve, reject) => {
+          const img = new window.Image();
+          img.src = letterImg.image;
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+      });
+
+      try {
+        await Promise.all(imagePromises);
+        setImagesPreloaded(true);
+      } catch (error) {
+        console.error("Error preloading images:", error);
+        setImagesPreloaded(true); // Continue anyway
+      }
+    };
+
+    preloadImages();
+  }, []);
 
   useEffect(() => {
+    if (!imagesPreloaded) return;
+
     const initialDelay = setTimeout(() => {
       setIsActive(true);
       setHasStarted(true);
     }, 15000);
 
     return () => clearTimeout(initialDelay);
-  }, []);
+  }, [imagesPreloaded]);
 
   useEffect(() => {
     if (!hasStarted) return;
@@ -105,6 +132,8 @@ const FallingLetters = () => {
             alt={letter.letter}
             width={200}
             height={200}
+            unoptimized
+            loading="eager"
             style={{
               width: "100%",
               height: "100%",
