@@ -507,7 +507,7 @@ const BrushCanvas = () => {
           },
           onDragEnd: function () {
             gsap.to(this.target, { scale: 1, duration: 0.2 });
-            
+
             // Save position after dragging on mobile
             if (isMobile) {
               lastPositionRef.current = {
@@ -554,9 +554,13 @@ const BrushCanvas = () => {
 
         if (isMobile && !isMinimized) {
           // Use stored last position or fallback to center
-          const currentX = gsap.getProperty(containerRef.current, "x") || lastPositionRef.current.x;
-          const currentY = gsap.getProperty(containerRef.current, "y") || lastPositionRef.current.y;
-          
+          const currentX =
+            gsap.getProperty(containerRef.current, "x") ||
+            lastPositionRef.current.x;
+          const currentY =
+            gsap.getProperty(containerRef.current, "y") ||
+            lastPositionRef.current.y;
+
           gsap.to(containerRef.current, {
             x: currentX,
             y: currentY,
@@ -573,10 +577,8 @@ const BrushCanvas = () => {
           const element = containerRef.current.getBoundingClientRect();
           let newX =
             gsap.getProperty(containerRef.current, "x") ||
-            (viewportWidth - element.width) / 2;
-          let newY =
-            gsap.getProperty(containerRef.current, "y") ||
-            (viewportHeight - element.height) / 2;
+            viewportWidth - element.width - 120;
+          let newY = gsap.getProperty(containerRef.current, "y") || 350;
 
           newX = Math.max(
             20,
@@ -626,7 +628,7 @@ const BrushCanvas = () => {
   const toggleMinimized = () => {
     if (!isMinimized) {
       saveCanvasState();
-      
+
       // Save current position before minimizing on mobile
       if (isMobile && containerRef.current) {
         lastPositionRef.current = {
@@ -730,12 +732,12 @@ const BrushCanvas = () => {
         const viewportHeight = window.innerHeight;
         const element = containerRef.current.getBoundingClientRect();
 
-        // Position in top-left with some padding
-        let newX = 20;
-        let newY = 20;
+        // Position in top-right with some padding
+        let newX = viewportWidth - element.width - 120;
+        let newY = 300;
 
         // Ensure it stays within bounds
-        newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
+        newX = Math.max(10, Math.min(newX, viewportWidth - element.width - 10));
         newY = Math.max(
           20,
           Math.min(newY, viewportHeight - element.height - 20)
@@ -792,7 +794,7 @@ const BrushCanvas = () => {
         </div>
 
         {isMinimized && <div className={styles.paintTextLabel}>Paint</div>}
-        
+
         <div
           ref={designContainerRef}
           className={`${styles.designContainer} ${

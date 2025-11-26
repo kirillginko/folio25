@@ -3,9 +3,21 @@
 const songs = [
   {
     id: 1,
-    name: "Wave Pulse",
-    artist: "Senki",
-    link: "/audio/Senki_Wave_Pulse.mp3", // Move to public/audio/
+    name: "Sheep",
+    artist: "Dolly",
+    link: "/audio/Dolly_Sheep_2.mp3", // Move to public/audio/
+  },
+  {
+    id: 2,
+    name: "self-titled",
+    artist: "Dolly",
+    link: "/audio/Dolly_Self_Titled.mp3", // Move to public/audio/
+  },
+  {
+    id: 3,
+    name: "Two",
+    artist: "Dolly",
+    link: "/audio/Dolly_2.mp3", // Move to public/audio/
   },
 ];
 
