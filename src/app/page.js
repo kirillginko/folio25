@@ -5,23 +5,29 @@ import flower from "./svg/flower.svg";
 import { useTheme } from "next-themes";
 import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
-import About from "./components/About";
-import MusicPlayer from "./components/MusicPlayer";
-import Email from "./components/Email";
-import Stamp from "./components/Stamp";
-import FluidBackground from "./components/fluid/Fluid";
-import ImageGallery from "./components/ImageGallery";
-import BrushCanvas from "./components/BrushCanvas";
-import FallingText from "./components/FallingText";
-import AnalogClock from "./components/AnalogClock";
+import dynamic from "next/dynamic";
 import { useGlobalState } from "./context/GlobalStateContext";
-import FallingLetters from "./components/FallingLetters";
-import DraggableCard from "./components/DraggableCard";
+
+// Critical components - load immediately
+import FallingText from "./components/FallingText";
+import FluidBackground from "./components/fluid/Fluid";
+
+// Lazy load non-critical components
+const About = dynamic(() => import("./components/About"), { ssr: false });
+const MusicPlayer = dynamic(() => import("./components/MusicPlayer"), { ssr: false });
+const Email = dynamic(() => import("./components/Email"), { ssr: false });
+const Stamp = dynamic(() => import("./components/Stamp"), { ssr: false });
+const ImageGallery = dynamic(() => import("./components/ImageGallery"), { ssr: false });
+const BrushCanvas = dynamic(() => import("./components/BrushCanvas"), { ssr: false });
+const AnalogClock = dynamic(() => import("./components/AnalogClock"), { ssr: false });
+const FallingLetters = dynamic(() => import("./components/FallingLetters"), { ssr: false });
+const DraggableCard = dynamic(() => import("./components/DraggableCard"), { ssr: false });
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [componentsReady, setComponentsReady] = useState(false);
   const loadingContainerRef = useRef(null);
   const mainContentRef = useRef(null);
   const fluidBackgroundRef = useRef(null);
@@ -77,6 +83,11 @@ export default function Home() {
         onComplete: () => {
           setLoading(false);
 
+          // Progressive component loading for better performance
+          requestAnimationFrame(() => {
+            setComponentsReady(true);
+          });
+
           // Add delay before fading in main content
           setTimeout(() => {
             if (mainContentRef.current) {
@@ -118,10 +129,10 @@ export default function Home() {
                 }
               );
             }
-          }, 1500); // 1.5 second delay before showing main content
+          }, 300); // Reduced delay for faster perceived performance
         },
       });
-    }, 2000); // Increased to 2 seconds delay before starting transition
+    }, 1500); // Reduced initial delay
   };
 
   if (!mounted) return null;
@@ -139,30 +150,34 @@ export default function Home() {
           className={styles.main}
           style={{ opacity: 0 }}
         >
-          <FallingLetters />
+          {componentsReady && <FallingLetters />}
           {showThemeSelector && (
             <div
               className={`
-                ${styles.flowerContainer} 
-                ${isTransitioning ? styles.transitioning : ""} 
+                ${styles.flowerContainer}
+                ${isTransitioning ? styles.transitioning : ""}
                 ${isRotating ? styles.rotating : ""}
               `}
               onClick={toggleTheme}
             >
-              <Image src={flower} alt="Flower" width={88} height={88} />
+              <Image src={flower} alt="Flower" width={88} height={88} priority />
               <span className={styles.flowerLabel}>theme</span>
             </div>
           )}
-          <About />
-          <AnalogClock />
-          <MusicPlayer />
-          <Email />
-          <Stamp />
-          <DraggableCard />
-          <div className="interactive-element">
-            <ImageGallery />
-          </div>
-          <BrushCanvas />
+          {componentsReady && (
+            <>
+              <About />
+              <AnalogClock />
+              <MusicPlayer />
+              <Email />
+              <Stamp />
+              <DraggableCard />
+              <div className="interactive-element">
+                <ImageGallery />
+              </div>
+              <BrushCanvas />
+            </>
+          )}
         </main>
       )}
     </div>
