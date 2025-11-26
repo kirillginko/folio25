@@ -7,6 +7,7 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: layout style paint;
 }
 
 .letter {
@@ -15,22 +16,28 @@
   animation: fall linear forwards;
   opacity: 0;
   pointer-events: none;
-  will-change: transform, opacity;
+  will-change: transform;
   transform-origin: center center;
+  transform: translate3d(0, 0, 0);
   mix-blend-mode: color-dodge;
   filter: invert(80%) sepia(50%) saturate(1000%) hue-rotate(360deg)
     brightness(1.2) contrast(1);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  contain: layout paint;
 }
 
 .letter img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 @keyframes fall {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
     opacity: 0;
   }
 
@@ -43,7 +50,7 @@
   }
 
   100% {
-    transform: translateY(calc(100vh + 50px));
+    transform: translate3d(0, calc(100vh + 50px), 0);
     opacity: 0;
   }
 }
