@@ -43,16 +43,39 @@ const nextConfig = {
         },
       ];
     },
-    // Disable CSS optimization in development
+    // Performance optimizations
     experimental: {
       optimizeCss: process.env.NODE_ENV === 'production',
-      optimizePackageImports: ["@vercel/analytics"],
+      optimizePackageImports: ["@vercel/analytics", "gsap", "next-themes"],
+    },
+    compiler: {
+      removeConsole: process.env.NODE_ENV === "production" ? {
+        exclude: ["error", "warn"],
+      } : false,
     },
     // Configure webpack for development
     async headers() {
       return [
         {
           source: '/_next/image(.*)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
+          ],
+        },
+        {
+          source: '/_next/static/(.*)',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
+          ],
+        },
+        {
+          source: '/fonts/(.*)',
           headers: [
             {
               key: 'Cache-Control',

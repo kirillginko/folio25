@@ -10,24 +10,32 @@ const AustinCyRoman = localFont({
   src: "./fonts/AustinCy-Roman.woff2",
   variable: "--font-austin-cy-roman",
   weight: "100 900",
+  display: "swap",
+  preload: true,
 });
 
 const instructionFont = localFont({
   src: "./fonts/Instruction.otf",
   variable: "--font-instruction",
   weight: "100 900",
+  display: "swap",
+  preload: true,
 });
 
 const foundersGrotesk = localFont({
   src: "./fonts/fg-regular.woff2",
   variable: "--font-founders-grotesk",
   weight: "100 900",
+  display: "swap",
+  preload: true,
 });
 
 const foundersGroteskLight = localFont({
   src: "./fonts/fg-light.woff2",
   variable: "--font-founders-grotesk-light",
   weight: "100 400",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata = {
@@ -303,7 +311,6 @@ export default function RootLayout({ children }) {
           <Providers>{children}</Providers>
           <Analytics mode="production" />
         </GlobalStateProvider>
-        <Script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" />
       </body>
     </html>
   );

@@ -578,7 +578,7 @@ const BrushCanvas = () => {
           let newX =
             gsap.getProperty(containerRef.current, "x") ||
             viewportWidth - element.width - 120;
-          let newY = gsap.getProperty(containerRef.current, "y") || 350;
+          let newY = gsap.getProperty(containerRef.current, "y") || 450;
 
           newX = Math.max(
             20,
