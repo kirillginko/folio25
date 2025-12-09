@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
+import MuxPlayer from "@mux/mux-player-react";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import images from "../images";
@@ -739,10 +740,33 @@ const ImageGallery = () => {
 
       zIndexCounter.current += 1;
 
+      // Position media - center Mux videos with description to the left
+      const isMuxVideo = media.type === "mux";
+      const targetScale = isMuxVideo ? 1 : getScaleForScreen;
+
+      // For Mux videos, position to create centered group with description
+      let targetX = windowCenter.x;
+      let targetY = windowCenter.y;
+
+      if (isMuxVideo) {
+        const videoWidth = Math.min(window.innerWidth * 0.65, 900);
+        const descriptionWidth = Math.min(380, window.innerWidth * 0.3);
+        const gap = 10; // Gap between description and video
+        const totalWidth = descriptionWidth + gap + videoWidth;
+
+        // Center the entire group and shift left
+        const groupStartX = (window.innerWidth - totalWidth) / 2 - 100; // Shift 100px to the left
+        targetX = groupStartX + descriptionWidth + gap;
+
+        // Vertically center and move down slightly
+        const videoHeight = videoWidth * 9 / 16;
+        targetY = (window.innerHeight - videoHeight) / 2 + 30; // Move down 30px
+      }
+
       gsap.to(currentRef, {
-        x: windowCenter.x,
-        y: windowCenter.y,
-        scale: getScaleForScreen,
+        x: targetX,
+        y: targetY,
+        scale: targetScale,
         rotation: 0,
         zIndex: zIndexCounter.current,
         duration: 0.25, // Much faster
@@ -958,7 +982,7 @@ const ImageGallery = () => {
             >
               →
             </button>
-            <div className={styles.imageInfo}>
+            <div className={`${styles.imageInfo} ${images[selectedImage].type === "mux" ? styles.muxVideoInfo : ""}`}>
               <h2>{images[selectedImage].title}</h2>
               <p>{images[selectedImage].description}</p>
               <div className={styles.imageMetadata}>
@@ -984,7 +1008,7 @@ const ImageGallery = () => {
             ref={(el) => (imageRefs.current[index] = el)}
             className={`${styles.imageWrapper} ${
               selectedImage === index ? styles.selected : ""
-            }`}
+            } ${image.type === "mux" ? styles.muxVideo : ""}`}
             onMouseEnter={() => handleVideoHoverPlay(index)}
             onMouseLeave={() => handleVideoHoverPause(index)}
             onTouchStart={() => handleVideoTouch(index)}
@@ -998,7 +1022,17 @@ const ImageGallery = () => {
             >
               {selectedImage === index ? "close" : "< more info"}
             </span>
-            {image.type === "video" ? (
+            {image.type === "mux" ? (
+              <MuxPlayer
+                playbackId={image.playbackId}
+                streamType="on-demand"
+                loop
+                muted={selectedImage !== index}
+                autoPlay={selectedImage === index ? "muted" : false}
+                controls={false}
+                className={styles.image}
+              />
+            ) : image.type === "video" ? (
               <video
                 ref={(el) => {
                   if (el) {

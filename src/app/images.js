@@ -175,6 +175,18 @@ const imagesData = [
     link: "",
     type: "video",
   },
+  {
+    id: 18,
+    playbackId: "7rZ3YmIJHIsVotgSB2DfW6HHQQkjAW02B1hbGqQB4yFE", // Replace with actual Mux playback ID
+    title: "Vega Creative Agency",
+    description: "Vega Website - Branding, Web Design, UI/UX, Development",
+    year: 2025,
+    technologies:
+      "Next.js, Tailwind CSS, TypeScript, React, Framer Motion, GSAP, Figma, Adobe Photoshop, Adobe Illustrator, Adobe After Effects",
+    link: "https://vega.earth",
+    type: "mux",
+    aspectRatio: "16:9",
+  },
 ];
 
 const images = imagesData.map((media) => {
@@ -184,7 +196,7 @@ const images = imagesData.map((media) => {
 
     // Create mobile-optimized versions for problematic videos (IDs 12, 13, 14)
     let mobileUrl = media.url;
-    
+
     if ([12, 13, 14].includes(media.id)) {
       // Create mobile-optimized URL with lower quality and different format
       mobileUrl = media.url.replace(

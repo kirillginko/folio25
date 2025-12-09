@@ -81,8 +81,8 @@ video.image {
   height: 100% !important;
 }
 
-/* Mobile-specific video fixes */
-@media (max-width: 768px) {
+/* Mobile and tablet-specific video fixes */
+@media (max-width: 1024px) {
   .image[src*=".mp4"],
   .image[src*=".webm"],
   .image[src*=".ogg"],
@@ -172,7 +172,7 @@ video.image {
   transition: all 0.2s ease;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .imageWrapper {
     width: 150px;
     height: 150px;
@@ -213,6 +213,41 @@ video.image {
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   z-index: 1600 !important;
+}
+
+/* Mux video specific styles - always 16:9 aspect ratio */
+.imageWrapper.muxVideo {
+  width: 350px;
+  height: 198px;
+  border-radius: 10px; /* 300 / 16 * 9 = 168.75 for 16:9 */
+}
+
+.imageWrapper.muxVideo.selected {
+  width: min(65vw, 900px);
+  height: calc(min(65vw, 900px) * 9 / 16);
+  border-radius: 10px;
+  max-width: 900px;
+}
+
+.imageWrapper.muxVideo .image {
+  object-fit: contain !important;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Hide all Mux player controls completely */
+.imageWrapper.muxVideo mux-player::part(bottom),
+.imageWrapper.muxVideo mux-player::part(center),
+.imageWrapper.muxVideo mux-player::part(top),
+.imageWrapper.muxVideo mux-player::part(play-button),
+.imageWrapper.muxVideo mux-player::part(seek-backward-button),
+.imageWrapper.muxVideo mux-player::part(seek-forward-button),
+.imageWrapper.muxVideo mux-player::part(mute-button),
+.imageWrapper.muxVideo mux-player::part(volume-range),
+.imageWrapper.muxVideo mux-player::part(time-range),
+.imageWrapper.muxVideo mux-player::part(time-display),
+.imageWrapper.muxVideo mux-player::part(duration-display) {
+  display: none !important;
 }
 
 .selected:hover {
@@ -282,18 +317,31 @@ video.image {
 
 .selected .detailButton {
   top: 0px;
-  right: -35px;
-  padding: 3px 8px;
+  right: -40px;
+  padding: 4px 10px;
   background-color: transparent;
   border: 0.5px solid #ffb120;
   color: white;
-  font-size: 0.3rem;
-  border-radius: 50px; /* Added to make pill shaped */
+  font-size: 0.25rem;
+  border-radius: 50px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+/* Larger close button for Mux videos */
+.muxVideo.selected .detailButton {
+  top: 0px;
+  right: -75px;
+  padding: 8px 16px;
+  border: 1px solid #ffb120;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
 }
 
 .selected .detailButton:hover {
-  background-color: #e6a400;
-  transform: none;
+  background-color: #ffb120;
+  transform: scale(1.05);
 }
 
 .imageContainer {
@@ -316,9 +364,9 @@ video.image {
 
 .imageInfo {
   position: fixed;
-  right: calc(50% + 320px);
+  left: 50%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(calc(-100% - 320px), -50%);
   background: rgba(0, 0, 0, 0.8);
   padding: 20px;
   border-radius: 10px;
@@ -329,6 +377,21 @@ video.image {
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
   border: 1px solid #7a708f;
+}
+
+/* Adjust imageInfo position when Mux video is selected - responsive */
+.imageInfo.muxVideoInfo {
+  /* Position as part of centered group with video */
+  left: 50%;
+  top: calc(50% + 30px);
+  transform: translate(
+    calc(-50% - min(32.5vw, 450px) - 5px - min(20px, 15vw) - 100px),
+    -50%
+  );
+  width: min(380px, 30vw);
+  height: auto;
+  max-height: calc(min(65vw, 900px) * 9 / 16);
+  overflow-y: auto;
 }
 
 .imageInfo h2 {
@@ -371,22 +434,20 @@ video.image {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(-50%) translateX(0);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .imageInfo {
     position: fixed;
-    top: 75%;
-    left: 0%;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, 0);
     width: calc(100% - 20px);
-    margin-left: 10px;
-    max-height: 40%;
+    max-height: 45%;
     max-width: 500px;
     background: rgba(0, 0, 0, 0.8);
     border-radius: 12px;
@@ -444,6 +505,22 @@ video.image {
     border: none;
     outline: none;
   }
+
+  /* Mobile Mux video styles */
+  .imageWrapper.muxVideo.selected {
+    width: 90vw !important;
+    height: calc(90vw * 9 / 16) !important;
+    max-width: none !important;
+    transform: translate(-50%, -95%) !important;
+  }
+
+  .imageInfo.muxVideoInfo {
+    left: 50% !important;
+    transform: translate(-50%, 0) !important;
+    width: calc(100% - 50px) !important;
+    max-height: 45% !important;
+    top: 55% !important;
+  }
 }
 
 .navButton {
@@ -475,7 +552,7 @@ video.image {
   right: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .navButton {
     font-size: 20px;
   }
