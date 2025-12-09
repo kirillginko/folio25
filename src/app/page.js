@@ -14,14 +14,23 @@ import FluidBackground from "./components/fluid/Fluid";
 
 // Lazy load non-critical components
 const About = dynamic(() => import("./components/About"), { ssr: false });
-const MusicPlayer = dynamic(() => import("./components/MusicPlayer"), { ssr: false });
+const MusicPlayer = dynamic(() => import("./components/MusicPlayer"), {
+  ssr: false,
+});
 const Email = dynamic(() => import("./components/Email"), { ssr: false });
 const Stamp = dynamic(() => import("./components/Stamp"), { ssr: false });
-const ImageGallery = dynamic(() => import("./components/ImageGallery"), { ssr: false });
-const BrushCanvas = dynamic(() => import("./components/BrushCanvas"), { ssr: false });
-const AnalogClock = dynamic(() => import("./components/AnalogClock"), { ssr: false });
-const FallingLetters = dynamic(() => import("./components/FallingLetters"), { ssr: false });
-const DraggableCard = dynamic(() => import("./components/DraggableCard"), { ssr: false });
+const ImageGallery = dynamic(() => import("./components/ImageGallery"), {
+  ssr: false,
+});
+const BrushCanvas = dynamic(() => import("./components/BrushCanvas"), {
+  ssr: false,
+});
+const AnalogClock = dynamic(() => import("./components/AnalogClock"), {
+  ssr: false,
+});
+const FallingLetters = dynamic(() => import("./components/FallingLetters"), {
+  ssr: false,
+});
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -125,7 +134,7 @@ export default function Home() {
                   duration: 1,
                   stagger: 0.1,
                   ease: "power2.out",
-                  clearProps: "all",
+                  clearProps: "opacity,y",
                 }
               );
             }
@@ -160,22 +169,33 @@ export default function Home() {
               `}
               onClick={toggleTheme}
             >
-              <Image src={flower} alt="Flower" width={88} height={88} priority />
+              <Image
+                src={flower}
+                alt="Flower"
+                width={88}
+                height={88}
+                priority
+              />
               <span className={styles.flowerLabel}>theme</span>
             </div>
           )}
           {componentsReady && (
             <>
-              <About />
-              <AnalogClock />
+              <div className="interactive-element">
+                <About />
+              </div>
+              <div className="interactive-element">
+                <AnalogClock />
+              </div>
               <MusicPlayer />
               <Email />
               <Stamp />
-              <DraggableCard />
               <div className="interactive-element">
                 <ImageGallery />
               </div>
-              <BrushCanvas />
+              <div className="interactive-element">
+                <BrushCanvas />
+              </div>
             </>
           )}
         </main>

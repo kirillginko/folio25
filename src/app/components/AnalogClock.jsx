@@ -11,7 +11,9 @@ const AnalogClock = () => {
   const clockContainerRef = useRef(null);
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth <= 768
+  );
 
   const isInitialPositionSet = useRef(false);
   const {
@@ -140,8 +142,16 @@ const AnalogClock = () => {
         const viewportHeight = window.innerHeight;
         const element = containerRef.current.getBoundingClientRect();
 
-        let newX = viewportWidth - element.width - 40;
-        let newY = 200;
+        let newX, newY;
+        if (isMobile) {
+          // Mobile: position from left with even spacing
+          newX = 220;
+          newY = 100;
+        } else {
+          // Desktop: position from right
+          newX = viewportWidth - element.width - 200;
+          newY = 200;
+        }
 
         newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
         newY = Math.max(
@@ -155,6 +165,11 @@ const AnalogClock = () => {
         });
 
         isInitialPositionSet.current = true;
+
+        // Add positioned class to show component
+        if (containerRef.current) {
+          containerRef.current.classList.add(styles.positioned);
+        }
       }
     };
 

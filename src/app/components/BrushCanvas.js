@@ -39,7 +39,6 @@ const BrushCanvas = () => {
 
   // Add new refs and state
   const containerRef = useRef(null);
-  const designContainerRef = useRef(null);
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
 
@@ -60,15 +59,86 @@ const BrushCanvas = () => {
     useGlobalState();
 
   // Add isMobile state at the top with other states
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Add state to store last position for mobile
-  const lastPositionRef = useRef({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" && window.innerWidth <= 768
+  );
+  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
   const isInitialPositionSet = useRef(false);
+  const stablePositionRef = useRef({ x: 0, y: 0 });
+
+  // Add position adjustment effect - EXACTLY like About
+  useEffect(() => {
+    const adjustPositionAndSize = () => {
+      if (containerRef.current) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        if (isMobile && !isMinimized) {
+          // For mobile expanded view
+          gsap.set(containerRef.current, {
+            x: 0,
+            y: 0,
+          });
+        } else {
+          // For desktop or minimized view, maintain position
+          const element = containerRef.current.getBoundingClientRect();
+
+          let newX = gsap.getProperty(containerRef.current, "x");
+          let newY = gsap.getProperty(containerRef.current, "y");
+
+          // If position is invalid, use saved positions
+          if (!newX || !newY || (Math.abs(newX) < 5 && Math.abs(newY) < 5)) {
+            if (stablePositionRef.current.x !== 0) {
+              newX = stablePositionRef.current.x;
+              newY = stablePositionRef.current.y;
+            } else if (lastPosition.x !== 0) {
+              newX = lastPosition.x;
+              newY = lastPosition.y;
+            } else {
+              // Default fallback position
+              if (isMobile) {
+                newX = 20;
+                newY = 100;
+              } else {
+                newX = viewportWidth - element.width - 500;
+                newY = 200;
+              }
+            }
+          }
+
+          // Ensure position is within bounds
+          newX = Math.max(
+            20,
+            Math.min(newX, viewportWidth - element.width - 20)
+          );
+          newY = Math.max(
+            20,
+            Math.min(newY, viewportHeight - element.height - 20)
+          );
+
+          // Apply position with no animation to prevent movement
+          gsap.set(containerRef.current, {
+            x: newX,
+            y: newY,
+          });
+
+          // Store the position
+          stablePositionRef.current = { x: newX, y: newY };
+          setLastPosition({ x: newX, y: newY });
+        }
+      }
+    };
+
+    // Run with a delay to ensure component is mounted
+    const timer = setTimeout(adjustPositionAndSize, 10);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMinimized, isMobile, showBrushCanvas]);
 
   const setup = (p5, canvasParentRef) => {
-    let canvasWidth = 1000;
-    let canvasHeight = 800;
+    let canvasWidth = 350;
+    let canvasHeight = 300;
 
     // Adjust canvas size for mobile
     if (isMobile) {
@@ -508,12 +578,13 @@ const BrushCanvas = () => {
           onDragEnd: function () {
             gsap.to(this.target, { scale: 1, duration: 0.2 });
 
-            // Save position after dragging on mobile
-            if (isMobile) {
-              lastPositionRef.current = {
-                x: gsap.getProperty(this.target, "x") || 0,
-                y: gsap.getProperty(this.target, "y") || 0,
-              };
+            // Save position after drag
+            const newX = gsap.getProperty(this.target, "x");
+            const newY = gsap.getProperty(this.target, "y");
+
+            if (newX !== undefined && newY !== undefined) {
+              stablePositionRef.current = { x: newX, y: newY };
+              setLastPosition({ x: newX, y: newY });
             }
           },
         })[0];
@@ -540,90 +611,6 @@ const BrushCanvas = () => {
     };
   }, [isMinimized, isMobile, showBrushCanvas]);
 
-  useEffect(() => {
-    const adjustPositionAndSize = () => {
-      if (containerRef.current) {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        // Common animation config
-        const animConfig = {
-          duration: 0.15, // Reduced from 0.3 to 0.15 seconds
-          ease: "power2.out", // Changed to a snappier easing
-        };
-
-        if (isMobile && !isMinimized) {
-          // Use stored last position or fallback to center
-          const currentX =
-            gsap.getProperty(containerRef.current, "x") ||
-            lastPositionRef.current.x;
-          const currentY =
-            gsap.getProperty(containerRef.current, "y") ||
-            lastPositionRef.current.y;
-
-          gsap.to(containerRef.current, {
-            x: currentX,
-            y: currentY,
-            ...animConfig,
-          });
-
-          gsap.to(designContainerRef.current, {
-            width: `${viewportWidth * 0.9}px`,
-            height: `${viewportHeight * 0.8}px`,
-            borderRadius: "16px",
-            ...animConfig,
-          });
-        } else {
-          const element = containerRef.current.getBoundingClientRect();
-          let newX =
-            gsap.getProperty(containerRef.current, "x") ||
-            viewportWidth - element.width - 120;
-          let newY = gsap.getProperty(containerRef.current, "y") || 450;
-
-          newX = Math.max(
-            20,
-            Math.min(newX, viewportWidth - element.width - 20)
-          );
-          newY = Math.max(
-            20,
-            Math.min(newY, viewportHeight - element.height - 20)
-          );
-
-          gsap.to(containerRef.current, {
-            x: newX,
-            y: newY,
-            ...animConfig,
-          });
-
-          gsap.to(designContainerRef.current, {
-            width: isMinimized ? "100px" : "800px",
-            height: isMinimized ? "50px" : "600px",
-            borderRadius: isMinimized ? "25px" : "16px",
-            ...animConfig,
-          });
-        }
-      }
-    };
-
-    // Initial adjustment
-    setTimeout(adjustPositionAndSize, 100);
-
-    // Add resize listener with consistent debounce
-    let resizeTimeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(adjustPositionAndSize, 100);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    // Clean up
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(resizeTimeout);
-    };
-  }, [isMinimized, isMobile]);
-
   // Modify the toggleMinimized function to hide/show other components
   const toggleMinimized = () => {
     if (!isMinimized) {
@@ -631,10 +618,9 @@ const BrushCanvas = () => {
 
       // Save current position before minimizing on mobile
       if (isMobile && containerRef.current) {
-        lastPositionRef.current = {
-          x: gsap.getProperty(containerRef.current, "x") || 0,
-          y: gsap.getProperty(containerRef.current, "y") || 0,
-        };
+        const currentX = gsap.getProperty(containerRef.current, "x") || 0;
+        const currentY = gsap.getProperty(containerRef.current, "y") || 0;
+        setLastPosition({ x: currentX, y: currentY });
       }
 
       // When minimizing, hide the backdrop
@@ -695,6 +681,11 @@ const BrushCanvas = () => {
         const currentX = gsap.getProperty(containerRef.current, "x");
         const currentY = gsap.getProperty(containerRef.current, "y");
 
+        // Save current position to stable ref
+        if (currentX !== undefined && currentY !== undefined) {
+          stablePositionRef.current = { x: currentX, y: currentY };
+        }
+
         // Calculate bounds
         const maxX = windowWidth - rect.width - padding;
         const maxY = windowHeight - rect.height - padding;
@@ -732,12 +723,20 @@ const BrushCanvas = () => {
         const viewportHeight = window.innerHeight;
         const element = containerRef.current.getBoundingClientRect();
 
-        // Position in top-right with some padding
-        let newX = viewportWidth - element.width - 120;
-        let newY = 300;
+        // Position based on viewport size
+        let newX, newY;
+        if (isMobile) {
+          // Mobile: position from left with even spacing
+          newX = 20;
+          newY = 100;
+        } else {
+          // Desktop: position from right
+          newX = viewportWidth - element.width - 500;
+          newY = 200;
+        }
 
         // Ensure it stays within bounds
-        newX = Math.max(10, Math.min(newX, viewportWidth - element.width - 10));
+        newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
         newY = Math.max(
           20,
           Math.min(newY, viewportHeight - element.height - 20)
@@ -748,7 +747,15 @@ const BrushCanvas = () => {
           y: newY,
         });
 
+        // Save this initial position
+        stablePositionRef.current = { x: newX, y: newY };
+        setLastPosition({ x: newX, y: newY });
         isInitialPositionSet.current = true;
+
+        // Add positioned class to show component
+        if (containerRef.current) {
+          containerRef.current.classList.add(styles.positioned);
+        }
       }
     };
 
@@ -756,22 +763,39 @@ const BrushCanvas = () => {
     setTimeout(setInitialPosition, 100);
   }, []);
 
+  // Track component position continuously (like About does)
+  useEffect(() => {
+    if (!containerRef.current || !isInitialPositionSet.current) return;
+
+    // Update position tracking on an interval
+    const trackInterval = setInterval(() => {
+      if (containerRef.current) {
+        const currentX = gsap.getProperty(containerRef.current, "x");
+        const currentY = gsap.getProperty(containerRef.current, "y");
+
+        if (
+          currentX !== undefined &&
+          currentY !== undefined &&
+          (currentX !== 0 || currentY !== 0)
+        ) {
+          stablePositionRef.current = { x: currentX, y: currentY };
+          setLastPosition({ x: currentX, y: currentY });
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(trackInterval);
+  }, []);
+
+  if (!showBrushCanvas) return null;
+
   return (
     <div style={{ display: showBrushCanvas ? "block" : "none" }}>
       <div
         ref={containerRef}
-        className={styles.draggableWrapper}
-        style={{
-          ...(isMobile &&
-            !isMinimized && {
-              position: "fixed",
-              top: "10%",
-              left: "5%",
-              width: "90vw",
-              maxWidth: "100%",
-              zIndex: 10000 /* Higher than backdrop */,
-            }),
-        }}
+        className={`${styles.draggableWrapper} ${
+          isMobile && !isMinimized ? styles.mobileFixed : ""
+        }`}
       >
         {notificationState.show && (
           <div
@@ -796,7 +820,6 @@ const BrushCanvas = () => {
         {isMinimized && <div className={styles.paintTextLabel}>Paint</div>}
 
         <div
-          ref={designContainerRef}
           className={`${styles.designContainer} ${
             isMinimized ? styles.minimizedContainer : styles.normalContainer
           }`}

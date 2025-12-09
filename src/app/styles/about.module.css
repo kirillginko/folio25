@@ -225,6 +225,13 @@
   will-change: transform;
   touch-action: none;
   pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  transition-delay: 0.15s;
+}
+
+.draggableWrapper.positioned {
+  opacity: 1;
 }
 
 .hidden {
