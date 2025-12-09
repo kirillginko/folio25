@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createDirectUpload } from "@/app/lib/mux";
+import { createDirectUpload } from "../../../lib/mux";
 
 /**
  * POST /api/mux/upload
