@@ -511,11 +511,6 @@ const ImageGallery = () => {
         return;
       }
 
-      const computedStyle = window.getComputedStyle(element);
-      if (computedStyle.display === "none") {
-        return;
-      }
-
       const elementKey = element.id || `element-${index}`;
       const lastKnownPos = lastKnownPositions.current.get(elementKey);
       const isMusicPlayer = element.className
@@ -626,7 +621,7 @@ const ImageGallery = () => {
 
       addTimeout(() => {
         immediatelyRestoreComponents();
-      }, 50);
+      }, 100);
 
       addTimeout(() => {
         window.dispatchEvent(new CustomEvent("recreateDraggables"));
@@ -677,12 +672,18 @@ const ImageGallery = () => {
             () => setSelectedImage(null),
             () => handleThemeButtonForImage(false),
             () => setActiveComponent(null),
-            () => setShowAbout(true),
-            () => setShowBrushCanvas(true),
-            () => setShowMusicPlayer(true),
-            () => setShowEmail(true),
-            () => setShowAnalogClock(true),
           ]);
+
+          // Only show components if gallery is closed
+          if (!isVisible) {
+            batchStateUpdate([
+              () => setShowAbout(true),
+              () => setShowBrushCanvas(true),
+              () => setShowMusicPlayer(true),
+              () => setShowEmail(true),
+              () => setShowAnalogClock(true),
+            ]);
+          }
         },
         onComplete: () => {
           gsap.set(currentRef, { zIndex: 1 });
