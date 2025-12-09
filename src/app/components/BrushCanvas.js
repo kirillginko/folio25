@@ -761,7 +761,7 @@ const BrushCanvas = () => {
 
     // Initial position with a slight delay to ensure the component is mounted
     setTimeout(setInitialPosition, 100);
-  }, []);
+  }, [isMobile]);
 
   // Track component position continuously (like About does)
   useEffect(() => {
