@@ -787,8 +787,6 @@ const BrushCanvas = () => {
     return () => clearInterval(trackInterval);
   }, []);
 
-  if (!showBrushCanvas) return null;
-
   return (
     <div style={{ display: showBrushCanvas ? "block" : "none" }}>
       <div
