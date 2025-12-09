@@ -115,15 +115,20 @@ export default function Home() {
                 }
               );
 
-              // Stagger fade-in for child components
-              const nonInteractiveElements = Array.from(
+              // Stagger fade-in only for non-draggable components
+              const nonDraggableElements = Array.from(
                 mainContentRef.current.children
-              ).filter(
-                (child) => !child.classList.contains("interactive-element")
-              );
+              ).filter((child) => {
+                // Exclude components that have their own fade-in animation
+                const className = child.className || "";
+                return (
+                  !className.includes("draggableWrapper") &&
+                  !className.includes("musicPlayerWrapper")
+                );
+              });
 
               gsap.fromTo(
-                nonInteractiveElements,
+                nonDraggableElements,
                 {
                   opacity: 0,
                   y: 20,
@@ -181,21 +186,13 @@ export default function Home() {
           )}
           {componentsReady && (
             <>
-              <div className="interactive-element">
-                <About />
-              </div>
-              <div className="interactive-element">
-                <AnalogClock />
-              </div>
+              <About />
+              <AnalogClock />
               <MusicPlayer />
               <Email />
               <Stamp />
-              <div className="interactive-element">
-                <ImageGallery />
-              </div>
-              <div className="interactive-element">
-                <BrushCanvas />
-              </div>
+              <ImageGallery />
+              <BrushCanvas />
             </>
           )}
         </main>

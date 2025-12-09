@@ -338,7 +338,6 @@ const ImageGallery = () => {
 
     allDraggables.forEach((element, index) => {
       if (
-        element.closest(".interactive-element") ||
         element.className.toLowerCase().includes("email") ||
         element.id?.toLowerCase().includes("email") ||
         element.id === "draggable-card"
@@ -465,10 +464,6 @@ const ImageGallery = () => {
       );
 
       allDraggables.forEach((element) => {
-        if (element.closest(".interactive-element")) {
-          return;
-        }
-
         if (
           element.className.toLowerCase().includes("email") ||
           element.id?.toLowerCase().includes("email") ||
@@ -508,10 +503,6 @@ const ImageGallery = () => {
     );
 
     allDraggables.forEach((element, index) => {
-      if (element.closest(".interactive-element")) {
-        return;
-      }
-
       if (
         element.className.toLowerCase().includes("email") ||
         element.id?.toLowerCase().includes("email") ||
