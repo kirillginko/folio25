@@ -6,6 +6,8 @@
 }
 .designContainer {
   position: relative;
+  width: 750px;
+  height: 580px;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -40,6 +42,13 @@
   padding: 0;
   cursor: crosshair;
   background-color: white; /* Add explicit background color */
+}
+
+.normalContainer {
+  width: 750px;
+  height: 580px; /* 300px canvas + 80px controls */
+  border: 1px solid black;
+  border-radius: 16px;
 }
 
 .minimizedContainer {
@@ -295,10 +304,18 @@
 
 .draggableWrapper {
   position: fixed;
-  z-index: 10;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
   will-change: transform;
+  touch-action: none;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  transition-delay: 0s;
+}
+
+.draggableWrapper.positioned {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
@@ -598,4 +615,14 @@
 /* When expanded, the component should be above the backdrop */
 .draggableWrapperExpanded {
   z-index: 51;
+}
+
+/* Mobile fixed style */
+.mobileFixed {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 90vw;
+  z-index: 10000 !important; /* Must be above backdrop */
 }

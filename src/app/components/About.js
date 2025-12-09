@@ -12,7 +12,9 @@ const About = () => {
   const containerRef = useRef(null);
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth <= 768
+  );
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
   const isInitialPositionSet = useRef(false);
   const stablePositionRef = useRef({ x: 0, y: 0 });
@@ -75,8 +77,13 @@ const About = () => {
               newY = lastPosition.y;
             } else {
               // Default fallback position
-              newX = viewportWidth - element.width - 130;
-              newY = 200;
+              if (isMobile) {
+                newX = 120;
+                newY = 100;
+              } else {
+                newX = viewportWidth - element.width - 350;
+                newY = 200;
+              }
             }
           }
 
@@ -279,9 +286,17 @@ const About = () => {
         const viewportHeight = window.innerHeight;
         const element = containerRef.current.getBoundingClientRect();
 
-        // Position in top-right corner with some padding (different from clock)
-        let newX = viewportWidth - element.width - 130;
-        let newY = 200; // Same Y position as clock
+        // Position based on viewport size
+        let newX, newY;
+        if (isMobile) {
+          // Mobile: position from left with even spacing
+          newX = 120;
+          newY = 100;
+        } else {
+          // Desktop: position from right (evenly spaced)
+          newX = viewportWidth - element.width - 350;
+          newY = 200;
+        }
 
         // Ensure it stays within bounds
         newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
@@ -299,6 +314,11 @@ const About = () => {
         stablePositionRef.current = { x: newX, y: newY };
         setLastPosition({ x: newX, y: newY });
         isInitialPositionSet.current = true;
+
+        // Add positioned class to show component
+        if (containerRef.current) {
+          containerRef.current.classList.add(styles.positioned);
+        }
       }
     };
 
