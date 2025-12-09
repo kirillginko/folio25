@@ -402,15 +402,13 @@ const About = () => {
     setIsMinimized((prev) => !prev);
   };
 
-  if (!showAbout) return null;
-
   return (
     <div style={{ display: showAbout ? "block" : "none" }}>
       <div
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
           isMobile && !isMinimized ? styles.mobileFixed : ""
-        } ${activeComponent === "image" ? styles.hidden : ""}`}
+        }`}
       >
         <div
           className={`${styles.expandButton} about-toggle-button`}

@@ -228,15 +228,13 @@ const AnalogClock = () => {
     setIsMinimized((prev) => !prev);
   };
 
-  if (!showAnalogClock) return null;
-
   return (
     <div style={{ display: showAnalogClock ? "block" : "none" }}>
       <div
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
           isMobile && !isMinimized ? styles.draggableWrapperMobile : ""
-        } ${activeComponent === "image" ? styles.hidden : ""}`}
+        }`}
       >
         <div
           className={`${styles.expandButton} clock-toggle-button`}

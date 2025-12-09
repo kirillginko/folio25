@@ -677,17 +677,12 @@ const ImageGallery = () => {
             () => setSelectedImage(null),
             () => handleThemeButtonForImage(false),
             () => setActiveComponent(null),
+            () => setShowAbout(true),
+            () => setShowBrushCanvas(true),
+            () => setShowMusicPlayer(true),
+            () => setShowEmail(true),
+            () => setShowAnalogClock(true),
           ]);
-
-          if (!isVisible) {
-            batchStateUpdate([
-              () => setShowAbout(true),
-              () => setShowBrushCanvas(true),
-              () => setShowMusicPlayer(true),
-              () => setShowEmail(true),
-              () => setShowAnalogClock(true),
-            ]);
-          }
         },
         onComplete: () => {
           gsap.set(currentRef, { zIndex: 1 });
