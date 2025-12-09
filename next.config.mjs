@@ -105,7 +105,11 @@ const nextConfig = {
       return config;
     },
     // Turbopack configuration (Next.js 16+)
-    turbopack: {},
+    turbopack: {
+      resolveAlias: {
+        '@': './src',
+      },
+    },
 };
 
 export default nextConfig;
