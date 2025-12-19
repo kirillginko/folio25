@@ -234,7 +234,7 @@ const AnalogClock = () => {
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
           isMobile && !isMinimized ? styles.draggableWrapperMobile : ""
-        }`}
+        } ${styles.positioned}`}
       >
         <div
           className={`${styles.expandButton} clock-toggle-button`}

@@ -625,4 +625,5 @@
   transform: translate(-50%, -50%) !important;
   width: 90vw;
   z-index: 10000 !important; /* Must be above backdrop */
+  opacity: 1 !important; /* Ensure visible when expanded */
 }
