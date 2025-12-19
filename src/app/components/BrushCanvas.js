@@ -793,7 +793,7 @@ const BrushCanvas = () => {
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
           isMobile && !isMinimized ? styles.mobileFixed : ""
-        }`}
+        } ${styles.positioned}`}
       >
         {notificationState.show && (
           <div

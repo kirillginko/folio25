@@ -297,6 +297,8 @@
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
   width: 90vw;
+  z-index: 10000 !important; /* Must be above backdrop (9999) */
+  opacity: 1 !important; /* Ensure visible when expanded */
 }
 
 /* Mobile styles */

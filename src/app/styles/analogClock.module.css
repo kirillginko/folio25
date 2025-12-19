@@ -39,6 +39,7 @@
   z-index: 99999;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 40px);
+  opacity: 1 !important; /* Ensure visible when expanded */
 }
 
 .clockContainer {
@@ -431,6 +432,7 @@
     height: min(85vw, 85vh) !important;
     margin: 0 !important;
     z-index: 99999 !important;
+    opacity: 1 !important; /* Ensure visible when expanded */
   }
 }
 

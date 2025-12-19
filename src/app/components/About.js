@@ -408,7 +408,7 @@ const About = () => {
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
           isMobile && !isMinimized ? styles.mobileFixed : ""
-        }`}
+        } ${styles.positioned}`}
       >
         <div
           className={`${styles.expandButton} about-toggle-button`}
