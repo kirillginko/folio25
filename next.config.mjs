@@ -57,16 +57,16 @@ const nextConfig = {
     async headers() {
       const isDev = process.env.NODE_ENV === 'development';
 
-      return [
-        {
+      const headerConfigs = [
+        ...(isDev ? [{
           source: '/:path*',
-          headers: isDev ? [
+          headers: [
             {
               key: 'Cache-Control',
               value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
             },
-          ] : [],
-        },
+          ],
+        }] : []),
         {
           source: '/_next/image(.*)',
           headers: [
@@ -104,6 +104,8 @@ const nextConfig = {
           ],
         },
       ];
+
+      return headerConfigs;
     },
     webpack: (config, { dev }) => {
       if (dev) {
