@@ -111,7 +111,7 @@ const imagesData = [
   },
   {
     id: 12,
-    url: "https://res.cloudinary.com/ds8rxobq9/video/upload/v1754148736/output_1_online-video-cutter.com_vkwiy7_semynv.mp4",
+    url: "/videos/car.mp4",
     title: "Case Study 12",
     description:
       "Generative video piece using p5.js and video processing tools.",
@@ -122,7 +122,7 @@ const imagesData = [
   },
   {
     id: 13,
-    url: "https://res.cloudinary.com/ds8rxobq9/video/upload/v1754148756/Screen_Recording_2025-07-13_at_21.48.28_online-video-cutter.com_uvx0xa_hck22n.mp4",
+    url: "/videos/clock.mov",
     title: "Perlin Noise Flow Field",
     description:
       "Generative video piece using p5.js and video processing tools.",
@@ -133,7 +133,7 @@ const imagesData = [
   },
   {
     id: 14,
-    url: "https://res.cloudinary.com/ds8rxobq9/video/upload/v1754148766/Screen_Recording_2025-07-13_at_21.35.19_online-video-cutter.com_1_mb4ccx_bqljoc.mp4",
+    url: "/videos/eye.mp4",
     title: "Perlin Noise Heatmap",
     description:
       "Generative video piece using p5.js and video processing tools.",
@@ -144,7 +144,7 @@ const imagesData = [
   },
   {
     id: 15,
-    url: "https://res.cloudinary.com/ds8rxobq9/video/upload/v1754148725/1958a4d2-4bf4-652e-3f51-ac57caf07929-ezgif.com-crop-video_bla764_yxmwri.mp4",
+    url: "/videos/pattern.mp4",
     title: "Generative Video Art",
     description:
       "Generative video piece using p5.js and video processing tools.",
@@ -155,7 +155,7 @@ const imagesData = [
   },
   {
     id: 16,
-    url: "https://res.cloudinary.com/ds8rxobq9/video/upload/v1754148725/STG_vessel-ezgif.com-crop-video_njuern_oi1aar.mp4",
+    url: "/videos/pattern2.mp4",
     title: "The Shape of Things to Come",
     description:
       "Motion graphic typography using p5.js and video processing tools.",
@@ -166,7 +166,7 @@ const imagesData = [
   },
   {
     id: 17,
-    url: "https://res.cloudinary.com/ds8rxobq9/video/upload/v1754148724/a570bca3-90ac-f473-4927-b94ff290a9e4-ezgif.com-crop-video_1_om2qdv_lt8xzp.mp4",
+    url: "/videos/pixel.mov",
     title: "Geo Rhythm Pattern",
     description:
       "A generative art piece that uses p5.js to create a dynamic visual pattern.",

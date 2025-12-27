@@ -14,26 +14,18 @@ const FallingLetters = () => {
 
   // Preload all images on mount
   useEffect(() => {
-    const preloadImages = async () => {
-      const imagePromises = letterImages.map((letterImg) => {
-        return new Promise((resolve, reject) => {
-          const img = new window.Image();
-          img.src = letterImg.image;
-          img.onload = resolve;
-          img.onerror = reject;
-        });
-      });
+    // Skip preloading, just mark as ready immediately
+    setImagesPreloaded(true);
 
+    // Preload in background without blocking
+    letterImages.forEach((letterImg) => {
       try {
-        await Promise.all(imagePromises);
-        setImagesPreloaded(true);
-      } catch (error) {
-        console.error("Error preloading images:", error);
-        setImagesPreloaded(true); // Continue anyway
+        const img = new window.Image();
+        img.src = letterImg.image;
+      } catch {
+        // Silently ignore errors
       }
-    };
-
-    preloadImages();
+    });
   }, []);
 
   useEffect(() => {
