@@ -12,25 +12,37 @@ import styles from "../styles/fallingtext.module.css";
 import Model from "./Model";
 import * as THREE from "three";
 
-// Add responsive camera hook
+// Add responsive camera hook with performance detection
 function useResponsiveCamera() {
   const [cameraSettings, setCameraSettings] = useState({
-    position: [-12, 6, 17.1], // More to the left and lower
+    position: [-12, 6, 17.1],
     fov: 65,
+    isMobile: false,
+    isLowPerformance: false,
   });
 
   useEffect(() => {
     function handleResize() {
       const isMobile = window.innerWidth < 768;
+      // Detect low performance devices
+      const isLowPerformance =
+        isMobile ||
+        navigator.hardwareConcurrency <= 4 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
       if (isMobile) {
         setCameraSettings({
-          position: [-20, 7, 45], // Adjusted mobile position to match new perspective
+          position: [-20, 7, 45],
           fov: 85,
+          isMobile: true,
+          isLowPerformance,
         });
       } else {
         setCameraSettings({
-          position: [-14, 6, 25.1], // More to the left and lower
+          position: [-14, 6, 25.1],
           fov: 70,
+          isMobile: false,
+          isLowPerformance,
         });
       }
     }
@@ -44,53 +56,54 @@ function useResponsiveCamera() {
 }
 
 // Tennis ball with physics - powerful direct trajectory to hit letters
-function TennisBall() {
+function TennisBall({ isLowPerformance }) {
   const [ref, api] = useSphere(() => ({
     mass: 1,
-    position: [0, 8, 50], // Start even further back
+    position: [0, 8, 50],
     args: [1.5],
     material: { restitution: 0.8 },
     userData: { type: "ball" },
-    linearDamping: 0.05, // Reduced damping for less slowdown
+    linearDamping: 0.05,
     angularDamping: 0.1,
-    collisionFilterGroup: 1, // Ball in group 1
-    collisionFilterMask: 1 | 2, // Collide with ground (group 1) and letters (group 2)
+    collisionFilterGroup: 1,
+    collisionFilterMask: 1 | 2,
   }));
 
   useEffect(() => {
+    // Reduced delay for faster action on low-performance devices
+    const launchDelay = isLowPerformance ? 1000 : 1500;
+
     const launchTimer = setTimeout(() => {
       if (ref.current) {
         ref.current.userData = { type: "ball" };
       }
 
-      // Position with slight randomness
-      const randomX = (Math.random() - 0.5) * 3; // Further reduced randomness
-      const launchY = 8; // Same moderate height
+      const randomX = (Math.random() - 0.5) * 3;
+      const launchY = 8;
 
-      // Position ball even further back for more momentum
       api.position.set(randomX, launchY, 50);
 
       setTimeout(() => {
-        // Much stronger horizontal velocity for guaranteed hit
         api.velocity.set(
-          randomX * -0.5, // Same correction toward center
-          -6, // Increased downward velocity for faster movement
-          -95 // Further increased forward velocity for faster, more direct impact
+          randomX * -0.5,
+          -6,
+          -95
         );
 
-        // Add angular velocity for spin effect
+        // Reduce angular velocity on low-performance devices
+        const angularSpeed = isLowPerformance ? 5 : 10;
         api.angularVelocity.set(
-          Math.random() * 10 - 5,
-          Math.random() * 10 - 5,
-          Math.random() * 10 - 5
+          Math.random() * angularSpeed - angularSpeed/2,
+          Math.random() * angularSpeed - angularSpeed/2,
+          Math.random() * angularSpeed - angularSpeed/2
         );
       }, 50);
-    }, 2000);
+    }, launchDelay);
 
     return () => {
       clearTimeout(launchTimer);
     };
-  }, [api, ref]);
+  }, [api, ref, isLowPerformance]);
 
   return (
     <group>
@@ -246,12 +259,15 @@ const LetterFragment = React.memo(function LetterFragment({
     };
   }, [api, ref]);
 
+  // Detect mobile for shadow optimization
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   // Use shared geometry and material for better performance
   return (
     <mesh
       ref={ref}
-      castShadow
-      receiveShadow
+      castShadow={!isMobile}
+      receiveShadow={!isMobile}
       geometry={sharedFragmentGeometry}
       material={sharedFragmentMaterial}
       scale={size}
@@ -269,6 +285,7 @@ const Letter = React.memo(function Letter({
   shouldExplode,
   ballVelocity,
   onCollide,
+  isLowPerformance,
 }) {
   const [exploded, setExploded] = useState(false);
   const [letterVisible, setLetterVisible] = useState(true);
@@ -453,7 +470,10 @@ const Letter = React.memo(function Letter({
 
   // Pre-generate fragment data on mount to avoid calculation during collision
   useEffect(() => {
-    fragmentsRef.current = generateFragmentData(15, letter); // Increased to 15 fragments for dramatic raining effect
+    // Reduce fragment count on mobile for better performance
+    const isMobile = window.innerWidth < 768;
+    const fragmentCount = isMobile ? 8 : 15; // 8 on mobile, 15 on desktop
+    fragmentsRef.current = generateFragmentData(fragmentCount, letter);
   }, [letter]);
 
   // Handle explosion triggered from parent with optimized timing and minimal re-renders
@@ -481,10 +501,10 @@ const Letter = React.memo(function Letter({
             bevelEnabled
             bevelSize={0.45}
             bevelThickness={0.45}
-            bevelSegments={12}
-            curveSegments={36}
-            castShadow
-            receiveShadow
+            bevelSegments={isLowPerformance ? 6 : 12}
+            curveSegments={isLowPerformance ? 18 : 36}
+            castShadow={!isLowPerformance}
+            receiveShadow={!isLowPerformance}
           >
             {letter}
             <meshPhysicalMaterial
@@ -524,7 +544,7 @@ const Letter = React.memo(function Letter({
 });
 
 // Update Scene component's collision handling
-function Scene({ onComplete }) {
+function Scene({ onComplete, isLowPerformance }) {
   const letters = "Kirill.Agency";
   const letterArray = letters.split("");
 
@@ -612,6 +632,9 @@ function Scene({ onComplete }) {
     return () => clearTimeout(timer);
   }, [onComplete]);
 
+  // Optimize shadow map size based on performance
+  const shadowMapSize = isLowPerformance ? [512, 512] : [2048, 2048];
+
   return (
     <>
       {/* Increased ambient light for more even base illumination */}
@@ -621,8 +644,8 @@ function Scene({ onComplete }) {
       <directionalLight
         position={[0, 15, 10]}
         intensity={1.2}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
+        castShadow={!isLowPerformance} // Disable shadows on mobile
+        shadow-mapSize={shadowMapSize}
         shadow-camera-left={-25}
         shadow-camera-right={25}
         shadow-camera-top={25}
@@ -644,25 +667,27 @@ function Scene({ onComplete }) {
       <pointLight
         position={[-1, 12, 5]}
         intensity={0.9}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
+        castShadow={!isLowPerformance} // Disable shadows on mobile
+        shadow-mapSize={shadowMapSize}
         shadow-bias={-0.001}
       />
 
       {/* Subtle fill lights from sides for balanced illumination */}
-      <pointLight position={[-12, 8, 8]} intensity={0.7} color="#ffffff" />
-      <pointLight position={[12, 8, 8]} intensity={0.4} color="#ffffff" />
+      {!isLowPerformance && <pointLight position={[-12, 8, 8]} intensity={0.7} color="#ffffff" />}
+      {!isLowPerformance && <pointLight position={[12, 8, 8]} intensity={0.4} color="#ffffff" />}
 
       {/* Additional targeted lighting for "Kirill" to brighten it */}
-      <pointLight position={[-8, 6, 12]} intensity={0.8} color="#ffffff" />
-      <directionalLight
-        position={[-10, 10, 8]}
-        intensity={0.6}
-        color="#ffffff"
-      />
+      {!isLowPerformance && <pointLight position={[-8, 6, 12]} intensity={0.8} color="#ffffff" />}
+      {!isLowPerformance && (
+        <directionalLight
+          position={[-10, 10, 8]}
+          intensity={0.6}
+          color="#ffffff"
+        />
+      )}
 
       <Ground />
-      <TennisBall />
+      <TennisBall isLowPerformance={isLowPerformance} />
 
       {/* Collision detection handled directly in Letter components */}
 
@@ -676,6 +701,7 @@ function Scene({ onComplete }) {
           shouldExplode={wordExploded && lettersToExplode.includes(i)}
           ballVelocity={ballImpactVelocity}
           onCollide={handleLetterCollision}
+          isLowPerformance={isLowPerformance}
         />
       ))}
     </>
@@ -684,36 +710,45 @@ function Scene({ onComplete }) {
 
 export default function FallingText({ onComplete }) {
   const cameraSettings = useResponsiveCamera();
+  const { isMobile, isLowPerformance } = cameraSettings;
 
   return (
     <div className={styles.canvasContainer}>
       <Canvas
-        shadows="soft"
+        shadows={isLowPerformance ? "basic" : "soft"}
         camera={{
           position: cameraSettings.position,
-          rotation: [-0.35, -0.5, -0.2], // Adjusted rotation for new camera position
+          rotation: [-0.35, -0.5, -0.2],
           fov: cameraSettings.fov,
         }}
+        gl={{
+          // Reduce quality on mobile for better performance
+          antialias: !isLowPerformance,
+          powerPreference: isLowPerformance ? "low-power" : "high-performance",
+          alpha: true,
+          stencil: false,
+        }}
+        dpr={isLowPerformance ? [1, 1] : [1, 2]} // Limit pixel ratio on mobile
       >
         <Physics
           gravity={[0, -20, 0]}
           defaultContactMaterial={{ restitution: 0.7 }}
-          iterations={10}
+          iterations={isLowPerformance ? 6 : 10} // Reduce physics iterations on mobile
           tolerance={0.01}
           broadphase="SAP"
           allowSleep={true}
         >
-          <Scene onComplete={onComplete} />
+          <Scene onComplete={onComplete} isLowPerformance={isLowPerformance} />
         </Physics>
         <OrbitControls
           enablePan={false}
           enableZoom={false}
           enableRotate={false}
-          autoRotate
+          autoRotate={!isLowPerformance} // Disable auto-rotate on mobile
           autoRotateSpeed={0.3}
           target={[0, 0, 0]}
         />
-        <Environment preset="sunset" />
+        {!isLowPerformance && <Environment preset="sunset" />}
       </Canvas>
     </div>
   );

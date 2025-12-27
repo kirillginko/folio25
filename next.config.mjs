@@ -4,7 +4,7 @@ const nextConfig = {
         formats: ["image/avif", "image/webp"],
         deviceSizes: [640, 750, 828, 1080, 1200, 1920],
         imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-        minimumCacheTTL: 31536000,
+        minimumCacheTTL: process.env.NODE_ENV === 'production' ? 86400 : 0, // 1 day in production, 0 in dev
         remotePatterns: [
           {
             protocol: 'https',
@@ -55,13 +55,24 @@ const nextConfig = {
     },
     // Configure webpack for development
     async headers() {
-      return [
+      const isDev = process.env.NODE_ENV === 'development';
+
+      const headerConfigs = [
+        ...(isDev ? [{
+          source: '/:path*',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+            },
+          ],
+        }] : []),
         {
           source: '/_next/image(.*)',
           headers: [
             {
               key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable',
+              value: isDev ? 'no-store, must-revalidate' : 'public, max-age=604800, immutable', // 7 days
             },
           ],
         },
@@ -70,7 +81,7 @@ const nextConfig = {
           headers: [
             {
               key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable',
+              value: isDev ? 'no-store, must-revalidate' : 'public, max-age=86400, immutable', // 1 day
             },
           ],
         },
@@ -79,7 +90,7 @@ const nextConfig = {
           headers: [
             {
               key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable',
+              value: isDev ? 'no-store, must-revalidate' : 'public, max-age=2592000, immutable', // 30 days (fonts rarely change)
             },
           ],
         },
@@ -88,11 +99,13 @@ const nextConfig = {
           headers: [
             {
               key: 'Cache-Control',
-              value: 'public, max-age=3600',
+              value: isDev ? 'no-store, must-revalidate' : 'public, max-age=3600',
             },
           ],
         },
       ];
+
+      return headerConfigs;
     },
     webpack: (config, { dev }) => {
       if (dev) {
