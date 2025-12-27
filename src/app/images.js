@@ -1,7 +1,7 @@
 const imagesData = [
   {
     id: 1,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148724/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIxMjMxNjM1My9vcmlnaW5hbF8yY2IwZmE4OWQ0NjQ2NjUyODNlMjVlNDk2ZDg1ZTc2ZC5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjYwMCwiaGVpZ2h0Ijo2MDAsImZpdCI6Imluc2lkZSIsIndpdGhvdXRFbmxhcmdl_b6dcwz.webp",
+    url: "/images/body.webp",
     title: "Case Study 1",
     description: "Body, Mind, Endurance, Test - Branding",
     year: 2023,
@@ -11,7 +11,7 @@ const imagesData = [
   },
   {
     id: 2,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148724/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzNzAyNTc4L29yaWdpbmFsXzRhZjJiZWNmOTMzNWYxMGVjZWUwYTE2YjYxMDQ4MjVmLmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6NjAwLCJoZWlnaHQiOjYwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2Vt_ceyt9u.webp",
+    url: "/images/record.webp",
     title: "Case Study 2",
     description: "M Image Campaign - Branding",
     year: 2023,
@@ -21,7 +21,7 @@ const imagesData = [
   },
   {
     id: 3,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148723/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiI1NTU2ODY4L29yaWdpbmFsXzEyYjQ4NDM2N2FiZmM1Y2YzMjc4NDJkOGI0ZWJiMWE2LmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6NjAwLCJoZWlnaHQiOjYwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2Vt_ljogg4.webp",
+    url: "/images/club.webp",
     title: "Case Study 3",
     description: "Club Mutante - Branding",
     year: 2022,
@@ -31,7 +31,7 @@ const imagesData = [
   },
   {
     id: 4,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148724/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiI5NTAzNDI4L29yaWdpbmFsX2JmYjRmYWMyMjI4NDdkZWYzOTk2MjE2OWJjNDk3YTExLmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6NjAwLCJoZWlnaHQiOjYwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2Vt_w6ouhc.webp",
+    url: "/images/gum.webp",
     title: "Case Study 4",
     description: "Joon Magazine - Branding",
     year: 2022,
@@ -41,7 +41,7 @@ const imagesData = [
   },
   {
     id: 5,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754150891/dade_lrvyiu_wyodjq.webp",
+    url: "/images/dade.webp",
     title: "Case Study 5",
     description: "Country Beats - Branding",
     year: 2022,
@@ -51,7 +51,7 @@ const imagesData = [
   },
   {
     id: 6,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754150815/1987_n867s8_os0nty.webp",
+    url: "/images/1987.webp",
     title: "Case Study 6",
     description: "Generative Art",
     year: 2023,
@@ -61,7 +61,7 @@ const imagesData = [
   },
   {
     id: 7,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754150751/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIxNTI2MDQyOC9vcmlnaW5hbF8xNWYzZDJhZGI0YmU2Njc0OGExNWI5MGQ2YWY5NmE2Ni5qcGciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjYwMCwiaGVpZ2h0Ijo2MDAsImZpdCI6Imluc2lkZSIsIndpdGhvdXRFbmxhcmdlbW_oxhwy4.webp",
+    url: "/images/disco.webp",
     title: "Case Study 7",
     description: "This is a detailed description of Case Study 7.",
     year: 2022,
@@ -71,7 +71,7 @@ const imagesData = [
   },
   {
     id: 8,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148723/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIxNzE0MzEwMi9vcmlnaW5hbF8wNWUzMzI1N2Q4OWQ0MzlhMDZlZjM0ZDdiNzIwY2E3NC5qcGciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjYwMCwiaGVpZ2h0Ijo2MDAsImZpdCI6Imluc2lkZSIsIndpdGhvdXRFbmxhcmdl_d8bmc7.webp",
+    url: "/images/circle.webp",
     title: "Case Study 8",
     description: "This is a detailed description of Case Study 8.",
     year: 2022,
@@ -81,7 +81,7 @@ const imagesData = [
   },
   {
     id: 9,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148724/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiI0MTE4OTQzL29yaWdpbmFsX2NjMWJiOWM5ZWMwMTczZGNkYzcxOGFkNDZhODg4ZTI3LmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6NjAwLCJoZWlnaHQiOjYwMCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2Vt_cobifn.webp",
+    url: "/images/butterfly.webp",
     title: "Case Study 9",
     description: "This is a detailed description of Case Study 9.",
     year: 2022,
@@ -91,7 +91,7 @@ const imagesData = [
   },
   {
     id: 10,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148724/tumblr_4051b11752472940536562f56a260b80_c9d0670b_1280_nghmgg_pcc6ct.jpg",
+    url: "/images/foil.webp",
     title: "Case Study 10",
     description: "This is a detailed description of Case Study 10.",
     year: 2022,
@@ -101,7 +101,7 @@ const imagesData = [
   },
   {
     id: 11,
-    url: "https://res.cloudinary.com/ds8rxobq9/image/upload/v1754150551/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIxMTM5MjkxNC9vcmlnaW5hbF82MjA1NjQwZjdkNGEzZjNjY2Q1ZjU2YTI5MDIzOTMwYS5qcGciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjYwMCwiaGVpZ2h0Ijo2MDAsImZpdCI6Imluc2lkZSIsIndpdGhvdXRFbmxhcmdl_zb7dgx.webp",
+    url: "/images/flower.webp",
     title: "Case Study 11",
     description: "This is a detailed description of Case Study 11.",
     year: 2022,

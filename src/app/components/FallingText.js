@@ -332,7 +332,7 @@ const Letter = React.memo(function Letter({
   }));
 
   // Generate fragment data without creating physics objects - optimized count for performance
-  const generateFragmentData = (count, letterChar) => {
+  const generateFragmentData = (count, letterChar, letterIndex) => {
     const fragmentData = [];
     const optimizedCount = Math.min(count, 15); // Allow up to 15 fragments for dramatic raining effect
 
@@ -352,7 +352,7 @@ const Letter = React.memo(function Letter({
       ];
 
       fragmentData.push({
-        id: `${letterChar}-frag-${i}`,
+        id: `${letterChar}-${letterIndex}-frag-${i}`,
         size,
         rotation,
         distanceWeight: Math.pow(Math.random(), 1.5), // Adjusted power for more center bias
@@ -473,8 +473,8 @@ const Letter = React.memo(function Letter({
     // Reduce fragment count on mobile for better performance
     const isMobile = window.innerWidth < 768;
     const fragmentCount = isMobile ? 8 : 15; // 8 on mobile, 15 on desktop
-    fragmentsRef.current = generateFragmentData(fragmentCount, letter);
-  }, [letter]);
+    fragmentsRef.current = generateFragmentData(fragmentCount, letter, index);
+  }, [letter, index]);
 
   // Handle explosion triggered from parent with optimized timing and minimal re-renders
   useEffect(() => {
