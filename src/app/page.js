@@ -50,20 +50,37 @@ export default function Home() {
   } = useGlobalState();
 
   useEffect(() => {
-    if (!mounted) {
-      setMounted(true);
-      if (!theme) {
-        setTheme("dark");
-      }
+    setMounted(true);
+    // Always set theme to dark on mount, never use system theme
+    if (!theme || theme === "system") {
+      setTheme("dark");
     }
-  }, [theme, setTheme, mounted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const toggleTheme = () => {
+    console.log('Toggle clicked, mounted:', mounted, 'current theme:', theme);
+    if (!mounted) {
+      console.log('Not mounted, returning');
+      return;
+    }
+
     setIsRotating(true);
     setIsTransitioning(true);
 
+    // Use functional update to avoid stale closure
+    setTheme((currentTheme) => {
+      // Handle system theme edge case
+      if (currentTheme === "system") {
+        console.log('System theme detected, switching to light');
+        return "light";
+      }
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      console.log('Changing theme from', currentTheme, 'to', newTheme);
+      return newTheme;
+    });
+
     setTimeout(() => {
-      setTheme(theme === "dark" ? "light" : "dark");
       setIsTransitioning(false);
     }, 300);
 

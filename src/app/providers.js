@@ -5,8 +5,8 @@ export function Providers({ children }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem={true}
+      defaultTheme="dark"
+      enableSystem={false}
       disableTransitionOnChange
       suppressHydrationWarning
     >

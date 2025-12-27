@@ -75,9 +75,8 @@ const ImageGallery = () => {
             videoElement.currentTime = 0;
           }
 
-          if (shouldUnmute) {
-            videoElement.muted = false;
-          }
+          // Always keep videos muted
+          videoElement.muted = true;
 
           // On mobile, ensure video is loaded first
           if (isMobile && videoElement.readyState < 2) {
@@ -1073,7 +1072,7 @@ const ImageGallery = () => {
                     el.addEventListener("canplay", handleCanPlay);
 
                     // Ensure video starts in correct state
-                    el.muted = selectedImage === index ? false : true;
+                    el.muted = true;
                     el.currentTime = 0;
 
                     // Force video to load on mobile
@@ -1083,15 +1082,14 @@ const ImageGallery = () => {
                   }
                 }}
                 src={isMobile && image.mobileUrl ? image.mobileUrl : image.url}
-                poster={image.poster}
+                {...(image.poster && { poster: image.poster })}
                 className={styles.image}
                 width={200}
                 height={200}
                 loop
-                muted={selectedImage !== index}
+                muted
                 playsInline
-                preload={isMobile && [12, 13, 14].includes(image.id) ? "auto" : "metadata"}
-                loading="lazy"
+                preload={[12, 13, 14, 15, 16, 17].includes(image.id) ? "auto" : "metadata"}
                 controls={false}
                 webkit-playsinline="true"
                 x5-playsinline="true"
