@@ -673,18 +673,16 @@ function Scene({ onComplete, isLowPerformance }) {
       />
 
       {/* Subtle fill lights from sides for balanced illumination */}
-      {!isLowPerformance && <pointLight position={[-12, 8, 8]} intensity={0.7} color="#ffffff" />}
-      {!isLowPerformance && <pointLight position={[12, 8, 8]} intensity={0.4} color="#ffffff" />}
+      <pointLight position={[-12, 8, 8]} intensity={0.7} color="#ffffff" />
+      <pointLight position={[12, 8, 8]} intensity={0.4} color="#ffffff" />
 
       {/* Additional targeted lighting for "Kirill" to brighten it */}
-      {!isLowPerformance && <pointLight position={[-8, 6, 12]} intensity={0.8} color="#ffffff" />}
-      {!isLowPerformance && (
-        <directionalLight
-          position={[-10, 10, 8]}
-          intensity={0.6}
-          color="#ffffff"
-        />
-      )}
+      <pointLight position={[-8, 6, 12]} intensity={0.8} color="#ffffff" />
+      <directionalLight
+        position={[-10, 10, 8]}
+        intensity={0.6}
+        color="#ffffff"
+      />
 
       <Ground />
       <TennisBall isLowPerformance={isLowPerformance} />
@@ -723,12 +721,12 @@ export default function FallingText({ onComplete }) {
         }}
         gl={{
           // Reduce quality on mobile for better performance
-          antialias: !isLowPerformance,
+          antialias: true,
           powerPreference: isLowPerformance ? "low-power" : "high-performance",
           alpha: true,
           stencil: false,
         }}
-        dpr={isLowPerformance ? [1, 1] : [1, 2]} // Limit pixel ratio on mobile
+        dpr={[1, 2]} // Use high pixel ratio for smooth edges
       >
         <Physics
           gravity={[0, -20, 0]}
@@ -744,11 +742,11 @@ export default function FallingText({ onComplete }) {
           enablePan={false}
           enableZoom={false}
           enableRotate={false}
-          autoRotate={!isLowPerformance} // Disable auto-rotate on mobile
+          autoRotate={true}
           autoRotateSpeed={0.3}
           target={[0, 0, 0]}
         />
-        {!isLowPerformance && <Environment preset="sunset" />}
+        <Environment preset="sunset" />
       </Canvas>
     </div>
   );
