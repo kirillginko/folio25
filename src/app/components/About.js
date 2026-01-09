@@ -13,7 +13,7 @@ const About = () => {
   const draggableInstance = useRef(null);
   const [isMinimized, setIsMinimized] = useState(true);
   const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' && window.innerWidth <= 768
+    typeof window !== "undefined" && window.innerWidth <= 768
   );
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
   const isInitialPositionSet = useRef(false);
@@ -441,7 +441,7 @@ const About = () => {
               </header>
               <div className={styles.imageWrapper}>
                 <Image
-                  src="https://res.cloudinary.com/ds8rxobq9/image/upload/v1754148774/t_6s___0c0a0b1b-b02e-42bd-886c-9b9fa77dbf08__2025-07-13_22-54-15_1_jtgvze_z6adyd.png"
+                  src="/images/kirill.webp"
                   alt="Kirill Ginko"
                   width={600}
                   height={600}

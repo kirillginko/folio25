@@ -75,7 +75,7 @@
 .image[src*=".ogg"],
 video.image {
   object-fit: cover;
-  background-color: #000;
+  background-color: transparent;
   display: block !important;
   width: 100% !important;
   height: 100% !important;
@@ -215,40 +215,6 @@ video.image {
   z-index: 1600 !important;
 }
 
-/* Mux video specific styles - always 16:9 aspect ratio */
-.imageWrapper.muxVideo {
-  width: 350px;
-  height: 198px;
-  border-radius: 10px; /* 300 / 16 * 9 = 168.75 for 16:9 */
-}
-
-.imageWrapper.muxVideo.selected {
-  width: min(65vw, 900px);
-  height: calc(min(65vw, 900px) * 9 / 16);
-  border-radius: 10px;
-  max-width: 900px;
-}
-
-.imageWrapper.muxVideo .image {
-  object-fit: contain !important;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-/* Hide all Mux player controls completely */
-.imageWrapper.muxVideo mux-player::part(bottom),
-.imageWrapper.muxVideo mux-player::part(center),
-.imageWrapper.muxVideo mux-player::part(top),
-.imageWrapper.muxVideo mux-player::part(play-button),
-.imageWrapper.muxVideo mux-player::part(seek-backward-button),
-.imageWrapper.muxVideo mux-player::part(seek-forward-button),
-.imageWrapper.muxVideo mux-player::part(mute-button),
-.imageWrapper.muxVideo mux-player::part(volume-range),
-.imageWrapper.muxVideo mux-player::part(time-range),
-.imageWrapper.muxVideo mux-player::part(time-display),
-.imageWrapper.muxVideo mux-player::part(duration-display) {
-  display: none !important;
-}
 
 .selected:hover {
   cursor: pointer;
@@ -328,17 +294,6 @@ video.image {
   letter-spacing: 0.08em;
 }
 
-/* Larger close button for Mux videos */
-.muxVideo.selected .detailButton {
-  top: 0px;
-  right: -75px;
-  padding: 8px 16px;
-  border: 1px solid #ffb120;
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-}
-
 .selected .detailButton:hover {
   background-color: #ffb120;
   transform: scale(1.05);
@@ -377,21 +332,6 @@ video.image {
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
   border: 1px solid #7a708f;
-}
-
-/* Adjust imageInfo position when Mux video is selected - responsive */
-.imageInfo.muxVideoInfo {
-  /* Position as part of centered group with video */
-  left: 50%;
-  top: calc(50% + 30px);
-  transform: translate(
-    calc(-50% - min(32.5vw, 450px) - 5px - min(20px, 15vw) - 100px),
-    -50%
-  );
-  width: min(380px, 30vw);
-  height: auto;
-  max-height: calc(min(65vw, 900px) * 9 / 16);
-  overflow-y: auto;
 }
 
 .imageInfo h2 {
@@ -506,21 +446,6 @@ video.image {
     outline: none;
   }
 
-  /* Mobile Mux video styles */
-  .imageWrapper.muxVideo.selected {
-    width: 90vw !important;
-    height: calc(90vw * 9 / 16) !important;
-    max-width: none !important;
-    transform: translate(-50%, -95%) !important;
-  }
-
-  .imageInfo.muxVideoInfo {
-    left: 50% !important;
-    transform: translate(-50%, 0) !important;
-    width: calc(100% - 50px) !important;
-    max-height: 45% !important;
-    top: 55% !important;
-  }
 }
 
 .navButton {
