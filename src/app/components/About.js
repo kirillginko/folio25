@@ -19,7 +19,7 @@ const About = () => {
   const isInitialPositionSet = useRef(false);
   const stablePositionRef = useRef({ x: 0, y: 0 });
   const positionBeforeImageRef = useRef({ x: 0, y: 0 });
-  const { showAbout, setShowBackdrop, setActiveComponent, activeComponent } =
+  const { showAbout, setShowBackdrop, setActiveComponent, activeComponent, isGalleryOpen } =
     useGlobalState();
 
   // Add a position adjustment effect that runs on component state changes
@@ -403,7 +403,7 @@ const About = () => {
   };
 
   return (
-    <div style={{ display: showAbout ? "block" : "none" }}>
+    <div style={{ display: (showAbout && !isGalleryOpen) ? "block" : "none" }}>
       <div
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
