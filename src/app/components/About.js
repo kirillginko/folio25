@@ -19,8 +19,13 @@ const About = () => {
   const isInitialPositionSet = useRef(false);
   const stablePositionRef = useRef({ x: 0, y: 0 });
   const positionBeforeImageRef = useRef({ x: 0, y: 0 });
-  const { showAbout, setShowBackdrop, setActiveComponent, activeComponent, isGalleryOpen } =
-    useGlobalState();
+  const {
+    showAbout,
+    setShowBackdrop,
+    setActiveComponent,
+    activeComponent,
+    isGalleryOpen,
+  } = useGlobalState();
 
   // Add a position adjustment effect that runs on component state changes
   useEffect(() => {
@@ -403,7 +408,7 @@ const About = () => {
   };
 
   return (
-    <div style={{ display: (showAbout && !isGalleryOpen) ? "block" : "none" }}>
+    <div style={{ display: showAbout && !isGalleryOpen ? "block" : "none" }}>
       <div
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
@@ -441,7 +446,7 @@ const About = () => {
               </header>
               <div className={styles.imageWrapper}>
                 <Image
-                  src="/images/kirill.webp"
+                  src="/images/Kirill.webp"
                   alt="Kirill Ginko"
                   width={600}
                   height={600}

@@ -1057,12 +1057,12 @@ const ImageGallery = () => {
                 }}
                 key={`video-${image.id}`}
                 src={isMobile && image.mobileUrl ? image.mobileUrl : image.url}
-                {...(image.poster && { poster: image.poster })}
                 className={styles.image}
                 width={200}
                 height={200}
                 loop
                 muted
+                autoPlay
                 playsInline
                 preload="auto"
                 controls={false}
@@ -1075,6 +1075,7 @@ const ImageGallery = () => {
                   display: "block",
                   width: "100%",
                   height: "100%",
+                  backgroundColor: "transparent",
                 }}
               />
             ) : (
