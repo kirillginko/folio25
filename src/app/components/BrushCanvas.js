@@ -101,10 +101,10 @@ const BrushCanvas = () => {
               // Default fallback position
               if (isMobile) {
                 newX = 20;
-                newY = 100;
+                newY = 250;
               } else {
                 newX = viewportWidth - element.width - 500;
-                newY = 200;
+                newY = 350;
               }
             }
           }
@@ -737,11 +737,11 @@ const BrushCanvas = () => {
         if (isMobile) {
           // Mobile: position from left with even spacing
           newX = 20;
-          newY = 100;
+          newY = 250;
         } else {
           // Desktop: position from right
           newX = viewportWidth - element.width - 500;
-          newY = 200;
+          newY = 350;
         }
 
         // Ensure it stays within bounds

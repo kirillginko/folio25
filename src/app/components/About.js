@@ -79,10 +79,10 @@ const About = () => {
               // Default fallback position
               if (isMobile) {
                 newX = 120;
-                newY = 100;
+                newY = 250;
               } else {
                 newX = viewportWidth - element.width - 350;
-                newY = 200;
+                newY = 350;
               }
             }
           }
@@ -291,11 +291,11 @@ const About = () => {
         if (isMobile) {
           // Mobile: position from left with even spacing
           newX = 120;
-          newY = 100;
+          newY = 250;
         } else {
           // Desktop: position from right (evenly spaced)
           newX = viewportWidth - element.width - 350;
-          newY = 200;
+          newY = 350;
         }
 
         // Ensure it stays within bounds

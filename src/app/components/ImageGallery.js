@@ -817,6 +817,23 @@ const ImageGallery = () => {
     handleDetailClick(newIndex, { stopPropagation: () => {} });
   };
 
+  // Preload all videos on mobile for instant playback
+  useEffect(() => {
+    if (isMobile) {
+      // Wait a short moment for refs to populate
+      const preloadTimer = setTimeout(() => {
+        videoRefs.current.forEach((video, index) => {
+          if (video && video.readyState < 2) {
+            // Force load if not already loaded
+            video.load();
+          }
+        });
+      }, 100);
+
+      return () => clearTimeout(preloadTimer);
+    }
+  }, [isMobile]);
+
   useEffect(() => {
     if (!gsap.registerPlugin) {
       return;
@@ -1046,9 +1063,18 @@ const ImageGallery = () => {
                     el.muted = true;
                     el.currentTime = 0;
 
-                    // Force video to load on mobile
+                    // Force video to load immediately on mobile for instant playback
                     if (isMobile) {
+                      el.preload = "auto";
                       el.load();
+
+                      // Preload first frame
+                      const preloadFirstFrame = () => {
+                        if (el.readyState >= 2) {
+                          el.removeEventListener("loadeddata", preloadFirstFrame);
+                        }
+                      };
+                      el.addEventListener("loadeddata", preloadFirstFrame);
                     }
                   }
                 }}
@@ -1060,11 +1086,12 @@ const ImageGallery = () => {
                 loop
                 muted
                 playsInline
-                preload={[12, 13, 14, 15, 16, 17].includes(image.id) ? "auto" : "metadata"}
+                preload="auto"
                 controls={false}
                 webkit-playsinline="true"
                 x5-playsinline="true"
                 crossOrigin="anonymous"
+                fetchPriority={isMobile ? "high" : "auto"}
                 style={{
                   objectFit: "cover",
                   display: "block",
