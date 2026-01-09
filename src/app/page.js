@@ -11,6 +11,7 @@ import { useGlobalState } from "./context/GlobalStateContext";
 // Critical components - load immediately
 import FallingText from "./components/FallingText";
 import FluidBackground from "./components/fluid/Fluid";
+import HeroBio from "./components/HeroBio";
 
 // Lazy load non-critical components
 const About = dynamic(() => import("./components/About"), { ssr: false });
@@ -59,9 +60,9 @@ export default function Home() {
   }, []); // Only run once on mount
 
   const toggleTheme = () => {
-    console.log('Toggle clicked, mounted:', mounted, 'current theme:', theme);
+    console.log("Toggle clicked, mounted:", mounted, "current theme:", theme);
     if (!mounted) {
-      console.log('Not mounted, returning');
+      console.log("Not mounted, returning");
       return;
     }
 
@@ -72,11 +73,11 @@ export default function Home() {
     setTheme((currentTheme) => {
       // Handle system theme edge case
       if (currentTheme === "system") {
-        console.log('System theme detected, switching to light');
+        console.log("System theme detected, switching to light");
         return "light";
       }
       const newTheme = currentTheme === "dark" ? "light" : "dark";
-      console.log('Changing theme from', currentTheme, 'to', newTheme);
+      console.log("Changing theme from", currentTheme, "to", newTheme);
       return newTheme;
     });
 
@@ -181,6 +182,7 @@ export default function Home() {
           className={styles.main}
           style={{ opacity: 0 }}
         >
+          {/* <HeroBio /> */}
           {componentsReady && <FallingLetters />}
           {showThemeSelector && (
             <div

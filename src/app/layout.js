@@ -38,6 +38,14 @@ const foundersGroteskLight = localFont({
   preload: false,
 });
 
+const headerFont = localFont({
+  src: "./fonts/Header.ttf",
+  variable: "--font-header",
+  weight: "100 900",
+  display: "swap",
+  preload: true,
+});
+
 export const metadata = {
   title: "Kirill Ginko | Creative Developer & Digital Designer in NYC",
   description:
@@ -303,7 +311,7 @@ export default function RootLayout({ children }) {
         </Script>
       </head>
       <body
-        className={`${instructionFont.variable} ${AustinCyRoman.variable} ${foundersGrotesk.variable} ${foundersGroteskLight.variable}`}
+        className={`${instructionFont.variable} ${AustinCyRoman.variable} ${foundersGrotesk.variable} ${foundersGroteskLight.variable} ${headerFont.variable}`}
         suppressHydrationWarning
       >
         <GlobalStateProvider>

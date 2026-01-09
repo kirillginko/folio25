@@ -1,0 +1,53 @@
+.heroContainer {
+  position: fixed;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 50vw;
+  width: 50vw;
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+}
+
+.bioText {
+  font-size: clamp(2rem, 4vw, 4.5rem);
+  line-height: 1.1;
+  font-weight: 500;
+  color: rgb(62, 255, 45);
+  margin: 0;
+  letter-spacing: 0.05em;
+  font-family: var(--font-header);
+}
+
+/* Tablet and mobile responsive styles */
+@media screen and (max-width: 1024px) {
+  .heroContainer {
+    left: 30px;
+    max-width: 60vw;
+    width: 60vw;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .heroContainer {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    max-width: 100%;
+    padding: 20px;
+    margin: 40px 0;
+  }
+
+  .bioText {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .heroContainer {
+    padding: 15px;
+    margin: 30px 0;
+  }
+}

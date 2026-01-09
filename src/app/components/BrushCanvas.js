@@ -55,6 +55,9 @@ const BrushCanvas = () => {
 
   const [isNotificationExiting, setIsNotificationExiting] = useState(false);
 
+  // Add canvas ready state
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
+
   const { showBrushCanvas, setShowBackdrop, setActiveComponent } =
     useGlobalState();
 
@@ -168,7 +171,12 @@ const BrushCanvas = () => {
     if (canvasData) {
       p5.loadImage(canvasData, (img) => {
         p5.image(img, 0, 0);
+        // Mark canvas as ready after image loads
+        setIsCanvasReady(true);
       });
+    } else {
+      // Mark canvas as ready immediately if no data to load
+      setIsCanvasReady(true);
     }
   };
 
@@ -626,6 +634,7 @@ const BrushCanvas = () => {
       // When minimizing, hide the backdrop
       setShowBackdrop(false);
       setActiveComponent(null);
+      setIsCanvasReady(false); // Reset canvas ready state
     } else if (isMobile) {
       // When expanding on mobile, show the backdrop
       setShowBackdrop(true);
@@ -828,6 +837,12 @@ const BrushCanvas = () => {
             <>
               {controls}
               <div className={styles.canvasWrapper}>
+                {!isCanvasReady && (
+                  <div className={styles.canvasLoading}>
+                    <div className={styles.loadingSpinner}></div>
+                    <p>Loading canvas...</p>
+                  </div>
+                )}
                 <Sketch setup={setup} draw={draw} />
               </div>
             </>

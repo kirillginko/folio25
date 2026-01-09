@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
-import MuxPlayer from "@mux/mux-player-react";
 import { gsap } from "gsap";
 import { Draggable } from "gsap/Draggable";
 import images from "../images";
@@ -739,28 +738,10 @@ const ImageGallery = () => {
 
       zIndexCounter.current += 1;
 
-      // Position media - center Mux videos with description to the left
-      const isMuxVideo = media.type === "mux";
-      const targetScale = isMuxVideo ? 1 : getScaleForScreen;
-
-      // For Mux videos, position to create centered group with description
-      let targetX = windowCenter.x;
-      let targetY = windowCenter.y;
-
-      if (isMuxVideo) {
-        const videoWidth = Math.min(window.innerWidth * 0.65, 900);
-        const descriptionWidth = Math.min(380, window.innerWidth * 0.3);
-        const gap = 10; // Gap between description and video
-        const totalWidth = descriptionWidth + gap + videoWidth;
-
-        // Center the entire group and shift left
-        const groupStartX = (window.innerWidth - totalWidth) / 2 - 100; // Shift 100px to the left
-        targetX = groupStartX + descriptionWidth + gap;
-
-        // Vertically center and move down slightly
-        const videoHeight = videoWidth * 9 / 16;
-        targetY = (window.innerHeight - videoHeight) / 2 + 30; // Move down 30px
-      }
+      // Position all media the same way - centered
+      const targetScale = getScaleForScreen;
+      const targetX = windowCenter.x;
+      const targetY = windowCenter.y;
 
       gsap.to(currentRef, {
         x: targetX,
@@ -981,7 +962,7 @@ const ImageGallery = () => {
             >
               →
             </button>
-            <div className={`${styles.imageInfo} ${images[selectedImage].type === "mux" ? styles.muxVideoInfo : ""}`}>
+            <div className={styles.imageInfo}>
               <h2>{images[selectedImage].title}</h2>
               <p>{images[selectedImage].description}</p>
               <div className={styles.imageMetadata}>
@@ -1007,7 +988,7 @@ const ImageGallery = () => {
             ref={(el) => (imageRefs.current[index] = el)}
             className={`${styles.imageWrapper} ${
               selectedImage === index ? styles.selected : ""
-            } ${image.type === "mux" ? styles.muxVideo : ""}`}
+            }`}
             onMouseEnter={() => handleVideoHoverPlay(index)}
             onMouseLeave={() => handleVideoHoverPause(index)}
             onTouchStart={() => handleVideoTouch(index)}
@@ -1021,17 +1002,7 @@ const ImageGallery = () => {
             >
               {selectedImage === index ? "close" : "< more info"}
             </span>
-            {image.type === "mux" ? (
-              <MuxPlayer
-                playbackId={image.playbackId}
-                streamType="on-demand"
-                loop
-                muted={selectedImage !== index}
-                autoPlay={selectedImage === index ? "muted" : false}
-                controls={false}
-                className={styles.image}
-              />
-            ) : image.type === "video" ? (
+            {image.type === "video" ? (
               <video
                 ref={(el) => {
                   if (el) {
@@ -1108,12 +1079,12 @@ const ImageGallery = () => {
                 className={styles.image}
                 width={200}
                 height={200}
-                priority={index < 3}
-                quality={60}
-                loading={index < 3 ? "eager" : "lazy"}
+                priority={isMobile ? index < 6 : index < 3}
+                quality={isMobile ? 70 : 60}
+                loading={isMobile ? (index < 6 ? "eager" : "lazy") : (index < 3 ? "eager" : "lazy")}
                 sizes="(max-width: 768px) 200px, (max-width: 1200px) 300px, 400px"
                 placeholder="blur"
-                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAf/AABEIAAEAAQMBEQACEQEDEQH/xABKAAEAAAAAAAAAAAAAAAAAAAALEAEBAQADAQAAAAAAAAAAAAAGBQQHAwgJAgsBAQAAAAAAAAAAAAAAAAAAAAARAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AJgB84n/2Q=="
               />
             )}
           </div>
