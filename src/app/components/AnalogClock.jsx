@@ -146,11 +146,11 @@ const AnalogClock = () => {
         if (isMobile) {
           // Mobile: position from left with even spacing
           newX = 220;
-          newY = 100;
+          newY = 250;
         } else {
           // Desktop: position from right
           newX = viewportWidth - element.width - 200;
-          newY = 200;
+          newY = 350;
         }
 
         newX = Math.max(20, Math.min(newX, viewportWidth - element.width - 20));
