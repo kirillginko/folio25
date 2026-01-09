@@ -817,23 +817,6 @@ const ImageGallery = () => {
     handleDetailClick(newIndex, { stopPropagation: () => {} });
   };
 
-  // Preload all videos on mobile for instant playback
-  useEffect(() => {
-    if (isMobile) {
-      // Wait a short moment for refs to populate
-      const preloadTimer = setTimeout(() => {
-        videoRefs.current.forEach((video, index) => {
-          if (video && video.readyState < 2) {
-            // Force load if not already loaded
-            video.load();
-          }
-        });
-      }, 100);
-
-      return () => clearTimeout(preloadTimer);
-    }
-  }, [isMobile]);
-
   useEffect(() => {
     if (!gsap.registerPlugin) {
       return;
@@ -1063,21 +1046,16 @@ const ImageGallery = () => {
                     el.muted = true;
                     el.currentTime = 0;
 
-                    // Force video to load immediately on mobile for instant playback
-                    if (isMobile) {
-                      el.preload = "auto";
-                      el.load();
+                    // Force video to load immediately for instant playback
+                    el.preload = "auto";
 
-                      // Preload first frame
-                      const preloadFirstFrame = () => {
-                        if (el.readyState >= 2) {
-                          el.removeEventListener("loadeddata", preloadFirstFrame);
-                        }
-                      };
-                      el.addEventListener("loadeddata", preloadFirstFrame);
+                    // Force load only if not already loading/loaded to prevent reloads
+                    if (el.networkState === 0 || el.networkState === 3) {
+                      el.load();
                     }
                   }
                 }}
+                key={`video-${image.id}`}
                 src={isMobile && image.mobileUrl ? image.mobileUrl : image.url}
                 {...(image.poster && { poster: image.poster })}
                 className={styles.image}
@@ -1091,7 +1069,7 @@ const ImageGallery = () => {
                 webkit-playsinline="true"
                 x5-playsinline="true"
                 crossOrigin="anonymous"
-                fetchPriority={isMobile ? "high" : "auto"}
+                fetchPriority="high"
                 style={{
                   objectFit: "cover",
                   display: "block",

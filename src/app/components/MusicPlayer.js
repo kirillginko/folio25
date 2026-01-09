@@ -22,7 +22,7 @@ const MusicPlayer = () => {
   const [audioContext, setAudioContext] = useState(null);
   const [analyser, setAnalyser] = useState(null);
   const animationFrameRef = useRef(null);
-  const { showMusicPlayer, isMusicPlayerMinimized, setIsMusicPlayerMinimized } =
+  const { showMusicPlayer, isMusicPlayerMinimized, setIsMusicPlayerMinimized, isGalleryOpen } =
     useGlobalState();
 
   const currentSong = songs[currentSongIndex]; // Get the current song
@@ -400,7 +400,7 @@ const MusicPlayer = () => {
   }, [isMusicPlayerMinimized]);
 
   return (
-    <div style={{ display: showMusicPlayer ? "block" : "none" }}>
+    <div style={{ display: (showMusicPlayer && !isGalleryOpen) ? "block" : "none" }}>
       <div ref={containerRef} className={styles.musicPlayerWrapper}>
         {!isMusicPlayerMinimized && (
           <div className={styles.visualizerWrapper}>

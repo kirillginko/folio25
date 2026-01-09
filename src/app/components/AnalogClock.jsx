@@ -21,6 +21,7 @@ const AnalogClock = () => {
     setShowBackdrop,
     setActiveComponent,
     activeComponent,
+    isGalleryOpen,
   } = useGlobalState();
 
   // Clock hands refs
@@ -229,7 +230,7 @@ const AnalogClock = () => {
   };
 
   return (
-    <div style={{ display: showAnalogClock ? "block" : "none" }}>
+    <div style={{ display: (showAnalogClock && !isGalleryOpen) ? "block" : "none" }}>
       <div
         ref={containerRef}
         className={`${styles.draggableWrapper} ${

@@ -58,7 +58,7 @@ const BrushCanvas = () => {
   // Add canvas ready state
   const [isCanvasReady, setIsCanvasReady] = useState(false);
 
-  const { showBrushCanvas, setShowBackdrop, setActiveComponent } =
+  const { showBrushCanvas, setShowBackdrop, setActiveComponent, isGalleryOpen } =
     useGlobalState();
 
   // Add isMobile state at the top with other states
@@ -797,7 +797,7 @@ const BrushCanvas = () => {
   }, []);
 
   return (
-    <div style={{ display: showBrushCanvas ? "block" : "none" }}>
+    <div style={{ display: (showBrushCanvas && !isGalleryOpen) ? "block" : "none" }}>
       <div
         ref={containerRef}
         className={`${styles.draggableWrapper} ${
