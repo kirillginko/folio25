@@ -8,7 +8,7 @@ import Marquee from "react-fast-marquee";
 import AudioVisualizer from "./AudioVisualizer";
 import { IoPlaySharp, IoPauseSharp } from "react-icons/io5";
 import { IoIosSkipBackward, IoIosSkipForward } from "react-icons/io";
-import { BsArrowsAngleExpand, BsArrowsAngleContract } from "react-icons/bs";
+import { BsArrowsAngleExpand, BsArrowsAngleContract, BsShuffle } from "react-icons/bs";
 import { useGlobalState } from "../context/GlobalStateContext";
 
 const MusicPlayer = () => {
@@ -22,10 +22,20 @@ const MusicPlayer = () => {
   const [audioContext, setAudioContext] = useState(null);
   const [analyser, setAnalyser] = useState(null);
   const animationFrameRef = useRef(null);
+  const [isShuffled, setIsShuffled] = useState(false);
   const { showMusicPlayer, isMusicPlayerMinimized, setIsMusicPlayerMinimized, isGalleryOpen } =
     useGlobalState();
 
   const currentSong = songs[currentSongIndex]; // Get the current song
+
+  const getRandomIndex = (excludeIndex) => {
+    if (songs.length <= 1) return 0;
+    let randomIndex;
+    do {
+      randomIndex = Math.floor(Math.random() * songs.length);
+    } while (randomIndex === excludeIndex);
+    return randomIndex;
+  };
 
   useEffect(() => {
     gsap.registerPlugin(Draggable);
@@ -113,13 +123,21 @@ const MusicPlayer = () => {
   };
 
   const nextSong = () => {
-    setCurrentSongIndex((prevIndex) => (prevIndex + 1) % songs.length);
+    if (isShuffled) {
+      setCurrentSongIndex((prevIndex) => getRandomIndex(prevIndex));
+    } else {
+      setCurrentSongIndex((prevIndex) => (prevIndex + 1) % songs.length);
+    }
   };
 
   const prevSong = () => {
-    setCurrentSongIndex((prevIndex) =>
-      prevIndex === 0 ? songs.length - 1 : prevIndex - 1
-    );
+    if (isShuffled) {
+      setCurrentSongIndex((prevIndex) => getRandomIndex(prevIndex));
+    } else {
+      setCurrentSongIndex((prevIndex) =>
+        prevIndex === 0 ? songs.length - 1 : prevIndex - 1
+      );
+    }
   };
 
   useEffect(() => {
@@ -496,6 +514,13 @@ const MusicPlayer = () => {
                   onClick={nextSong}
                 >
                   <IoIosSkipForward size={20} />
+                </button>
+                <button
+                  className={`${styles.controlButton} ${styles.shuffleButton} ${isShuffled ? styles.shuffleActive : ""}`}
+                  aria-label="Shuffle"
+                  onClick={() => setIsShuffled((prev) => !prev)}
+                >
+                  <BsShuffle size={16} />
                 </button>
               </div>
 

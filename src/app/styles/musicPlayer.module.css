@@ -12,7 +12,7 @@
   width: 500px;
   height: 60px;
   max-width: min(500px, calc(100vw - 40px));
-  gap: 10px;
+  gap: 14px;
   z-index: inherit; /* Inherit from parent wrapper */
   margin-top: -40px;
 }
@@ -54,12 +54,14 @@
 
 /* Song details (hidden in minimized state) */
 .songDetails {
-  flex: 0.6;
+  flex: 0 0 80px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-width: 100px;
-  margin-left: 10px;
+  margin-left: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .songTitle {
@@ -79,9 +81,9 @@
 .controls {
   display: flex;
   align-items: center;
-  gap: 18px;
-  justify-content: center;
-  flex: 1;
+  gap: 14px;
+  justify-content: space-evenly;
+  flex: 1.6;
 }
 
 .controlButton {
@@ -90,7 +92,6 @@
   color: white;
   cursor: pointer;
   transition: transform 0.2s ease;
-  /* Set fixed width and center the icon */
   width: 12px;
   display: flex;
   justify-content: center;
@@ -98,7 +99,19 @@
 }
 
 .playButton {
-  width: 12px; /* Slightly larger for play/pause button */
+  width: 12px;
+}
+
+.shuffleButton {
+  opacity: 0.5;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.shuffleActive {
+  opacity: 1;
+  color: #f8e932;
 }
 
 .controlButton:active {
@@ -113,7 +126,7 @@
   background-color: #495a78;
   border-radius: 3px;
   overflow: hidden;
-  flex: 2;
+  flex: 2.6;
 }
 
 .progress {

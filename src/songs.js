@@ -9,9 +9,9 @@ const songs = [
   },
   {
     id: 2,
-    name: "self-titled",
+    name: "Butterfly",
     artist: "Dolly",
-    link: "/audio/Dolly_Self_Titled.mp3", // Move to public/audio/
+    link: "/audio/butterfly.mp3", // Move to public/audio/
   },
   {
     id: 3,
@@ -39,9 +39,21 @@ const songs = [
   },
   {
     id: 7,
-    name: "Self-made",
+    name: "Self-Made",
     artist: "Dolly",
-    link: "/audio/self-made.mp3", // Move to public/audio/
+    link: "/audio/self_made.mp3", // Move to public/audio/
+  },
+  {
+    id: 8,
+    name: "Institute",
+    artist: "Dimitri",
+    link: "/audio/institute.mp3", // Move to public/audio/
+  },
+  {
+    id: 9,
+    name: "Wednesday",
+    artist: "Dimitri",
+    link: "/audio/wednesday.mp3", // Move to public/audio/
   },
 ];
 
