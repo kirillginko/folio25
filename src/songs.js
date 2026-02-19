@@ -11,7 +11,7 @@ const songs = [
     id: 2,
     name: "Butterfly",
     artist: "Dolly",
-    link: "/audio/butterfly.mp3", // Move to public/audio/
+    link: "/audio/Butterfly.mp3", // Move to public/audio/
   },
   {
     id: 3,
