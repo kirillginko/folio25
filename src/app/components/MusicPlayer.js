@@ -229,7 +229,11 @@ const MusicPlayer = () => {
     
     // Ensure newTime is valid
     if (newTime >= 0 && newTime <= duration) {
-      audioRef.current.currentTime = newTime;
+      if (audioRef.current.fastSeek) {
+        audioRef.current.fastSeek(newTime);
+      } else {
+        audioRef.current.currentTime = newTime;
+      }
       setCurrentTime(newTime);
     }
   };
